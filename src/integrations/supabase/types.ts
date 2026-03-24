@@ -14,26 +14,136 @@ export type Database = {
   }
   public: {
     Tables: {
-      profiles: {
+      applications: {
         Row: {
           created_at: string
-          email: string
           id: string
-          nome: string | null
-          tipo: string
+          job_id: string
+          status: string
+          user_id: string
         }
         Insert: {
           created_at?: string
-          email: string
-          id: string
-          nome?: string | null
-          tipo: string
+          id?: string
+          job_id: string
+          status?: string
+          user_id: string
         }
         Update: {
           created_at?: string
+          id?: string
+          job_id?: string
+          status?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "applications_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "jobs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      jobs: {
+        Row: {
+          address: string
+          category: string
+          company_name: string
+          created_at: string
+          date: string
+          description: string
+          id: string
+          neighborhood: string
+          payment: number
+          skill: string
+          slots: number
+          slots_remaining: number
+          status: string
+          time_end: string
+          time_start: string
+          title: string
+          user_id: string
+        }
+        Insert: {
+          address?: string
+          category: string
+          company_name: string
+          created_at?: string
+          date: string
+          description?: string
+          id?: string
+          neighborhood?: string
+          payment?: number
+          skill: string
+          slots?: number
+          slots_remaining?: number
+          status?: string
+          time_end: string
+          time_start: string
+          title: string
+          user_id: string
+        }
+        Update: {
+          address?: string
+          category?: string
+          company_name?: string
+          created_at?: string
+          date?: string
+          description?: string
+          id?: string
+          neighborhood?: string
+          payment?: number
+          skill?: string
+          slots?: number
+          slots_remaining?: number
+          status?: string
+          time_end?: string
+          time_start?: string
+          title?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          bio: string | null
+          created_at: string
+          email: string
+          id: string
+          jobs_completed: number | null
+          neighborhood: string | null
+          nome: string | null
+          phone: string | null
+          rating: number | null
+          skills: string[] | null
+          tipo: string
+        }
+        Insert: {
+          bio?: string | null
+          created_at?: string
+          email: string
+          id: string
+          jobs_completed?: number | null
+          neighborhood?: string | null
+          nome?: string | null
+          phone?: string | null
+          rating?: number | null
+          skills?: string[] | null
+          tipo: string
+        }
+        Update: {
+          bio?: string | null
+          created_at?: string
           email?: string
           id?: string
+          jobs_completed?: number | null
+          neighborhood?: string | null
           nome?: string | null
+          phone?: string | null
+          rating?: number | null
+          skills?: string[] | null
           tipo?: string
         }
         Relationships: []

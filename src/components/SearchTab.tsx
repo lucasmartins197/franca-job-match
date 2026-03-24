@@ -1,18 +1,30 @@
 import { useState } from "react";
-import { Search, MapPin, Filter, SlidersHorizontal } from "lucide-react";
+import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import JobCard from "@/components/JobCard";
 import JobDetailSheet from "@/components/JobDetailSheet";
-import { mockJobs, SKILLS, NEIGHBORHOODS } from "@/data/mockData";
-import { Job, Skill } from "@/types";
+import { mockJobs, SKILLS } from "@/data/mockData";
+import { Job, Skill, JobCategory } from "@/types";
+import { useJobs, DbJob } from "@/hooks/useJobs";
+
+const dbJobToJob = (j: DbJob): Job => ({
+  id: j.id, companyId: j.user_id, companyName: j.company_name, title: j.title,
+  category: j.category as JobCategory, skill: j.skill as any, description: j.description,
+  date: j.date, timeStart: j.time_start, timeEnd: j.time_end, payment: j.payment,
+  slots: j.slots, slotsRemaining: j.slots_remaining, neighborhood: j.neighborhood,
+  address: j.address, status: j.status as any, postedAt: j.created_at,
+});
 
 const SearchTab = () => {
   const [query, setQuery] = useState("");
   const [selectedSkill, setSelectedSkill] = useState<Skill | null>(null);
   const [selectedJob, setSelectedJob] = useState<Job | null>(null);
+  const { data: dbJobs } = useJobs();
 
-  const filtered = mockJobs.filter((job) => {
+  const allJobs = dbJobs && dbJobs.length > 0 ? dbJobs.map(dbJobToJob) : mockJobs;
+
+  const filtered = allJobs.filter((job) => {
     const matchQ = !query || job.title.toLowerCase().includes(query.toLowerCase()) || job.companyName.toLowerCase().includes(query.toLowerCase());
     const matchS = !selectedSkill || job.skill === selectedSkill;
     return matchQ && matchS;
@@ -24,37 +36,15 @@ const SearchTab = () => {
         <h1 className="text-2xl font-extrabold text-foreground mb-4">Buscar Vagas</h1>
         <div className="relative mb-4">
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Cargo, empresa ou habilidade..."
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            className="pl-11 h-12 rounded-xl"
-          />
+          <Input placeholder="Cargo, empresa ou habilidade..." value={query} onChange={(e) => setQuery(e.target.value)} className="pl-11 h-12 rounded-xl" />
         </div>
-
         <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
-          <Badge
-            onClick={() => setSelectedSkill(null)}
-            className={`cursor-pointer shrink-0 px-3 py-1.5 rounded-lg font-semibold transition-all ${
-              !selectedSkill ? "bg-primary text-primary-foreground" : "bg-secondary text-secondary-foreground hover:bg-secondary/80"
-            }`}
-          >
-            Todas
-          </Badge>
+          <Badge onClick={() => setSelectedSkill(null)} className={`cursor-pointer shrink-0 px-3 py-1.5 rounded-lg font-semibold transition-all ${!selectedSkill ? "bg-primary text-primary-foreground" : "bg-secondary text-secondary-foreground hover:bg-secondary/80"}`}>Todas</Badge>
           {SKILLS.slice(0, 12).map((skill) => (
-            <Badge
-              key={skill}
-              onClick={() => setSelectedSkill(skill === selectedSkill ? null : skill)}
-              className={`cursor-pointer shrink-0 px-3 py-1.5 rounded-lg font-semibold transition-all ${
-                selectedSkill === skill ? "bg-primary text-primary-foreground" : "bg-secondary text-secondary-foreground hover:bg-secondary/80"
-              }`}
-            >
-              {skill}
-            </Badge>
+            <Badge key={skill} onClick={() => setSelectedSkill(skill === selectedSkill ? null : skill)} className={`cursor-pointer shrink-0 px-3 py-1.5 rounded-lg font-semibold transition-all ${selectedSkill === skill ? "bg-primary text-primary-foreground" : "bg-secondary text-secondary-foreground hover:bg-secondary/80"}`}>{skill}</Badge>
           ))}
         </div>
       </div>
-
       <div className="px-5 space-y-3">
         <p className="text-sm text-muted-foreground">{filtered.length} resultados</p>
         {filtered.map((job, i) => (
@@ -67,7 +57,6 @@ const SearchTab = () => {
           </div>
         )}
       </div>
-
       <JobDetailSheet job={selectedJob} onClose={() => setSelectedJob(null)} />
     </div>
   );

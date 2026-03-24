@@ -6,6 +6,8 @@ import { MapPin, Clock, Banknote, Users, Calendar, Building2, CheckCircle2 } fro
 import { useState } from "react";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
+import { useAuth } from "@/hooks/useAuth";
+import { useApply, useMyApplications } from "@/hooks/useJobs";
 
 interface JobDetailSheetProps {
   job: Job | null;
@@ -13,21 +15,31 @@ interface JobDetailSheetProps {
 }
 
 const JobDetailSheet = ({ job, onClose }: JobDetailSheetProps) => {
-  const [applied, setApplied] = useState(false);
+  const { user } = useAuth();
+  const applyMutation = useApply();
+  const { data: myApplications = [] } = useMyApplications();
+  const alreadyApplied = job ? myApplications.includes(job.id) : false;
+  const [justApplied, setJustApplied] = useState(false);
 
-  const handleApply = () => {
-    setApplied(true);
-    toast.success("Candidatura enviada!", {
-      description: `Você se candidatou para "${job?.title}"`,
-    });
+  const handleApply = async () => {
+    if (!user || !job) return;
+    try {
+      await applyMutation.mutateAsync({ jobId: job.id, userId: user.id });
+      setJustApplied(true);
+      toast.success("Candidatura enviada!", { description: `Você se candidatou para "${job.title}"` });
+    } catch {
+      toast.error("Erro ao candidatar-se. Tente novamente.");
+    }
   };
 
   const handleClose = () => {
-    setApplied(false);
+    setJustApplied(false);
     onClose();
   };
 
   if (!job) return null;
+
+  const applied = alreadyApplied || justApplied;
 
   return (
     <Sheet open={!!job} onOpenChange={handleClose}>
@@ -35,9 +47,7 @@ const JobDetailSheet = ({ job, onClose }: JobDetailSheetProps) => {
         <div className="p-6">
           <SheetHeader className="text-left mb-6">
             <div className="flex items-center gap-2 mb-2">
-              <Badge className="bg-brand-blue-light text-primary font-semibold border-0">
-                {job.skill}
-              </Badge>
+              <Badge className="bg-brand-blue-light text-primary font-semibold border-0">{job.skill}</Badge>
               <Badge variant="outline" className="text-brand-green border-brand-green font-semibold">
                 {job.status === "aberta" ? "Aberta" : job.status}
               </Badge>
@@ -67,11 +77,7 @@ const JobDetailSheet = ({ job, onClose }: JobDetailSheetProps) => {
           </div>
 
           {applied ? (
-            <motion.div
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              className="flex flex-col items-center gap-3 py-4"
-            >
+            <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="flex flex-col items-center gap-3 py-4">
               <CheckCircle2 className="h-12 w-12 text-brand-green" />
               <p className="font-bold text-foreground">Candidatura enviada!</p>
               <p className="text-sm text-muted-foreground text-center">A empresa será notificada e entrará em contato.</p>
@@ -79,10 +85,11 @@ const JobDetailSheet = ({ job, onClose }: JobDetailSheetProps) => {
           ) : (
             <Button
               onClick={handleApply}
+              disabled={applyMutation.isPending}
               className="w-full h-14 rounded-2xl bg-gradient-brand text-primary-foreground font-bold text-lg shadow-brand hover:opacity-90 transition-opacity"
               size="lg"
             >
-              Candidatar-se • R${job.payment}
+              {applyMutation.isPending ? "Enviando..." : `Candidatar-se • R$${job.payment}`}
             </Button>
           )}
         </div>
