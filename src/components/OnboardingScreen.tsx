@@ -9,9 +9,9 @@ interface OnboardingScreenProps {
 
 const slides = [
   {
-    title: "Freelancer Franca",
+    title: "ELOOPS",
     subtitle: "Trabalhos rápidos na sua cidade",
-    description: "Conectamos freelancers e empresas de Franca para trabalhos presenciais por turno.",
+    description: "Conectamos freelancers e empresas para trabalhos presenciais por turno.",
     icon: MapPin,
     emoji: "🏙️",
   },
