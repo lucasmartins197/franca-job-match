@@ -1,5 +1,6 @@
 import { useState } from "react";
-import OnboardingScreen from "@/components/OnboardingScreen";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/hooks/useAuth";
 import BottomNav from "@/components/BottomNav";
 import HomeTab from "@/components/HomeTab";
 import SearchTab from "@/components/SearchTab";
@@ -8,11 +9,14 @@ import MessagesTab from "@/components/MessagesTab";
 import ProfileTab from "@/components/ProfileTab";
 
 const Index = () => {
-  const [showOnboarding, setShowOnboarding] = useState(true);
   const [activeTab, setActiveTab] = useState("home");
+  const { userTipo } = useAuth();
+  const navigate = useNavigate();
 
-  if (showOnboarding) {
-    return <OnboardingScreen onComplete={() => setShowOnboarding(false)} />;
+  // Empresa users should use dashboard
+  if (userTipo === "empresa") {
+    navigate("/dashboard", { replace: true });
+    return null;
   }
 
   const renderTab = () => {
