@@ -1,216 +1,118 @@
 import { useState } from "react";
-import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/hooks/useAuth";
+import { useMyJobs } from "@/hooks/useJobs";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { LogOut, Plus, ArrowLeft, Trash2 } from "lucide-react";
-import { toast } from "sonner";
-import { useMyJobs, useCreateJob } from "@/hooks/useJobs";
-import { CATEGORIES, SKILLS, NEIGHBORHOODS } from "@/data/mockData";
-import { motion } from "framer-motion";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import PostJobTab from "@/components/PostJobTab";
+import { Plus, LogOut, Users, Briefcase, TrendingUp, Loader2 } from "lucide-react";
 
 const Dashboard = () => {
-  const { user, signOut } = useAuth();
+  const { user, signOut, userTipo } = useAuth();
   const navigate = useNavigate();
   const { data: myJobs = [], isLoading } = useMyJobs();
-  const createJob = useCreateJob();
-  const [showForm, setShowForm] = useState(false);
+  const [showPostModal, setShowPostModal] = useState(false);
 
-  const [title, setTitle] = useState("");
-  const [category, setCategory] = useState("");
-  const [skill, setSkill] = useState("");
-  const [description, setDescription] = useState("");
-  const [date, setDate] = useState("");
-  const [timeStart, setTimeStart] = useState("");
-  const [timeEnd, setTimeEnd] = useState("");
-  const [payment, setPayment] = useState("");
-  const [slots, setSlots] = useState("1");
-  const [neighborhood, setNeighborhood] = useState("");
-  const [address, setAddress] = useState("");
+  if (userTipo === "freelancer") {
+    navigate("/", { replace: true });
+    return null;
+  }
+
+  const nome = user?.user_metadata?.nome || "Empresa";
+  const activeJobs = myJobs.filter((j) => j.status === "aberta");
 
   const handleSignOut = async () => {
     await signOut();
     navigate("/auth");
   };
 
-  const resetForm = () => {
-    setTitle(""); setCategory(""); setSkill(""); setDescription("");
-    setDate(""); setTimeStart(""); setTimeEnd(""); setPayment("");
-    setSlots("1"); setNeighborhood(""); setAddress("");
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!user) return;
-    if (!title || !category || !skill || !date || !timeStart || !timeEnd || !payment) {
-      toast.error("Preencha todos os campos obrigatórios");
-      return;
-    }
-    try {
-      await createJob.mutateAsync({
-        user_id: user.id,
-        company_name: user.user_metadata?.nome || "Empresa",
-        title,
-        category,
-        skill,
-        description,
-        date,
-        time_start: timeStart,
-        time_end: timeEnd,
-        payment: Number(payment),
-        slots: Number(slots),
-        slots_remaining: Number(slots),
-        neighborhood,
-        address,
-        status: "aberta",
-      });
-      toast.success("Vaga publicada com sucesso!");
-      resetForm();
-      setShowForm(false);
-    } catch {
-      toast.error("Erro ao publicar vaga");
-    }
-  };
-
-  if (showForm) {
-    return (
-      <div className="min-h-screen bg-background max-w-lg mx-auto pb-8">
-        <div className="bg-gradient-hero px-5 pt-12 pb-6 rounded-b-3xl">
-          <div className="flex items-center gap-3">
-            <button onClick={() => setShowForm(false)} className="w-9 h-9 rounded-xl bg-primary-foreground/15 flex items-center justify-center">
-              <ArrowLeft className="h-5 w-5 text-primary-foreground" />
-            </button>
-            <h1 className="text-xl font-extrabold text-primary-foreground">Nova Vaga</h1>
-          </div>
-        </div>
-        <form onSubmit={handleSubmit} className="px-5 mt-6 space-y-4">
-          <div>
-            <Label className="text-sm font-semibold">Título da vaga *</Label>
-            <Input placeholder="Ex: Garçom para evento" value={title} onChange={(e) => setTitle(e.target.value)} className="mt-1 rounded-xl h-12" />
-          </div>
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <Label className="text-sm font-semibold">Categoria *</Label>
-              <Select value={category} onValueChange={setCategory}>
-                <SelectTrigger className="mt-1 rounded-xl h-12"><SelectValue placeholder="Selecione" /></SelectTrigger>
-                <SelectContent>{CATEGORIES.map((c) => (<SelectItem key={c.name} value={c.name}>{c.icon} {c.name}</SelectItem>))}</SelectContent>
-              </Select>
-            </div>
-            <div>
-              <Label className="text-sm font-semibold">Habilidade *</Label>
-              <Select value={skill} onValueChange={setSkill}>
-                <SelectTrigger className="mt-1 rounded-xl h-12"><SelectValue placeholder="Selecione" /></SelectTrigger>
-                <SelectContent>{SKILLS.map((s) => (<SelectItem key={s} value={s}>{s}</SelectItem>))}</SelectContent>
-              </Select>
-            </div>
-          </div>
-          <div>
-            <Label className="text-sm font-semibold">Descrição</Label>
-            <Textarea placeholder="Descreva a vaga..." value={description} onChange={(e) => setDescription(e.target.value)} className="mt-1 rounded-xl min-h-[100px]" />
-          </div>
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <Label className="text-sm font-semibold">Data *</Label>
-              <Input type="date" value={date} onChange={(e) => setDate(e.target.value)} className="mt-1 rounded-xl h-12" />
-            </div>
-            <div>
-              <Label className="text-sm font-semibold">Pagamento (R$) *</Label>
-              <Input type="number" placeholder="150" value={payment} onChange={(e) => setPayment(e.target.value)} className="mt-1 rounded-xl h-12" />
-            </div>
-          </div>
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <Label className="text-sm font-semibold">Início *</Label>
-              <Input type="time" value={timeStart} onChange={(e) => setTimeStart(e.target.value)} className="mt-1 rounded-xl h-12" />
-            </div>
-            <div>
-              <Label className="text-sm font-semibold">Término *</Label>
-              <Input type="time" value={timeEnd} onChange={(e) => setTimeEnd(e.target.value)} className="mt-1 rounded-xl h-12" />
-            </div>
-          </div>
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <Label className="text-sm font-semibold">Vagas</Label>
-              <Input type="number" value={slots} onChange={(e) => setSlots(e.target.value)} className="mt-1 rounded-xl h-12" />
-            </div>
-            <div>
-              <Label className="text-sm font-semibold">Bairro</Label>
-              <Select value={neighborhood} onValueChange={setNeighborhood}>
-                <SelectTrigger className="mt-1 rounded-xl h-12"><SelectValue placeholder="Selecione" /></SelectTrigger>
-                <SelectContent>{NEIGHBORHOODS.map((n) => (<SelectItem key={n} value={n}>{n}</SelectItem>))}</SelectContent>
-              </Select>
-            </div>
-          </div>
-          <div>
-            <Label className="text-sm font-semibold">Endereço</Label>
-            <Input placeholder="Rua, número" value={address} onChange={(e) => setAddress(e.target.value)} className="mt-1 rounded-xl h-12" />
-          </div>
-          <Button type="submit" disabled={createJob.isPending} className="w-full h-14 rounded-2xl bg-gradient-brand text-primary-foreground font-bold text-lg shadow-brand" size="lg">
-            {createJob.isPending ? "Publicando..." : "Publicar Vaga"}
-          </Button>
-        </form>
-      </div>
-    );
-  }
-
   return (
-    <div className="min-h-screen bg-background max-w-lg mx-auto pb-8">
-      <div className="bg-gradient-hero px-5 pt-12 pb-8 rounded-b-3xl">
-        <div className="flex items-center justify-between mb-4">
-          <h1 className="text-2xl font-extrabold text-primary-foreground">ELOOPS</h1>
-          <button onClick={handleSignOut} className="w-10 h-10 bg-primary-foreground/15 rounded-xl flex items-center justify-center">
-            <LogOut className="h-5 w-5 text-primary-foreground" />
+    <div className="min-h-screen bg-background pb-8">
+      <div className="px-5 pt-12 pb-6 flex items-center justify-between">
+        <div>
+          <p className="text-muted-foreground text-sm">Painel da Empresa</p>
+          <h1 className="text-2xl font-display font-bold text-foreground">Olá, {nome.split(" ")[0]}</h1>
+        </div>
+        <div className="flex gap-2">
+          <button onClick={() => setShowPostModal(true)}
+            className="w-10 h-10 rounded-xl gradient-gold flex items-center justify-center shadow-gold">
+            <Plus className="h-5 w-5 text-background" />
+          </button>
+          <button onClick={handleSignOut}
+            className="w-10 h-10 rounded-xl bg-card border border-border flex items-center justify-center">
+            <LogOut className="h-4 w-4 text-muted-foreground" />
           </button>
         </div>
-        <p className="text-primary-foreground/70 text-sm">Painel da Empresa</p>
       </div>
 
-      <div className="px-5 mt-6 space-y-4">
-        <div className="grid grid-cols-2 gap-3">
-          <div className="bg-card rounded-2xl p-4 border border-border/50 shadow-card">
-            <div className="text-2xl mb-1">📋</div>
-            <div className="text-2xl font-extrabold text-foreground">{myJobs.length}</div>
-            <div className="text-xs text-muted-foreground font-medium">Vagas ativas</div>
+      <div className="px-5 grid grid-cols-3 gap-3 mb-8">
+        {[
+          { label: "Vagas Ativas", value: activeJobs.length, icon: Briefcase },
+          { label: "Total Vagas", value: myJobs.length, icon: TrendingUp },
+          { label: "Candidatos", value: "—", icon: Users },
+        ].map((m) => (
+          <div key={m.label} className="bg-card rounded-xl p-4 border border-border text-center">
+            <m.icon className="h-5 w-5 text-gold mx-auto mb-2" />
+            <div className="text-xl font-display font-bold text-foreground">{m.value}</div>
+            <div className="text-[10px] text-muted-foreground">{m.label}</div>
           </div>
-          <div className="bg-card rounded-2xl p-4 border border-border/50 shadow-card">
-            <div className="text-2xl mb-1">👥</div>
-            <div className="text-2xl font-extrabold text-foreground">0</div>
-            <div className="text-xs text-muted-foreground font-medium">Candidatos</div>
-          </div>
-        </div>
-
-        <Button onClick={() => setShowForm(true)} className="w-full h-14 rounded-2xl bg-gradient-brand text-primary-foreground font-bold text-lg shadow-brand" size="lg">
-          <Plus className="mr-2 h-5 w-5" /> Nova Vaga
-        </Button>
-
-        {myJobs.length === 0 && !isLoading && (
-          <div className="bg-card rounded-2xl p-5 border border-border/50 shadow-card text-center">
-            <div className="text-4xl mb-3">🚀</div>
-            <h3 className="font-bold text-foreground mb-1">Comece agora</h3>
-            <p className="text-sm text-muted-foreground">Publique sua primeira vaga e encontre profissionais qualificados.</p>
-          </div>
-        )}
-
-        {myJobs.map((job) => (
-          <motion.div key={job.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="bg-card rounded-2xl p-4 border border-border/50 shadow-card">
-            <div className="flex items-start justify-between">
-              <div>
-                <h3 className="font-bold text-foreground">{job.title}</h3>
-                <p className="text-sm text-muted-foreground">{job.category} • {job.skill}</p>
-              </div>
-              <span className="text-xs bg-brand-green-light text-brand-green font-semibold px-2 py-1 rounded-lg">{job.status}</span>
-            </div>
-            <div className="flex items-center gap-4 mt-2 text-sm text-muted-foreground">
-              <span>📅 {new Date(job.date).toLocaleDateString("pt-BR")}</span>
-              <span>💰 R${job.payment}</span>
-              <span>👥 {job.slots_remaining}/{job.slots}</span>
-            </div>
-          </motion.div>
         ))}
       </div>
+
+      <div className="px-5">
+        <h2 className="font-display font-bold text-foreground mb-4">Suas Vagas</h2>
+        {isLoading ? (
+          <div className="flex justify-center py-8"><Loader2 className="h-6 w-6 animate-spin text-gold" /></div>
+        ) : myJobs.length === 0 ? (
+          <div className="text-center py-12">
+            <p className="text-muted-foreground mb-4">Nenhuma vaga publicada ainda</p>
+            <Button onClick={() => setShowPostModal(true)} className="gradient-gold text-background rounded-xl font-display font-bold shadow-gold">
+              <Plus className="h-4 w-4 mr-2" /> Publicar primeira vaga
+            </Button>
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {myJobs.map((job) => (
+              <div key={job.id} className="bg-card rounded-xl p-4 border border-border">
+                <div className="flex items-start justify-between mb-2">
+                  <div>
+                    <h3 className="font-display font-bold text-foreground">{job.title}</h3>
+                    <span className="text-xs text-muted-foreground">{job.category}</span>
+                  </div>
+                  <span className={`px-2.5 py-1 rounded-md text-xs font-medium ${
+                    job.status === "aberta" ? "bg-success/10 text-success" :
+                    job.status === "em_andamento" ? "bg-gold/10 text-gold" :
+                    "bg-muted text-muted-foreground"
+                  }`}>
+                    {job.status === "aberta" ? "Aberta" : job.status === "em_andamento" ? "Em Andamento" : "Finalizada"}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between mt-3">
+                  <span className="font-display font-bold text-gold">R${job.payment}</span>
+                  <Button size="sm" variant="outline" onClick={() => navigate(`/job/${job.id}/candidates`)}
+                    className="h-8 rounded-lg border-border text-muted-foreground hover:text-foreground text-xs">
+                    <Users className="h-3.5 w-3.5 mr-1" /> Ver Candidatos
+                  </Button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      <button onClick={() => setShowPostModal(true)}
+        className="fixed bottom-6 right-6 w-14 h-14 rounded-xl gradient-gold flex items-center justify-center shadow-gold z-50">
+        <Plus className="h-6 w-6 text-background" />
+      </button>
+
+      <Dialog open={showPostModal} onOpenChange={setShowPostModal}>
+        <DialogContent className="bg-card border-border max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="font-display font-bold text-foreground">Nova Vaga</DialogTitle>
+          </DialogHeader>
+          <PostJobTab onClose={() => setShowPostModal(false)} />
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
