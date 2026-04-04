@@ -14,16 +14,10 @@ const Auth = () => {
   const navigate = useNavigate();
   const [step, setStep] = useState<Step>("choice");
   const [tipo, setTipo] = useState<UserTipo | null>(null);
-  const [isLogin, setIsLogin] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [nome, setNome] = useState("");
   const [loading, setLoading] = useState(false);
-
-  const redirectByTipo = (t: string) => {
-    if (t === "empresa") navigate("/dashboard", { replace: true });
-    else navigate("/", { replace: true });
-  };
 
   const handleSignup = async () => {
     if (!email || !password || !nome || !tipo) {
@@ -45,7 +39,11 @@ const Auth = () => {
     }
     if (data.user) {
       toast.success("Conta criada com sucesso!");
-      redirectByTipo(tipo);
+      if (tipo === "empresa") {
+        navigate("/dashboard", { replace: true });
+      } else {
+        navigate("/", { replace: true });
+      }
     }
   };
 
@@ -61,17 +59,28 @@ const Auth = () => {
       toast.error(error.message);
       return;
     }
+    // Fetch tipo from profiles
     const { data: profile } = await supabase
       .from("profiles")
       .select("tipo")
       .eq("id", data.user.id)
       .single();
-    redirectByTipo(profile?.tipo || "freelancer");
+
+    if (profile?.tipo === "empresa") {
+      navigate("/dashboard", { replace: true });
+    } else {
+      navigate("/", { replace: true });
+    }
   };
 
   const selectTipo = (t: UserTipo) => {
     setTipo(t);
     setStep("signup");
+  };
+
+  const goBack = () => {
+    setStep("choice");
+    setTipo(null);
   };
 
   return (
@@ -80,7 +89,7 @@ const Auth = () => {
         <div className="flex items-center gap-3 mb-6">
           {step !== "choice" && (
             <button
-              onClick={() => { setIsLogin(false); setStep("choice"); }}
+              onClick={goBack}
               className="w-9 h-9 rounded-xl bg-primary-foreground/15 flex items-center justify-center"
             >
               <ArrowLeft className="h-5 w-5 text-primary-foreground" />
@@ -89,13 +98,17 @@ const Auth = () => {
           <h1 className="text-2xl font-extrabold text-primary-foreground">ELOOPS</h1>
         </div>
         <p className="text-primary-foreground/70 text-sm">
-          {step === "choice" ? "Como você quer usar o ELOOPS?" : isLogin ? "Entre na sua conta" : "Crie sua conta"}
+          {step === "choice"
+            ? "Como você quer usar o ELOOPS?"
+            : step === "login"
+            ? "Entre na sua conta"
+            : "Crie sua conta"}
         </p>
       </div>
 
       <div className="px-5 mt-8">
         <AnimatePresence mode="wait">
-          {step === "choice" && !isLogin && (
+          {step === "choice" && (
             <motion.div key="choice" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} className="space-y-4">
               <button onClick={() => selectTipo("freelancer")} className="w-full bg-card border border-border rounded-2xl p-5 flex items-center gap-4 text-left shadow-card hover:shadow-card-hover transition-shadow">
                 <div className="w-14 h-14 rounded-2xl bg-gradient-brand flex items-center justify-center">
@@ -118,26 +131,22 @@ const Auth = () => {
               <div className="text-center pt-4">
                 <p className="text-sm text-muted-foreground">
                   Já tem conta?{" "}
-                  <button onClick={() => { setIsLogin(true); setStep("login"); }} className="text-primary font-semibold">Entrar</button>
+                  <button onClick={() => setStep("login")} className="text-primary font-semibold">Entrar</button>
                 </p>
               </div>
             </motion.div>
           )}
 
-          {(step === "signup" || step === "login" || isLogin) && (
-            <motion.div key="form" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} className="space-y-4">
-              {!isLogin && tipo && (
-                <div className="flex items-center gap-2 bg-secondary rounded-xl px-4 py-3 mb-2">
-                  {tipo === "freelancer" ? <Briefcase className="h-4 w-4 text-primary" /> : <Users className="h-4 w-4 text-accent" />}
-                  <span className="text-sm font-medium text-foreground">{tipo === "freelancer" ? "Freelancer" : "Empresa"}</span>
-                </div>
-              )}
-              {!isLogin && (
-                <div className="relative">
-                  <User className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input placeholder="Seu nome" value={nome} onChange={(e) => setNome(e.target.value)} className="pl-11 h-12 rounded-xl" />
-                </div>
-              )}
+          {step === "signup" && tipo && (
+            <motion.div key="signup" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} className="space-y-4">
+              <div className="flex items-center gap-2 bg-secondary rounded-xl px-4 py-3 mb-2">
+                {tipo === "freelancer" ? <Briefcase className="h-4 w-4 text-primary" /> : <Users className="h-4 w-4 text-accent" />}
+                <span className="text-sm font-medium text-foreground">{tipo === "freelancer" ? "Freelancer" : "Empresa"}</span>
+              </div>
+              <div className="relative">
+                <User className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input placeholder="Nome completo" value={nome} onChange={(e) => setNome(e.target.value)} className="pl-11 h-12 rounded-xl" />
+              </div>
               <div className="relative">
                 <Mail className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input placeholder="Email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} className="pl-11 h-12 rounded-xl" />
@@ -146,15 +155,35 @@ const Auth = () => {
                 <Lock className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input placeholder="Senha" type="password" value={password} onChange={(e) => setPassword(e.target.value)} className="pl-11 h-12 rounded-xl" />
               </div>
-              <Button onClick={isLogin ? handleLogin : handleSignup} disabled={loading} className="w-full h-14 rounded-2xl bg-gradient-brand text-primary-foreground font-bold text-lg shadow-brand" size="lg">
-                {loading ? "Aguarde..." : isLogin ? "Entrar" : "Criar conta"}
+              <Button onClick={handleSignup} disabled={loading} className="w-full h-14 rounded-2xl bg-gradient-brand text-primary-foreground font-bold text-lg shadow-brand" size="lg">
+                {loading ? "Aguarde..." : "Criar conta"}
               </Button>
               <div className="text-center pt-2">
                 <p className="text-sm text-muted-foreground">
-                  {isLogin ? "Não tem conta? " : "Já tem conta? "}
-                  <button onClick={() => { setIsLogin(!isLogin); setStep(isLogin ? "choice" : "login"); }} className="text-primary font-semibold">
-                    {isLogin ? "Cadastre-se" : "Entrar"}
-                  </button>
+                  Já tem conta?{" "}
+                  <button onClick={() => setStep("login")} className="text-primary font-semibold">Entrar</button>
+                </p>
+              </div>
+            </motion.div>
+          )}
+
+          {step === "login" && (
+            <motion.div key="login" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} className="space-y-4">
+              <div className="relative">
+                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input placeholder="Email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} className="pl-11 h-12 rounded-xl" />
+              </div>
+              <div className="relative">
+                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input placeholder="Senha" type="password" value={password} onChange={(e) => setPassword(e.target.value)} className="pl-11 h-12 rounded-xl" />
+              </div>
+              <Button onClick={handleLogin} disabled={loading} className="w-full h-14 rounded-2xl bg-gradient-brand text-primary-foreground font-bold text-lg shadow-brand" size="lg">
+                {loading ? "Aguarde..." : "Entrar"}
+              </Button>
+              <div className="text-center pt-2">
+                <p className="text-sm text-muted-foreground">
+                  Não tem conta?{" "}
+                  <button onClick={() => setStep("choice")} className="text-primary font-semibold">Cadastre-se</button>
                 </p>
               </div>
             </motion.div>
