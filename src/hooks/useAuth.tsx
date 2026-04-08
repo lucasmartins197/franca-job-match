@@ -28,8 +28,8 @@ const normalizeUserTipo = (value: unknown): UserTipo | null => {
   return null;
 };
 
-const getFallbackUserTipo = (user: User): UserTipo => {
-  return normalizeUserTipo(user.user_metadata?.tipo) ?? "freelancer";
+const getUserTipoFromMetadata = (user: User | null) => {
+  return normalizeUserTipo(user?.user_metadata?.tipo);
 };
 
 const getFallbackUserName = (user: User) => {
@@ -38,7 +38,7 @@ const getFallbackUserName = (user: User) => {
 };
 
 const ensureUserProfile = async (user: User): Promise<UserTipo> => {
-  const fallbackTipo = getFallbackUserTipo(user);
+  const metadataTipo = getUserTipoFromMetadata(user);
 
   const { data: profile, error } = await supabase
     .from("profiles")
@@ -50,10 +50,12 @@ const ensureUserProfile = async (user: User): Promise<UserTipo> => {
     throw error;
   }
 
-  const existingTipo = normalizeUserTipo(profile?.tipo);
-  if (existingTipo) {
-    return existingTipo;
+  const profileTipo = normalizeUserTipo(profile?.tipo);
+  if (profileTipo) {
+    return profileTipo;
   }
+
+  const fallbackTipo = metadataTipo ?? "freelancer";
 
   const { data: savedProfile, error: upsertError } = await supabase
     .from("profiles")
@@ -85,44 +87,24 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     let isMounted = true;
 
-    const syncAuthState = async (nextSession: Session | null) => {
+    const applySession = (nextSession: Session | null) => {
       if (!isMounted) return;
 
-      setLoading(true);
-      setSession(nextSession);
-
       const nextUser = nextSession?.user ?? null;
+      setSession(nextSession);
       setUser(nextUser);
-
-      if (!nextUser) {
-        setUserTipo(null);
-        setLoading(false);
-        return;
-      }
-
-      try {
-        const tipo = await ensureUserProfile(nextUser);
-        if (!isMounted) return;
-        setUserTipo(tipo);
-      } catch (error) {
-        console.error("Erro ao sincronizar perfil do usuário", error);
-        if (!isMounted) return;
-        setUserTipo(getFallbackUserTipo(nextUser));
-      } finally {
-        if (isMounted) {
-          setLoading(false);
-        }
-      }
+      setUserTipo(getUserTipoFromMetadata(nextUser));
+      setLoading(false);
     };
 
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, nextSession) => {
-      void syncAuthState(nextSession);
+      applySession(nextSession);
     });
 
     void supabase.auth.getSession().then(({ data: { session: initialSession } }) => {
-      void syncAuthState(initialSession);
+      applySession(initialSession);
     });
 
     return () => {
@@ -131,20 +113,51 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     };
   }, []);
 
+  useEffect(() => {
+    let isMounted = true;
+
+    if (!user) {
+      setUserTipo(null);
+      return () => {
+        isMounted = false;
+      };
+    }
+
+    const metadataTipo = getUserTipoFromMetadata(user);
+    if (metadataTipo) {
+      setUserTipo(metadataTipo);
+    }
+
+    const syncUserProfile = async () => {
+      try {
+        const resolvedTipo = await ensureUserProfile(user);
+        if (!isMounted) return;
+        setUserTipo(resolvedTipo);
+      } catch (error) {
+        console.error("Erro ao sincronizar perfil do usuário", error);
+        if (!isMounted) return;
+        setUserTipo(metadataTipo ?? "freelancer");
+      }
+    };
+
+    void syncUserProfile();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [user]);
+
   const signOut = async () => {
-    setLoading(true);
     const { error } = await supabase.auth.signOut();
 
     if (error) {
       console.error("Erro ao sair da conta", error);
-      setLoading(false);
       return;
     }
 
     setSession(null);
     setUser(null);
     setUserTipo(null);
-    setLoading(false);
   };
 
   return (
