@@ -12,6 +12,18 @@ import { useAuth } from "@/hooks/useAuth";
 type Step = "onboarding" | "choose" | "signup" | "login";
 type UserTipo = "freelancer" | "empresa";
 
+const normalizeUserTipo = (value: unknown): UserTipo | null => {
+  if (value === "freelancer" || value === "empresa") {
+    return value;
+  }
+
+  return null;
+};
+
+const getRedirectPath = (tipo: UserTipo) => {
+  return tipo === "empresa" ? "/dashboard" : "/";
+};
+
 const Auth = () => {
   const navigate = useNavigate();
   const { session, userTipo, loading: authLoading } = useAuth();
@@ -21,14 +33,23 @@ const Auth = () => {
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
   const [loading, setLoading] = useState(false);
+  const [pendingRedirect, setPendingRedirect] = useState<UserTipo | null>(null);
 
   useEffect(() => {
-    if (!authLoading && session && userTipo) {
-      navigate(userTipo === "empresa" ? "/dashboard" : "/", { replace: true });
+    if (authLoading || !session) {
+      return;
     }
-  }, [authLoading, navigate, session, userTipo]);
+
+    const redirectTipo = userTipo ?? pendingRedirect;
+    if (!redirectTipo) {
+      return;
+    }
+
+    navigate(getRedirectPath(redirectTipo), { replace: true });
+  }, [authLoading, navigate, pendingRedirect, session, userTipo]);
 
   const goToSignUp = (selectedTipo: UserTipo) => {
+    setPendingRedirect(null);
     setTipo(selectedTipo);
     setNome("");
     setEmail("");
@@ -44,7 +65,7 @@ const Auth = () => {
 
     setLoading(true);
 
-    const { error } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({
       email: email.trim(),
       password: senha,
       options: {
@@ -62,6 +83,8 @@ const Auth = () => {
       return;
     }
 
+    const redirectTipo = normalizeUserTipo(data.user?.user_metadata?.tipo) ?? tipo;
+    setPendingRedirect(redirectTipo);
     toast.success("Conta criada com sucesso!");
   };
 
@@ -73,22 +96,35 @@ const Auth = () => {
 
     setLoading(true);
 
-    const { error } = await supabase.auth.signInWithPassword({
+    const { data, error } = await supabase.auth.signInWithPassword({
       email: email.trim(),
       password: senha,
     });
 
-    setLoading(false);
-
     if (error) {
+      setLoading(false);
       toast.error(error.message);
       return;
     }
 
+    let redirectTipo = normalizeUserTipo(data.user.user_metadata?.tipo);
+
+    if (!redirectTipo) {
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("tipo")
+        .eq("id", data.user.id)
+        .maybeSingle();
+
+      redirectTipo = normalizeUserTipo(profile?.tipo) ?? "freelancer";
+    }
+
+    setPendingRedirect(redirectTipo);
+    setLoading(false);
     toast.success("Login realizado com sucesso!");
   };
 
-  if (authLoading) {
+  if (authLoading && !session) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="text-primary font-display text-2xl animate-pulse">ELOOPS</div>
@@ -134,7 +170,7 @@ const Auth = () => {
                 </div>
               </button>
             </div>
-            <button onClick={() => setStep("login")} className="w-full mt-8 text-center text-sm text-muted-foreground">
+            <button onClick={() => { setPendingRedirect(null); setStep("login"); }} className="w-full mt-8 text-center text-sm text-muted-foreground">
               Já tem conta? <span className="text-primary font-medium">Entrar</span>
             </button>
           </motion.div>
@@ -142,7 +178,7 @@ const Auth = () => {
 
         {step === "signup" && (
           <motion.div key="signup" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} className="flex-1">
-            <button onClick={() => setStep("choose")} className="flex items-center gap-2 text-muted-foreground mb-6">
+            <button onClick={() => { setPendingRedirect(null); setStep("choose"); }} className="flex items-center gap-2 text-muted-foreground mb-6">
               <ArrowLeft className="h-4 w-4" /> Voltar
             </button>
             <div className="flex justify-center mb-6">
@@ -163,7 +199,7 @@ const Auth = () => {
               className="w-full h-14 mt-6 rounded-xl gradient-brand text-primary-foreground font-display font-bold text-lg shadow-brand hover:opacity-90 transition-opacity">
               {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : "Criar conta"}
             </Button>
-            <button onClick={() => { setStep("login"); setEmail(""); setSenha(""); }} className="w-full mt-4 text-center text-sm text-muted-foreground">
+            <button onClick={() => { setPendingRedirect(null); setStep("login"); setEmail(""); setSenha(""); }} className="w-full mt-4 text-center text-sm text-muted-foreground">
               Já tem conta? <span className="text-primary font-medium">Entrar</span>
             </button>
           </motion.div>
@@ -171,7 +207,7 @@ const Auth = () => {
 
         {step === "login" && (
           <motion.div key="login" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} className="flex-1">
-            <button onClick={() => setStep("choose")} className="flex items-center gap-2 text-muted-foreground mb-6">
+            <button onClick={() => { setPendingRedirect(null); setStep("choose"); }} className="flex items-center gap-2 text-muted-foreground mb-6">
               <ArrowLeft className="h-4 w-4" /> Voltar
             </button>
             <h2 className="text-xl font-display font-bold text-foreground text-center mb-8">Entrar</h2>
@@ -185,7 +221,7 @@ const Auth = () => {
               className="w-full h-14 mt-6 rounded-xl gradient-brand text-primary-foreground font-display font-bold text-lg shadow-brand hover:opacity-90 transition-opacity">
               {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : "Entrar"}
             </Button>
-            <button onClick={() => { setStep("signup"); setEmail(""); setSenha(""); }} className="w-full mt-4 text-center text-sm text-muted-foreground">
+            <button onClick={() => { setPendingRedirect(null); setStep("signup"); setEmail(""); setSenha(""); }} className="w-full mt-4 text-center text-sm text-muted-foreground">
               Não tem conta? <span className="text-primary font-medium">Criar conta</span>
             </button>
           </motion.div>
