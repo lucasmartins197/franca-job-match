@@ -11,21 +11,18 @@ const slides = [
   {
     title: "ELOOPS",
     subtitle: "O trabalho certo. Na hora certa.",
-    description: "",
     icon: null,
     isLogo: true,
   },
   {
     title: "Encontre trabalhos em minutos",
     subtitle: "Garçom, promotor, vendedor e muito mais. Escolha e receba ofertas.",
-    description: "",
     icon: Briefcase,
     isLogo: false,
   },
   {
     title: "Contrate rápido",
     subtitle: "Publique sua vaga e encontre o profissional ideal em menos de 4 horas.",
-    description: "",
     icon: Zap,
     isLogo: false,
   },
@@ -43,9 +40,9 @@ const OnboardingScreen = ({ onComplete }: OnboardingScreenProps) => {
 
   return (
     <div className="min-h-screen bg-background flex flex-col relative overflow-hidden">
-      {/* Subtle grid background */}
-      <div className="absolute inset-0 opacity-[0.03]" style={{
-        backgroundImage: `linear-gradient(hsl(var(--gold)) 1px, transparent 1px), linear-gradient(90deg, hsl(var(--gold)) 1px, transparent 1px)`,
+      {/* Subtle grid */}
+      <div className="absolute inset-0 opacity-[0.04]" style={{
+        backgroundImage: `linear-gradient(hsl(var(--brand)) 1px, transparent 1px), linear-gradient(90deg, hsl(var(--brand)) 1px, transparent 1px)`,
         backgroundSize: '60px 60px',
       }} />
 
@@ -61,7 +58,7 @@ const OnboardingScreen = ({ onComplete }: OnboardingScreenProps) => {
           >
             {slide.isLogo ? (
               <>
-                <h1 className="text-5xl font-display font-extrabold gradient-gold-text mb-4">
+                <h1 className="text-5xl font-display font-extrabold gradient-brand-text mb-4">
                   ELOOPS
                 </h1>
                 <p className="text-lg text-foreground/70 font-light max-w-xs mx-auto">
@@ -70,13 +67,13 @@ const OnboardingScreen = ({ onComplete }: OnboardingScreenProps) => {
               </>
             ) : (
               <>
-                <div className="w-20 h-20 rounded-2xl gradient-gold flex items-center justify-center mx-auto mb-8">
-                  {slide.icon && <slide.icon className="h-10 w-10 text-background" />}
+                <div className="w-20 h-20 rounded-2xl gradient-brand flex items-center justify-center mx-auto mb-8">
+                  {slide.icon && <slide.icon className="h-10 w-10 text-primary-foreground" />}
                 </div>
                 <h2 className="text-2xl font-display font-bold text-foreground mb-3">
                   {slide.title}
                 </h2>
-                <p className="text-foreground/50 max-w-xs mx-auto leading-relaxed font-light">
+                <p className="text-muted-foreground max-w-xs mx-auto leading-relaxed font-light">
                   {slide.subtitle}
                 </p>
               </>
@@ -91,7 +88,7 @@ const OnboardingScreen = ({ onComplete }: OnboardingScreenProps) => {
             <div
               key={i}
               className={`h-1 rounded-full transition-all duration-300 ${
-                i === currentSlide ? "w-8 bg-gold" : "w-2 bg-foreground/20"
+                i === currentSlide ? "w-8 bg-primary" : "w-2 bg-foreground/20"
               }`}
             />
           ))}
@@ -99,7 +96,7 @@ const OnboardingScreen = ({ onComplete }: OnboardingScreenProps) => {
 
         <Button
           onClick={nextSlide}
-          className="w-full h-14 rounded-xl gradient-gold text-background font-display font-bold text-lg hover:opacity-90 shadow-gold transition-opacity"
+          className="w-full h-14 rounded-xl gradient-brand text-primary-foreground font-display font-bold text-lg hover:opacity-90 shadow-brand transition-opacity"
           size="lg"
         >
           {currentSlide < slides.length - 1 ? "Próximo" : "Começar"}

@@ -66,7 +66,7 @@ const Auth = () => {
   return (
     <div className="min-h-screen bg-background flex flex-col px-6 pt-16 pb-8">
       <div className="text-center mb-10">
-        <h1 className="text-3xl font-display font-extrabold gradient-gold-text">ELOOPS</h1>
+        <h1 className="text-3xl font-display font-extrabold gradient-brand-text">ELOOPS</h1>
       </div>
 
       <AnimatePresence mode="wait">
@@ -77,9 +77,9 @@ const Auth = () => {
             </h2>
             <div className="space-y-4">
               <button onClick={() => { setTipo("freelancer"); setStep("signup"); }}
-                className="w-full flex items-center gap-4 p-5 rounded-xl bg-card border border-border hover:border-primary/40 transition-colors">
-                <div className="w-14 h-14 rounded-xl bg-blue-500/10 flex items-center justify-center">
-                  <Briefcase className="h-7 w-7 text-blue-400" />
+                className="w-full flex items-center gap-4 p-5 rounded-xl bg-card border border-border hover:border-primary/40 transition-colors shadow-sm">
+                <div className="w-14 h-14 rounded-xl bg-primary/10 flex items-center justify-center">
+                  <Briefcase className="h-7 w-7 text-primary" />
                 </div>
                 <div className="text-left">
                   <p className="font-display font-bold text-foreground">Quero trabalhar</p>
@@ -87,9 +87,9 @@ const Auth = () => {
                 </div>
               </button>
               <button onClick={() => { setTipo("empresa"); setStep("signup"); }}
-                className="w-full flex items-center gap-4 p-5 rounded-xl bg-card border border-border hover:border-primary/40 transition-colors">
+                className="w-full flex items-center gap-4 p-5 rounded-xl bg-card border border-border hover:border-primary/40 transition-colors shadow-sm">
                 <div className="w-14 h-14 rounded-xl bg-orange-500/10 flex items-center justify-center">
-                  <Users className="h-7 w-7 text-orange-400" />
+                  <Users className="h-7 w-7 text-orange-500" />
                 </div>
                 <div className="text-left">
                   <p className="font-display font-bold text-foreground">Quero contratar</p>
@@ -98,7 +98,7 @@ const Auth = () => {
               </button>
             </div>
             <button onClick={() => setStep("login")} className="w-full mt-8 text-center text-sm text-muted-foreground">
-              Já tem conta? <span className="text-gold font-medium">Entrar</span>
+              Já tem conta? <span className="text-primary font-medium">Entrar</span>
             </button>
           </motion.div>
         )}
@@ -109,7 +109,7 @@ const Auth = () => {
               <ArrowLeft className="h-4 w-4" /> Voltar
             </button>
             <div className="flex justify-center mb-6">
-              <span className="px-4 py-1.5 rounded-full text-xs font-medium gradient-gold text-background">
+              <span className="px-4 py-1.5 rounded-full text-xs font-medium gradient-brand text-primary-foreground">
                 {tipo === "freelancer" ? "Freelancer" : "Empresa"}
               </span>
             </div>
@@ -123,11 +123,11 @@ const Auth = () => {
                 className="h-13 rounded-xl bg-card border-border text-foreground placeholder:text-muted-foreground" />
             </div>
             <Button onClick={handleSignUp} disabled={loading}
-              className="w-full h-14 mt-6 rounded-xl gradient-gold text-background font-display font-bold text-lg shadow-gold hover:opacity-90 transition-opacity">
+              className="w-full h-14 mt-6 rounded-xl gradient-brand text-primary-foreground font-display font-bold text-lg shadow-brand hover:opacity-90 transition-opacity">
               {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : "Criar conta"}
             </Button>
             <button onClick={() => { setStep("login"); setEmail(""); setSenha(""); }} className="w-full mt-4 text-center text-sm text-muted-foreground">
-              Já tem conta? <span className="text-gold font-medium">Entrar</span>
+              Já tem conta? <span className="text-primary font-medium">Entrar</span>
             </button>
           </motion.div>
         )}
@@ -145,11 +145,11 @@ const Auth = () => {
                 className="h-13 rounded-xl bg-card border-border text-foreground placeholder:text-muted-foreground" />
             </div>
             <Button onClick={handleLogin} disabled={loading}
-              className="w-full h-14 mt-6 rounded-xl gradient-gold text-background font-display font-bold text-lg shadow-gold hover:opacity-90 transition-opacity">
+              className="w-full h-14 mt-6 rounded-xl gradient-brand text-primary-foreground font-display font-bold text-lg shadow-brand hover:opacity-90 transition-opacity">
               {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : "Entrar"}
             </Button>
             <button onClick={() => { setStep("signup"); setEmail(""); setSenha(""); }} className="w-full mt-4 text-center text-sm text-muted-foreground">
-              Não tem conta? <span className="text-gold font-medium">Criar conta</span>
+              Não tem conta? <span className="text-primary font-medium">Criar conta</span>
             </button>
           </motion.div>
         )}

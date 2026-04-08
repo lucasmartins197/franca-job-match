@@ -50,9 +50,14 @@ export default {
           foreground: "hsl(var(--card-foreground))",
         },
         gold: {
-          DEFAULT: "hsl(var(--gold))",
-          light: "hsl(var(--gold-light))",
-          dim: "hsl(var(--gold-dim))",
+          DEFAULT: "hsl(var(--brand))",
+          light: "hsl(var(--brand-light))",
+          dim: "hsl(var(--brand-dim))",
+        },
+        brand: {
+          DEFAULT: "hsl(var(--brand))",
+          light: "hsl(var(--brand-light))",
+          dim: "hsl(var(--brand-dim))",
         },
         success: "hsl(var(--success))",
         surface: "hsl(var(--surface))",

@@ -54,9 +54,8 @@ const ProfileTab = () => {
 
   return (
     <div className="pb-20 pt-12 px-5">
-      {/* Avatar + Name */}
       <div className="flex items-center gap-4 mb-8">
-        <div className="w-20 h-20 rounded-2xl gradient-gold flex items-center justify-center text-3xl font-display font-bold text-background shadow-gold">
+        <div className="w-20 h-20 rounded-2xl gradient-brand flex items-center justify-center text-3xl font-display font-bold text-primary-foreground shadow-brand">
           {nome.charAt(0) || "?"}
         </div>
         <div className="flex-1">
@@ -64,32 +63,30 @@ const ProfileTab = () => {
           <p className="text-sm text-muted-foreground">{user?.email}</p>
           <div className="flex items-center gap-1 mt-1">
             {[1, 2, 3, 4, 5].map((s) => (
-              <Star key={s} className={`h-4 w-4 ${s <= Math.round(rating) ? "fill-gold text-gold" : "text-border"}`} />
+              <Star key={s} className={`h-4 w-4 ${s <= Math.round(rating) ? "fill-amber-400 text-amber-400" : "text-border"}`} />
             ))}
-            <span className="text-sm font-medium text-gold ml-1">{rating.toFixed(1)}</span>
+            <span className="text-sm font-medium text-primary ml-1">{rating.toFixed(1)}</span>
           </div>
         </div>
         <button onClick={() => editing ? handleSave() : setEditing(true)}
-          className="w-10 h-10 rounded-xl bg-card border border-border flex items-center justify-center">
-          {saving ? <Loader2 className="h-4 w-4 animate-spin text-gold" /> : editing ? <Save className="h-4 w-4 text-gold" /> : <Edit2 className="h-4 w-4 text-muted-foreground" />}
+          className="w-10 h-10 rounded-xl bg-card border border-border flex items-center justify-center shadow-sm">
+          {saving ? <Loader2 className="h-4 w-4 animate-spin text-primary" /> : editing ? <Save className="h-4 w-4 text-primary" /> : <Edit2 className="h-4 w-4 text-muted-foreground" />}
         </button>
       </div>
 
-      {/* Stats */}
       <div className="grid grid-cols-3 gap-3 mb-6">
         {[
           { label: "Trabalhos", value: jobsCompleted },
           { label: "Avaliação", value: rating.toFixed(1) },
           { label: "Membro desde", value: memberSince },
         ].map((stat) => (
-          <div key={stat.label} className="bg-card rounded-xl p-3 text-center border border-border">
-            <div className="text-lg font-display font-bold text-gold">{stat.value}</div>
+          <div key={stat.label} className="bg-card rounded-xl p-3 text-center border border-border shadow-sm">
+            <div className="text-lg font-display font-bold text-primary">{stat.value}</div>
             <div className="text-[10px] text-muted-foreground">{stat.label}</div>
           </div>
         ))}
       </div>
 
-      {/* Edit form */}
       {editing && (
         <div className="space-y-4 mb-6">
           <div>
@@ -108,13 +105,12 @@ const ProfileTab = () => {
       )}
 
       {!editing && bio && (
-        <div className="bg-card rounded-xl p-4 border border-border mb-6">
+        <div className="bg-card rounded-xl p-4 border border-border mb-6 shadow-sm">
           <h3 className="font-display font-bold text-foreground text-sm mb-2">Sobre</h3>
           <p className="text-sm text-muted-foreground leading-relaxed">{bio}</p>
         </div>
       )}
 
-      {/* Logout */}
       <Button onClick={handleSignOut} variant="outline"
         className="w-full h-12 rounded-xl border-destructive/30 text-destructive hover:bg-destructive/10 font-medium">
         <LogOut className="h-4 w-4 mr-2" /> Sair da conta
