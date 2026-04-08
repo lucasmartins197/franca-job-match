@@ -1,4 +1,4 @@
-import { useState, useEffect, createContext, useContext, ReactNode } from "react";
+import { useState, useEffect, createContext, useContext, ReactNode, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Session, User } from "@supabase/supabase-js";
 
@@ -10,6 +10,7 @@ interface AuthContextType {
   userTipo: UserTipo | null;
   loading: boolean;
   signOut: () => Promise<void>;
+  refreshAuthState: () => Promise<{ session: Session | null; user: User | null; userTipo: UserTipo | null }>;
 }
 
 const AuthContext = createContext<AuthContextType>({
@@ -18,6 +19,7 @@ const AuthContext = createContext<AuthContextType>({
   userTipo: null,
   loading: true,
   signOut: async () => {},
+  refreshAuthState: async () => ({ session: null, user: null, userTipo: null }),
 });
 
 const normalizeUserTipo = (value: unknown): UserTipo | null => {
@@ -84,6 +86,36 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [userTipo, setUserTipo] = useState<UserTipo | null>(null);
   const [loading, setLoading] = useState(true);
 
+  const refreshAuthState = useCallback(async () => {
+    const {
+      data: { session: nextSession },
+    } = await supabase.auth.getSession();
+
+    const nextUser = nextSession?.user ?? null;
+    const metadataTipo = getUserTipoFromMetadata(nextUser);
+    let resolvedTipo = metadataTipo;
+
+    if (nextUser) {
+      try {
+        resolvedTipo = await ensureUserProfile(nextUser);
+      } catch (error) {
+        console.error("Erro ao sincronizar perfil do usuário", error);
+        resolvedTipo = metadataTipo ?? "freelancer";
+      }
+    }
+
+    setSession(nextSession);
+    setUser(nextUser);
+    setUserTipo(resolvedTipo ?? null);
+    setLoading(false);
+
+    return {
+      session: nextSession,
+      user: nextUser,
+      userTipo: resolvedTipo ?? null,
+    };
+  }, []);
+
   useEffect(() => {
     let isMounted = true;
 
@@ -101,51 +133,18 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, nextSession) => {
       applySession(nextSession);
+      if (nextSession?.user) {
+        void refreshAuthState();
+      }
     });
 
-    void supabase.auth.getSession().then(({ data: { session: initialSession } }) => {
-      applySession(initialSession);
-    });
+    void refreshAuthState();
 
     return () => {
       isMounted = false;
       subscription.unsubscribe();
     };
-  }, []);
-
-  useEffect(() => {
-    let isMounted = true;
-
-    if (!user) {
-      setUserTipo(null);
-      return () => {
-        isMounted = false;
-      };
-    }
-
-    const metadataTipo = getUserTipoFromMetadata(user);
-    if (metadataTipo) {
-      setUserTipo(metadataTipo);
-    }
-
-    const syncUserProfile = async () => {
-      try {
-        const resolvedTipo = await ensureUserProfile(user);
-        if (!isMounted) return;
-        setUserTipo(resolvedTipo);
-      } catch (error) {
-        console.error("Erro ao sincronizar perfil do usuário", error);
-        if (!isMounted) return;
-        setUserTipo(metadataTipo ?? "freelancer");
-      }
-    };
-
-    void syncUserProfile();
-
-    return () => {
-      isMounted = false;
-    };
-  }, [user]);
+  }, [refreshAuthState]);
 
   const signOut = async () => {
     const { error } = await supabase.auth.signOut();
@@ -161,7 +160,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ session, user, userTipo, loading, signOut }}>
+    <AuthContext.Provider value={{ session, user, userTipo, loading, signOut, refreshAuthState }}>
       {children}
     </AuthContext.Provider>
   );

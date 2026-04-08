@@ -26,35 +26,32 @@ const getRedirectPath = (tipo: UserTipo) => {
 
 const Auth = () => {
   const navigate = useNavigate();
-  const { session, userTipo, loading: authLoading } = useAuth();
+  const { session, userTipo, loading: authLoading, refreshAuthState } = useAuth();
   const [step, setStep] = useState<Step>("onboarding");
   const [tipo, setTipo] = useState<UserTipo>("freelancer");
   const [nome, setNome] = useState("");
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
   const [loading, setLoading] = useState(false);
-  const [pendingRedirect, setPendingRedirect] = useState<UserTipo | null>(null);
 
   useEffect(() => {
-    if (authLoading || !session) {
-      return;
+    if (!authLoading && session && userTipo) {
+      navigate(getRedirectPath(userTipo), { replace: true });
     }
-
-    const redirectTipo = userTipo ?? pendingRedirect;
-    if (!redirectTipo) {
-      return;
-    }
-
-    navigate(getRedirectPath(redirectTipo), { replace: true });
-  }, [authLoading, navigate, pendingRedirect, session, userTipo]);
+  }, [authLoading, navigate, session, userTipo]);
 
   const goToSignUp = (selectedTipo: UserTipo) => {
-    setPendingRedirect(null);
     setTipo(selectedTipo);
     setNome("");
     setEmail("");
     setSenha("");
     setStep("signup");
+  };
+
+  const handleSuccessfulAuthRedirect = async (fallbackTipo: UserTipo) => {
+    const authState = await refreshAuthState();
+    const resolvedTipo = authState.userTipo ?? fallbackTipo;
+    navigate(getRedirectPath(resolvedTipo), { replace: true });
   };
 
   const handleSignUp = async () => {
@@ -76,16 +73,16 @@ const Auth = () => {
       },
     });
 
-    setLoading(false);
-
     if (error) {
+      setLoading(false);
       toast.error(error.message);
       return;
     }
 
     const redirectTipo = normalizeUserTipo(data.user?.user_metadata?.tipo) ?? tipo;
-    setPendingRedirect(redirectTipo);
     toast.success("Conta criada com sucesso!");
+    await handleSuccessfulAuthRedirect(redirectTipo);
+    setLoading(false);
   };
 
   const handleLogin = async () => {
@@ -119,9 +116,9 @@ const Auth = () => {
       redirectTipo = normalizeUserTipo(profile?.tipo) ?? "freelancer";
     }
 
-    setPendingRedirect(redirectTipo);
-    setLoading(false);
     toast.success("Login realizado com sucesso!");
+    await handleSuccessfulAuthRedirect(redirectTipo);
+    setLoading(false);
   };
 
   if (authLoading && !session) {
@@ -170,7 +167,7 @@ const Auth = () => {
                 </div>
               </button>
             </div>
-            <button onClick={() => { setPendingRedirect(null); setStep("login"); }} className="w-full mt-8 text-center text-sm text-muted-foreground">
+            <button onClick={() => setStep("login")} className="w-full mt-8 text-center text-sm text-muted-foreground">
               Já tem conta? <span className="text-primary font-medium">Entrar</span>
             </button>
           </motion.div>
@@ -178,7 +175,7 @@ const Auth = () => {
 
         {step === "signup" && (
           <motion.div key="signup" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} className="flex-1">
-            <button onClick={() => { setPendingRedirect(null); setStep("choose"); }} className="flex items-center gap-2 text-muted-foreground mb-6">
+            <button onClick={() => setStep("choose")} className="flex items-center gap-2 text-muted-foreground mb-6">
               <ArrowLeft className="h-4 w-4" /> Voltar
             </button>
             <div className="flex justify-center mb-6">
@@ -199,7 +196,7 @@ const Auth = () => {
               className="w-full h-14 mt-6 rounded-xl gradient-brand text-primary-foreground font-display font-bold text-lg shadow-brand hover:opacity-90 transition-opacity">
               {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : "Criar conta"}
             </Button>
-            <button onClick={() => { setPendingRedirect(null); setStep("login"); setEmail(""); setSenha(""); }} className="w-full mt-4 text-center text-sm text-muted-foreground">
+            <button onClick={() => { setStep("login"); setEmail(""); setSenha(""); }} className="w-full mt-4 text-center text-sm text-muted-foreground">
               Já tem conta? <span className="text-primary font-medium">Entrar</span>
             </button>
           </motion.div>
@@ -207,7 +204,7 @@ const Auth = () => {
 
         {step === "login" && (
           <motion.div key="login" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} className="flex-1">
-            <button onClick={() => { setPendingRedirect(null); setStep("choose"); }} className="flex items-center gap-2 text-muted-foreground mb-6">
+            <button onClick={() => setStep("choose")} className="flex items-center gap-2 text-muted-foreground mb-6">
               <ArrowLeft className="h-4 w-4" /> Voltar
             </button>
             <h2 className="text-xl font-display font-bold text-foreground text-center mb-8">Entrar</h2>
@@ -221,7 +218,7 @@ const Auth = () => {
               className="w-full h-14 mt-6 rounded-xl gradient-brand text-primary-foreground font-display font-bold text-lg shadow-brand hover:opacity-90 transition-opacity">
               {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : "Entrar"}
             </Button>
-            <button onClick={() => { setPendingRedirect(null); setStep("signup"); setEmail(""); setSenha(""); }} className="w-full mt-4 text-center text-sm text-muted-foreground">
+            <button onClick={() => { setStep("signup"); setEmail(""); setSenha(""); }} className="w-full mt-4 text-center text-sm text-muted-foreground">
               Não tem conta? <span className="text-primary font-medium">Criar conta</span>
             </button>
           </motion.div>
