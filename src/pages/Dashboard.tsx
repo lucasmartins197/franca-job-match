@@ -35,11 +35,11 @@ const Dashboard = () => {
         </div>
         <div className="flex gap-2">
           <button onClick={() => setShowPostModal(true)}
-            className="w-10 h-10 rounded-xl gradient-gold flex items-center justify-center shadow-gold">
-            <Plus className="h-5 w-5 text-background" />
+            className="w-10 h-10 rounded-xl gradient-brand flex items-center justify-center shadow-brand">
+            <Plus className="h-5 w-5 text-primary-foreground" />
           </button>
           <button onClick={handleSignOut}
-            className="w-10 h-10 rounded-xl bg-card border border-border flex items-center justify-center">
+            className="w-10 h-10 rounded-xl bg-card border border-border flex items-center justify-center shadow-sm">
             <LogOut className="h-4 w-4 text-muted-foreground" />
           </button>
         </div>
@@ -51,8 +51,8 @@ const Dashboard = () => {
           { label: "Total Vagas", value: myJobs.length, icon: TrendingUp },
           { label: "Candidatos", value: "—", icon: Users },
         ].map((m) => (
-          <div key={m.label} className="bg-card rounded-xl p-4 border border-border text-center">
-            <m.icon className="h-5 w-5 text-gold mx-auto mb-2" />
+          <div key={m.label} className="bg-card rounded-xl p-4 border border-border text-center shadow-sm">
+            <m.icon className="h-5 w-5 text-primary mx-auto mb-2" />
             <div className="text-xl font-display font-bold text-foreground">{m.value}</div>
             <div className="text-[10px] text-muted-foreground">{m.label}</div>
           </div>
@@ -62,33 +62,33 @@ const Dashboard = () => {
       <div className="px-5">
         <h2 className="font-display font-bold text-foreground mb-4">Suas Vagas</h2>
         {isLoading ? (
-          <div className="flex justify-center py-8"><Loader2 className="h-6 w-6 animate-spin text-gold" /></div>
+          <div className="flex justify-center py-8"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>
         ) : myJobs.length === 0 ? (
           <div className="text-center py-12">
             <p className="text-muted-foreground mb-4">Nenhuma vaga publicada ainda</p>
-            <Button onClick={() => setShowPostModal(true)} className="gradient-gold text-background rounded-xl font-display font-bold shadow-gold">
+            <Button onClick={() => setShowPostModal(true)} className="gradient-brand text-primary-foreground rounded-xl font-display font-bold shadow-brand">
               <Plus className="h-4 w-4 mr-2" /> Publicar primeira vaga
             </Button>
           </div>
         ) : (
           <div className="space-y-3">
             {myJobs.map((job) => (
-              <div key={job.id} className="bg-card rounded-xl p-4 border border-border">
+              <div key={job.id} className="bg-card rounded-xl p-4 border border-border shadow-sm">
                 <div className="flex items-start justify-between mb-2">
                   <div>
                     <h3 className="font-display font-bold text-foreground">{job.title}</h3>
                     <span className="text-xs text-muted-foreground">{job.category}</span>
                   </div>
                   <span className={`px-2.5 py-1 rounded-md text-xs font-medium ${
-                    job.status === "aberta" ? "bg-success/10 text-success" :
-                    job.status === "em_andamento" ? "bg-gold/10 text-gold" :
+                    job.status === "aberta" ? "bg-green-100 text-green-700" :
+                    job.status === "em_andamento" ? "bg-blue-100 text-blue-700" :
                     "bg-muted text-muted-foreground"
                   }`}>
                     {job.status === "aberta" ? "Aberta" : job.status === "em_andamento" ? "Em Andamento" : "Finalizada"}
                   </span>
                 </div>
                 <div className="flex items-center justify-between mt-3">
-                  <span className="font-display font-bold text-gold">R${job.payment}</span>
+                  <span className="font-display font-bold text-primary">R${job.payment}</span>
                   <Button size="sm" variant="outline" onClick={() => navigate(`/job/${job.id}/candidates`)}
                     className="h-8 rounded-lg border-border text-muted-foreground hover:text-foreground text-xs">
                     <Users className="h-3.5 w-3.5 mr-1" /> Ver Candidatos
@@ -101,8 +101,8 @@ const Dashboard = () => {
       </div>
 
       <button onClick={() => setShowPostModal(true)}
-        className="fixed bottom-6 right-6 w-14 h-14 rounded-xl gradient-gold flex items-center justify-center shadow-gold z-50">
-        <Plus className="h-6 w-6 text-background" />
+        className="fixed bottom-6 right-6 w-14 h-14 rounded-xl gradient-brand flex items-center justify-center shadow-brand z-50">
+        <Plus className="h-6 w-6 text-primary-foreground" />
       </button>
 
       <Dialog open={showPostModal} onOpenChange={setShowPostModal}>

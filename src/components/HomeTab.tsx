@@ -36,7 +36,6 @@ const HomeTab = () => {
 
   return (
     <div className="pb-20">
-      {/* Header */}
       <div className="px-5 pt-12 pb-6">
         <div className="flex items-center justify-between mb-5">
           <div>
@@ -45,9 +44,9 @@ const HomeTab = () => {
               Olá, {nome.split(" ")[0]} 👋
             </h1>
           </div>
-          <button className="relative w-10 h-10 bg-card border border-border rounded-xl flex items-center justify-center">
+          <button className="relative w-10 h-10 bg-card border border-border rounded-xl flex items-center justify-center shadow-sm">
             <Bell className="h-5 w-5 text-muted-foreground" />
-            <div className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-gold rounded-full" />
+            <div className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-primary rounded-full" />
           </button>
         </div>
         <div className="relative">
@@ -56,18 +55,17 @@ const HomeTab = () => {
             placeholder="Buscar vagas, categorias..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-11 h-12 rounded-xl bg-card border-border text-foreground placeholder:text-muted-foreground"
+            className="pl-11 h-12 rounded-xl bg-card border-border text-foreground placeholder:text-muted-foreground shadow-sm"
           />
         </div>
       </div>
 
       <div className="px-5 space-y-6">
-        {/* Categories */}
         <div>
           <div className="flex items-center justify-between mb-3">
             <h2 className="font-display font-bold text-foreground">Categorias</h2>
             {selectedCategory && (
-              <button onClick={() => setSelectedCategory(null)} className="text-xs text-gold font-medium">
+              <button onClick={() => setSelectedCategory(null)} className="text-xs text-primary font-medium">
                 Limpar
               </button>
             )}
@@ -75,7 +73,6 @@ const HomeTab = () => {
           <CategoryGrid onSelect={setSelectedCategory} selected={selectedCategory} />
         </div>
 
-        {/* Recent Jobs */}
         <div>
           <div className="flex items-center justify-between mb-3">
             <h2 className="font-display font-bold text-foreground">

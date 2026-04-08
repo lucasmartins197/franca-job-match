@@ -24,12 +24,12 @@ const BottomNav = ({ activeTab, onTabChange }: BottomNavProps) => (
             key={tab.id}
             onClick={() => onTabChange(tab.id)}
             className={`flex flex-col items-center gap-0.5 min-w-0 px-3 py-1 transition-all ${
-              isPost ? "" : isActive ? "text-gold" : "text-muted-foreground"
+              isPost ? "" : isActive ? "text-primary" : "text-muted-foreground"
             }`}
           >
             {isPost ? (
-              <div className="w-12 h-12 -mt-5 rounded-xl gradient-gold flex items-center justify-center shadow-gold">
-                <Plus className="h-6 w-6 text-background" />
+              <div className="w-12 h-12 -mt-5 rounded-xl gradient-brand flex items-center justify-center shadow-brand">
+                <Plus className="h-6 w-6 text-primary-foreground" />
               </div>
             ) : (
               <>

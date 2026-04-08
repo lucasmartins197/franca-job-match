@@ -18,7 +18,7 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { session, loading } = useAuth();
   if (loading) return (
     <div className="min-h-screen flex items-center justify-center bg-background">
-      <div className="text-gold font-display text-2xl animate-pulse">ELOOPS</div>
+      <div className="text-primary font-display text-2xl animate-pulse">ELOOPS</div>
     </div>
   );
   if (!session) return <Navigate to="/auth" replace />;

@@ -28,8 +28,8 @@ const CategoryGrid = ({ onSelect, selected }: CategoryGridProps) => (
           onClick={() => onSelect?.(cat.name)}
           className={`flex flex-col items-center gap-2 p-4 rounded-xl border transition-all ${
             isSelected
-              ? "bg-gold/10 border-gold/40 text-gold"
-              : "bg-card border-border text-foreground hover:border-gold/20"
+              ? "bg-primary/10 border-primary/40 text-primary"
+              : "bg-card border-border text-foreground hover:border-primary/20 shadow-sm"
           }`}
         >
           <span className="text-2xl">{cat.emoji}</span>

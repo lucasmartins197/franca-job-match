@@ -38,17 +38,15 @@ const JobDetail = () => {
 
   return (
     <div className="min-h-screen bg-background pb-24">
-      {/* Header */}
       <div className="px-5 pt-12 pb-6 flex items-center gap-3">
-        <button onClick={() => navigate(-1)} className="w-10 h-10 rounded-xl bg-card border border-border flex items-center justify-center">
+        <button onClick={() => navigate(-1)} className="w-10 h-10 rounded-xl bg-card border border-border flex items-center justify-center shadow-sm">
           <ArrowLeft className="h-5 w-5 text-foreground" />
         </button>
         <h1 className="font-display font-bold text-foreground">Detalhes da Vaga</h1>
       </div>
 
       <div className="px-5">
-        {/* Company icon */}
-        <div className="w-16 h-16 rounded-2xl gradient-gold flex items-center justify-center text-2xl font-display font-bold text-background mb-4">
+        <div className="w-16 h-16 rounded-2xl gradient-brand flex items-center justify-center text-2xl font-display font-bold text-primary-foreground mb-4">
           {job.company_name.charAt(0)}
         </div>
 
@@ -58,45 +56,41 @@ const JobDetail = () => {
           <span>{job.company_name}</span>
         </div>
 
-        <span className="inline-block px-3 py-1 rounded-md text-xs font-medium bg-gold/10 text-gold mb-6">
+        <span className="inline-block px-3 py-1 rounded-md text-xs font-medium bg-primary/10 text-primary mb-6">
           {job.category}
         </span>
 
-        {/* Info grid */}
         <div className="grid grid-cols-2 gap-3 mb-6">
           {[
             { icon: Calendar, label: "Data", value: new Date(job.date).toLocaleDateString("pt-BR") },
             { icon: Clock, label: "Horário", value: `${job.time_start} – ${job.time_end}` },
             { icon: MapPin, label: "Local", value: job.address || job.neighborhood },
           ].map((item) => (
-            <div key={item.label} className="bg-card rounded-xl p-3 border border-border">
+            <div key={item.label} className="bg-card rounded-xl p-3 border border-border shadow-sm">
               <div className="flex items-center gap-1.5 mb-1">
-                <item.icon className="h-3.5 w-3.5 text-gold" />
+                <item.icon className="h-3.5 w-3.5 text-primary" />
                 <span className="text-xs text-muted-foreground">{item.label}</span>
               </div>
               <span className="text-sm font-medium text-foreground">{item.value}</span>
             </div>
           ))}
-          <div className="bg-card rounded-xl p-3 border border-gold/20">
+          <div className="bg-card rounded-xl p-3 border border-primary/20 shadow-sm">
             <span className="text-xs text-muted-foreground block mb-1">Pagamento</span>
-            <span className="text-lg font-display font-bold text-gold">R${job.payment}</span>
+            <span className="text-lg font-display font-bold text-primary">R${job.payment}</span>
           </div>
         </div>
 
-        {/* Description */}
         <div className="mb-6">
           <h3 className="font-display font-bold text-foreground mb-2">Descrição</h3>
           <p className="text-sm text-muted-foreground leading-relaxed">{job.description || "Sem descrição fornecida."}</p>
         </div>
 
-        {/* About Company */}
-        <div className="bg-card rounded-xl p-4 border border-border mb-6">
+        <div className="bg-card rounded-xl p-4 border border-border mb-6 shadow-sm">
           <h3 className="font-display font-bold text-foreground mb-2">Sobre a Empresa</h3>
           <p className="text-sm text-muted-foreground">{job.company_name} — Franca, SP</p>
         </div>
       </div>
 
-      {/* Fixed bottom button */}
       <div className="fixed bottom-0 left-0 right-0 p-5 bg-background/95 backdrop-blur-lg border-t border-border">
         {applied ? (
           <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="flex items-center justify-center gap-2 h-14">
@@ -105,7 +99,7 @@ const JobDetail = () => {
           </motion.div>
         ) : (
           <Button onClick={handleApply} disabled={applyMutation.isPending}
-            className="w-full h-14 rounded-xl gradient-gold text-background font-display font-bold text-lg shadow-gold hover:opacity-90 transition-opacity">
+            className="w-full h-14 rounded-xl gradient-brand text-primary-foreground font-display font-bold text-lg shadow-brand hover:opacity-90 transition-opacity">
             {applyMutation.isPending ? <Loader2 className="h-5 w-5 animate-spin" /> : "Candidatar-se"}
           </Button>
         )}
