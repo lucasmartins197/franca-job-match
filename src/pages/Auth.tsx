@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -10,37 +10,59 @@ import OnboardingScreen from "@/components/OnboardingScreen";
 import { useAuth } from "@/hooks/useAuth";
 
 type Step = "onboarding" | "choose" | "signup" | "login";
+type UserTipo = "freelancer" | "empresa";
 
 const Auth = () => {
   const navigate = useNavigate();
-  const { session, userTipo } = useAuth();
+  const { session, userTipo, loading: authLoading } = useAuth();
   const [step, setStep] = useState<Step>("onboarding");
-  const [tipo, setTipo] = useState<"freelancer" | "empresa">("freelancer");
+  const [tipo, setTipo] = useState<UserTipo>("freelancer");
   const [nome, setNome] = useState("");
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
   const [loading, setLoading] = useState(false);
 
-  if (session && userTipo) {
-    navigate(userTipo === "empresa" ? "/dashboard" : "/", { replace: true });
-    return null;
-  }
+  useEffect(() => {
+    if (!authLoading && session && userTipo) {
+      navigate(userTipo === "empresa" ? "/dashboard" : "/", { replace: true });
+    }
+  }, [authLoading, navigate, session, userTipo]);
+
+  const goToSignUp = (selectedTipo: UserTipo) => {
+    setTipo(selectedTipo);
+    setNome("");
+    setEmail("");
+    setSenha("");
+    setStep("signup");
+  };
 
   const handleSignUp = async () => {
     if (!nome.trim() || !email.trim() || !senha.trim()) {
       toast.error("Preencha todos os campos");
       return;
     }
+
     setLoading(true);
+
     const { error } = await supabase.auth.signUp({
       email: email.trim(),
       password: senha,
-      options: { data: { nome: nome.trim(), tipo } },
+      options: {
+        data: {
+          nome: nome.trim(),
+          tipo,
+        },
+      },
     });
+
     setLoading(false);
-    if (error) { toast.error(error.message); return; }
+
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
+
     toast.success("Conta criada com sucesso!");
-    navigate(tipo === "empresa" ? "/dashboard" : "/", { replace: true });
   };
 
   const handleLogin = async () => {
@@ -48,16 +70,31 @@ const Auth = () => {
       toast.error("Preencha todos os campos");
       return;
     }
+
     setLoading(true);
-    const { data, error } = await supabase.auth.signInWithPassword({
+
+    const { error } = await supabase.auth.signInWithPassword({
       email: email.trim(),
       password: senha,
     });
-    if (error) { setLoading(false); toast.error(error.message); return; }
-    const { data: profile } = await supabase.from("profiles").select("tipo").eq("id", data.user.id).single();
+
     setLoading(false);
-    navigate((profile?.tipo === "empresa") ? "/dashboard" : "/", { replace: true });
+
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
+
+    toast.success("Login realizado com sucesso!");
   };
+
+  if (authLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="text-primary font-display text-2xl animate-pulse">ELOOPS</div>
+      </div>
+    );
+  }
 
   if (step === "onboarding") {
     return <OnboardingScreen onComplete={() => setStep("choose")} />;
@@ -76,7 +113,7 @@ const Auth = () => {
               Como você quer usar o ELOOPS?
             </h2>
             <div className="space-y-4">
-              <button onClick={() => { setTipo("freelancer"); setStep("signup"); }}
+              <button onClick={() => goToSignUp("freelancer")}
                 className="w-full flex items-center gap-4 p-5 rounded-xl bg-card border border-border hover:border-primary/40 transition-colors shadow-sm">
                 <div className="w-14 h-14 rounded-xl bg-primary/10 flex items-center justify-center">
                   <Briefcase className="h-7 w-7 text-primary" />
@@ -86,7 +123,7 @@ const Auth = () => {
                   <p className="text-sm text-muted-foreground font-light">Encontre vagas e ganhe dinheiro</p>
                 </div>
               </button>
-              <button onClick={() => { setTipo("empresa"); setStep("signup"); }}
+              <button onClick={() => goToSignUp("empresa")}
                 className="w-full flex items-center gap-4 p-5 rounded-xl bg-card border border-border hover:border-primary/40 transition-colors shadow-sm">
                 <div className="w-14 h-14 rounded-xl bg-orange-500/10 flex items-center justify-center">
                   <Users className="h-7 w-7 text-orange-500" />
