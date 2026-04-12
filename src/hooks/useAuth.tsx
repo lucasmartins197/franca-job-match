@@ -87,41 +87,54 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [loading, setLoading] = useState(true);
 
   const refreshAuthState = useCallback(async () => {
-    const {
-      data: { session: nextSession },
-    } = await supabase.auth.getSession();
+    try {
+      const {
+        data: { session: nextSession },
+      } = await supabase.auth.getSession();
 
-    const nextUser = nextSession?.user ?? null;
-    const metadataTipo = getUserTipoFromMetadata(nextUser);
-    let resolvedTipo = metadataTipo;
+      const nextUser = nextSession?.user ?? null;
+      let resolvedTipo: UserTipo | null = null;
 
-    if (nextUser) {
-      try {
-        resolvedTipo = await ensureUserProfile(nextUser);
-      } catch (error) {
-        console.error("Erro ao sincronizar perfil do usuário", error);
-        resolvedTipo = metadataTipo ?? "freelancer";
+      if (nextUser) {
+        try {
+          resolvedTipo = await ensureUserProfile(nextUser);
+        } catch (error) {
+          console.error("Erro ao sincronizar perfil do usuário", error);
+          resolvedTipo = getUserTipoFromMetadata(nextUser) ?? "freelancer";
+        }
       }
+
+      setSession(nextSession);
+      setUser(nextUser);
+      setUserTipo(resolvedTipo);
+      setLoading(false);
+
+      return { session: nextSession, user: nextUser, userTipo: resolvedTipo };
+    } catch (error) {
+      console.error("Erro ao buscar sessão", error);
+      setSession(null);
+      setUser(null);
+      setUserTipo(null);
+      setLoading(false);
+      return { session: null, user: null, userTipo: null };
     }
-
-    setSession(nextSession);
-    setUser(nextUser);
-    setUserTipo(resolvedTipo ?? null);
-    setLoading(false);
-
-    return {
-      session: nextSession,
-      user: nextUser,
-      userTipo: resolvedTipo ?? null,
-    };
   }, []);
+
+  // Safety timeout: force loading to false after 3 seconds
+  useEffect(() => {
+    if (!loading) return;
+    const timeoutId = setTimeout(() => {
+      console.warn("Auth loading timed out after 3s, forcing isLoading to false.");
+      setLoading(false);
+    }, 3000);
+    return () => clearTimeout(timeoutId);
+  }, [loading]);
 
   useEffect(() => {
     let isMounted = true;
 
     const applySession = (nextSession: Session | null) => {
       if (!isMounted) return;
-
       const nextUser = nextSession?.user ?? null;
       setSession(nextSession);
       setUser(nextUser);
@@ -147,16 +160,18 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, [refreshAuthState]);
 
   const signOut = async () => {
-    const { error } = await supabase.auth.signOut();
-
-    if (error) {
-      console.error("Erro ao sair da conta", error);
-      return;
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) {
+        console.error("Erro ao sair da conta", error);
+      }
+    } catch (error) {
+      console.error("Erro inesperado ao sair", error);
+    } finally {
+      setSession(null);
+      setUser(null);
+      setUserTipo(null);
     }
-
-    setSession(null);
-    setUser(null);
-    setUserTipo(null);
   };
 
   return (
