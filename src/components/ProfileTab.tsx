@@ -111,6 +111,13 @@ const ProfileTab = () => {
         </div>
       )}
 
+      {roles.includes("admin") && (
+        <Button onClick={() => navigate("/admin")} variant="outline"
+          className="w-full h-12 rounded-xl border-primary/30 text-primary hover:bg-primary/10 font-medium mb-3">
+          Painel Admin
+        </Button>
+      )}
+
       <Button onClick={handleSignOut} variant="outline"
         className="w-full h-12 rounded-xl border-destructive/30 text-destructive hover:bg-destructive/10 font-medium">
         <LogOut className="h-4 w-4 mr-2" /> Sair da conta
