@@ -97,6 +97,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
       const nextUser = nextSession?.user ?? null;
       let resolvedTipo: UserTipo | null = null;
+      let resolvedRoles: string[] = [];
 
       if (nextUser) {
         try {
@@ -105,11 +106,25 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           console.error("Erro ao sincronizar perfil do usuário", error);
           resolvedTipo = getUserTipoFromMetadata(nextUser) ?? "freelancer";
         }
+
+        try {
+          const { data: rolesData, error: rolesError } = await supabase
+            .from("user_roles")
+            .select("role")
+            .eq("user_id", nextUser.id);
+
+          if (!rolesError && rolesData) {
+            resolvedRoles = rolesData.map((r) => r.role);
+          }
+        } catch (rolesError) {
+          console.error("Erro ao buscar roles", rolesError);
+        }
       }
 
       setSession(nextSession);
       setUser(nextUser);
       setUserTipo(resolvedTipo);
+      setRoles(resolvedRoles);
       setLoading(false);
 
       return { session: nextSession, user: nextUser, userTipo: resolvedTipo };
@@ -118,6 +133,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setSession(null);
       setUser(null);
       setUserTipo(null);
+      setRoles([]);
       setLoading(false);
       return { session: null, user: null, userTipo: null };
     }
