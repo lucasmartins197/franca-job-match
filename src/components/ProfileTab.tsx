@@ -9,7 +9,7 @@ import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 
 const ProfileTab = () => {
-  const { user, signOut } = useAuth();
+  const { user, signOut, roles } = useAuth();
   const navigate = useNavigate();
   const [editing, setEditing] = useState(false);
   const [nome, setNome] = useState("");
@@ -109,6 +109,13 @@ const ProfileTab = () => {
           <h3 className="font-display font-bold text-foreground text-sm mb-2">Sobre</h3>
           <p className="text-sm text-muted-foreground leading-relaxed">{bio}</p>
         </div>
+      )}
+
+      {roles.includes("admin") && (
+        <Button onClick={() => navigate("/admin")} variant="outline"
+          className="w-full h-12 rounded-xl border-primary/30 text-primary hover:bg-primary/10 font-medium mb-3">
+          Painel Admin
+        </Button>
       )}
 
       <Button onClick={handleSignOut} variant="outline"

@@ -8,6 +8,7 @@ interface AuthContextType {
   session: Session | null;
   user: User | null;
   userTipo: UserTipo | null;
+  roles: string[];
   loading: boolean;
   signOut: () => Promise<void>;
   refreshAuthState: () => Promise<{ session: Session | null; user: User | null; userTipo: UserTipo | null }>;
@@ -17,6 +18,7 @@ const AuthContext = createContext<AuthContextType>({
   session: null,
   user: null,
   userTipo: null,
+  roles: [],
   loading: true,
   signOut: async () => {},
   refreshAuthState: async () => ({ session: null, user: null, userTipo: null }),
@@ -84,6 +86,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [session, setSession] = useState<Session | null>(null);
   const [user, setUser] = useState<User | null>(null);
   const [userTipo, setUserTipo] = useState<UserTipo | null>(null);
+  const [roles, setRoles] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
 
   const refreshAuthState = useCallback(async () => {
@@ -94,6 +97,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
       const nextUser = nextSession?.user ?? null;
       let resolvedTipo: UserTipo | null = null;
+      let resolvedRoles: string[] = [];
 
       if (nextUser) {
         try {
@@ -102,11 +106,25 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           console.error("Erro ao sincronizar perfil do usuário", error);
           resolvedTipo = getUserTipoFromMetadata(nextUser) ?? "freelancer";
         }
+
+        try {
+          const { data: rolesData, error: rolesError } = await supabase
+            .from("user_roles")
+            .select("role")
+            .eq("user_id", nextUser.id);
+
+          if (!rolesError && rolesData) {
+            resolvedRoles = rolesData.map((r) => r.role);
+          }
+        } catch (rolesError) {
+          console.error("Erro ao buscar roles", rolesError);
+        }
       }
 
       setSession(nextSession);
       setUser(nextUser);
       setUserTipo(resolvedTipo);
+      setRoles(resolvedRoles);
       setLoading(false);
 
       return { session: nextSession, user: nextUser, userTipo: resolvedTipo };
@@ -115,6 +133,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setSession(null);
       setUser(null);
       setUserTipo(null);
+      setRoles([]);
       setLoading(false);
       return { session: null, user: null, userTipo: null };
     }
@@ -139,6 +158,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setSession(nextSession);
       setUser(nextUser);
       setUserTipo(getUserTipoFromMetadata(nextUser));
+      setRoles([]);
       setLoading(false);
     };
 
@@ -171,11 +191,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setSession(null);
       setUser(null);
       setUserTipo(null);
+      setRoles([]);
     }
   };
 
   return (
-    <AuthContext.Provider value={{ session, user, userTipo, loading, signOut, refreshAuthState }}>
+    <AuthContext.Provider value={{ session, user, userTipo, roles, loading, signOut, refreshAuthState }}>
       {children}
     </AuthContext.Provider>
   );
