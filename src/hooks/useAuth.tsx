@@ -8,6 +8,7 @@ interface AuthContextType {
   session: Session | null;
   user: User | null;
   userTipo: UserTipo | null;
+  roles: string[];
   loading: boolean;
   signOut: () => Promise<void>;
   refreshAuthState: () => Promise<{ session: Session | null; user: User | null; userTipo: UserTipo | null }>;
@@ -17,6 +18,7 @@ const AuthContext = createContext<AuthContextType>({
   session: null,
   user: null,
   userTipo: null,
+  roles: [],
   loading: true,
   signOut: async () => {},
   refreshAuthState: async () => ({ session: null, user: null, userTipo: null }),
