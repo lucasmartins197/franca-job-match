@@ -158,6 +158,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setSession(nextSession);
       setUser(nextUser);
       setUserTipo(getUserTipoFromMetadata(nextUser));
+      setRoles([]);
       setLoading(false);
     };
 
@@ -190,11 +191,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setSession(null);
       setUser(null);
       setUserTipo(null);
+      setRoles([]);
     }
   };
 
   return (
-    <AuthContext.Provider value={{ session, user, userTipo, loading, signOut, refreshAuthState }}>
+    <AuthContext.Provider value={{ session, user, userTipo, roles, loading, signOut, refreshAuthState }}>
       {children}
     </AuthContext.Provider>
   );
