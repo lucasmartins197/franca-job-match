@@ -10,7 +10,11 @@
    - média de avaliações no perfil de quem recebeu (`avaliacao_media` / `total_avaliacoes`);
    - trava no banco: empresa não cria vaga com contratação `em_andamento`;
    - realtime da tabela `notificacoes` (sino atualiza na hora).
-3. As migrations antigas (`20260324…`, `20260404…`, `20260618…`) são do projeto Supabase anterior — **não rode** no FreLa.
+3. **Fase 2 — rode também, nesta ordem:**
+   - `supabase/migrations/20261017120000_fase2_perfil.sql` — colunas `instagram`/`linkedin` em `profissional_dados`, bucket `avatars` (fotos) com policies, funções de histórico de trabalhos;
+   - `supabase/migrations/20261018120000_fase2_chat.sql` — validação de mensagens, notificação de nova mensagem, realtime de `mensagens`.
+4. **Auth → URL Configuration:** coloque a URL do app em *Site URL* (e em *Redirect URLs*), para o link de confirmação de email voltar para `/auth`.
+5. As migrations antigas (`20260324…`, `20260404…`, `20260618…`) são do projeto Supabase anterior — **não rode** no FreLa.
 
 ## Rotas
 
@@ -23,7 +27,12 @@
 | `/job/:id/candidates` | empresa | candidatos → aceitar/recusar |
 | `/contratacao/:id` | as duas partes | confirmar finalização, avaliações |
 | `/notificacoes` | todos | lista, marcar como lida |
-| `/profile` | empresa | perfil (o profissional usa a aba Perfil) |
+| `/profile` | empresa | meu perfil (o profissional usa a aba Perfil) |
+| `/completar-perfil` | todos | obrigatório após o cadastro (foto + campos essenciais) |
+| `/perfil/editar` | todos | editar meu perfil |
+| `/perfil/:id` | todos | perfil público (currículo do profissional / perfil da empresa) |
+| `/chat` | todos | lista de conversas (uma por contratação) |
+| `/chat/:id` | as duas partes | conversa em tempo real |
 
 ---
 

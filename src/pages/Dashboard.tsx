@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Navigate, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { Plus, LogOut, Users, Briefcase, Lock, Star, ChevronRight, Clock } from "lucide-react";
+import { Plus, LogOut, Users, Briefcase, Lock, Star, ChevronRight, Clock, MessageCircle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useMyJobs } from "@/hooks/useJobs";
@@ -19,6 +19,7 @@ import UserAvatar from "@/components/frela/UserAvatar";
 import EmptyState from "@/components/frela/EmptyState";
 import { JobListSkeleton } from "@/components/frela/JobCardSkeleton";
 import { useMeuPerfil } from "@/hooks/usePerfil";
+import { useChatNaoLidas } from "@/hooks/useChat";
 import FinalizarContratacaoButton from "@/components/frela/FinalizarContratacaoButton";
 
 const STATUS_TABS = [
@@ -37,6 +38,7 @@ const Dashboard = () => {
   const { data: contratacoes = [] } = useMinhasContratacoes();
   const { bloqueado, pendentes } = useTravaNovaVaga();
   const [showPostModal, setShowPostModal] = useState(false);
+  const chatNaoLidas = useChatNaoLidas();
 
   const jobIds = myJobs.map((j) => j.id);
   const { data: candidaturas = [] } = useQuery({
@@ -92,6 +94,15 @@ const Dashboard = () => {
           </div>
         </button>
         <div className="flex gap-2 shrink-0">
+          <button onClick={() => navigate("/chat")} aria-label={chatNaoLidas > 0 ? `Conversas (${chatNaoLidas} não lidas)` : "Conversas"}
+            className="relative w-10 h-10 rounded-xl bg-card border border-border flex items-center justify-center shadow-card">
+            <MessageCircle className="h-5 w-5 text-muted-foreground" />
+            {chatNaoLidas > 0 && (
+              <span className="absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] px-1 rounded-full bg-destructive text-white text-[10px] font-bold flex items-center justify-center">
+                {chatNaoLidas > 9 ? "9+" : chatNaoLidas}
+              </span>
+            )}
+          </button>
           <NotificationBell />
           <button onClick={handleSignOut} aria-label="Sair"
             className="w-10 h-10 rounded-xl bg-card border border-border flex items-center justify-center shadow-card">
@@ -146,7 +157,12 @@ const Dashboard = () => {
                     {c.jobs && <span className="text-xs text-muted-foreground">{formatDate(c.jobs.date)} · {c.jobs.time_start}–{c.jobs.time_end}</span>}
                   </div>
                 </button>
-                <FinalizarContratacaoButton contratacao={c} className="w-full h-11 mt-3" />
+                <div className="flex gap-2 mt-3">
+                  <Button variant="outline" onClick={() => navigate(`/chat/${c.id}`)} className="h-11 rounded-xl" aria-label="Abrir chat">
+                    <MessageCircle className="h-4 w-4" />
+                  </Button>
+                  <FinalizarContratacaoButton contratacao={c} className="flex-1 h-11" />
+                </div>
               </div>
             ))}
           </div>

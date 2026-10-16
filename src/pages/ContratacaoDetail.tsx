@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { Loader2, Calendar, Clock, MapPin, Phone, Info, ChevronRight } from "lucide-react";
+import { Loader2, Calendar, Clock, MapPin, Phone, Info, ChevronRight, MessageCircle } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -102,11 +102,16 @@ const ContratacaoDetail = () => {
             </div>
             <ChevronRight className="h-5 w-5 text-muted-foreground" />
           </button>
-          {outro?.telefone && (
-            <a href={`tel:${outro.telefone}`} className="mt-3 flex items-center gap-2 text-sm text-primary">
-              <Phone className="h-4 w-4" /> {outro.telefone}
-            </a>
-          )}
+          <div className="flex gap-2 mt-4">
+            <Button onClick={() => navigate(`/chat/${contratacao.id}`)} className="flex-1 h-11 rounded-xl font-semibold">
+              <MessageCircle className="h-4 w-4 mr-2" /> Abrir chat
+            </Button>
+            {outro?.telefone && (
+              <Button asChild variant="outline" className="h-11 rounded-xl">
+                <a href={`tel:${outro.telefone}`} aria-label={`Ligar para ${outro.telefone}`}><Phone className="h-4 w-4" /></a>
+              </Button>
+            )}
+          </div>
         </div>
 
         {!finalizada && (

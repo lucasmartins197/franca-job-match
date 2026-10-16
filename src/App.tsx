@@ -5,6 +5,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider, useAuth } from "@/hooks/useAuth";
 import { useMeuPerfil } from "@/hooks/usePerfil";
+import { useChatRealtime } from "@/hooks/useChat";
 import Logo from "@/components/frela/Logo";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
@@ -17,6 +18,8 @@ import Notificacoes from "./pages/Notificacoes";
 import CompletarPerfil from "./pages/CompletarPerfil";
 import EditarPerfil from "./pages/EditarPerfil";
 import PerfilPublico from "./pages/PerfilPublico";
+import Conversas from "./pages/Conversas";
+import Conversa from "./pages/Conversa";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient({
@@ -45,6 +48,12 @@ const ProtectedRoute = ({ children, perfilIncompletoOk = false }: { children: Re
   return <>{children}</>;
 };
 
+/** Mantém badges/listas de chat atualizados em tempo real em qualquer tela. */
+const ChatRealtime = () => {
+  useChatRealtime();
+  return null;
+};
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
@@ -52,6 +61,7 @@ const App = () => (
       <Sonner theme="light" position="top-center" />
       <BrowserRouter>
         <AuthProvider>
+          <ChatRealtime />
           <Routes>
             <Route path="/auth" element={<Auth />} />
             <Route path="/completar-perfil" element={<ProtectedRoute perfilIncompletoOk><CompletarPerfil /></ProtectedRoute>} />
@@ -63,6 +73,8 @@ const App = () => (
             <Route path="/perfil/editar" element={<ProtectedRoute><EditarPerfil /></ProtectedRoute>} />
             <Route path="/perfil/:id" element={<ProtectedRoute><PerfilPublico /></ProtectedRoute>} />
             <Route path="/contratacao/:id" element={<ProtectedRoute><ContratacaoDetail /></ProtectedRoute>} />
+            <Route path="/chat" element={<ProtectedRoute><Conversas /></ProtectedRoute>} />
+            <Route path="/chat/:id" element={<ProtectedRoute><Conversa /></ProtectedRoute>} />
             <Route path="/notificacoes" element={<ProtectedRoute><Notificacoes /></ProtectedRoute>} />
             <Route path="*" element={<NotFound />} />
           </Routes>
