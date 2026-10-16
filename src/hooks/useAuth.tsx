@@ -97,7 +97,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
       const nextUser = nextSession?.user ?? null;
       let resolvedTipo: UserTipo | null = null;
-      let resolvedRoles: string[] = [];
+      const resolvedRoles: string[] = [];
 
       if (nextUser) {
         try {
@@ -105,19 +105,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         } catch (error) {
           console.error("Erro ao sincronizar perfil do usuário", error);
           resolvedTipo = getUserTipoFromMetadata(nextUser) ?? "freelancer";
-        }
-
-        try {
-          const { data: rolesData, error: rolesError } = await supabase
-            .from("user_roles")
-            .select("role")
-            .eq("user_id", nextUser.id);
-
-          if (!rolesError && rolesData) {
-            resolvedRoles = rolesData.map((r) => r.role);
-          }
-        } catch (rolesError) {
-          console.error("Erro ao buscar roles", rolesError);
         }
       }
 

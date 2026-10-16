@@ -9,7 +9,7 @@ interface OnboardingScreenProps {
 
 const slides = [
   {
-    title: "ELOOPS",
+    title: "FreLa",
     subtitle: "O trabalho certo. Na hora certa.",
     icon: null,
     isLogo: true,
@@ -59,7 +59,7 @@ const OnboardingScreen = ({ onComplete }: OnboardingScreenProps) => {
             {slide.isLogo ? (
               <>
                 <h1 className="text-5xl font-display font-extrabold gradient-brand-text mb-4">
-                  ELOOPS
+                  FreLa
                 </h1>
                 <p className="text-lg text-foreground/70 font-light max-w-xs mx-auto">
                   {slide.subtitle}

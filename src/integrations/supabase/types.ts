@@ -46,6 +46,123 @@ export type Database = {
           },
         ]
       }
+      avaliacoes: {
+        Row: {
+          comentario: string | null
+          contratacao_id: string
+          created_at: string
+          de_id: string
+          id: string
+          nota: number
+          para_id: string
+        }
+        Insert: {
+          comentario?: string | null
+          contratacao_id: string
+          created_at?: string
+          de_id: string
+          id?: string
+          nota: number
+          para_id: string
+        }
+        Update: {
+          comentario?: string | null
+          contratacao_id?: string
+          created_at?: string
+          de_id?: string
+          id?: string
+          nota?: number
+          para_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "avaliacoes_contratacao_id_fkey"
+            columns: ["contratacao_id"]
+            isOneToOne: false
+            referencedRelation: "contratacoes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      contratacoes: {
+        Row: {
+          created_at: string
+          empresa_id: string
+          finalizada_em: string | null
+          id: string
+          job_id: string
+          profissional_id: string
+          status: string
+          taxa_5pct: number | null
+          taxa_cobrada: boolean | null
+          valor: number
+        }
+        Insert: {
+          created_at?: string
+          empresa_id: string
+          finalizada_em?: string | null
+          id?: string
+          job_id: string
+          profissional_id: string
+          status?: string
+          taxa_5pct?: number | null
+          taxa_cobrada?: boolean | null
+          valor: number
+        }
+        Update: {
+          created_at?: string
+          empresa_id?: string
+          finalizada_em?: string | null
+          id?: string
+          job_id?: string
+          profissional_id?: string
+          status?: string
+          taxa_5pct?: number | null
+          taxa_cobrada?: boolean | null
+          valor?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "contratacoes_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "jobs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      empresa_dados: {
+        Row: {
+          cnpj: string | null
+          endereco: string | null
+          nome_empresa: string | null
+          profile_id: string
+          ramo: string | null
+        }
+        Insert: {
+          cnpj?: string | null
+          endereco?: string | null
+          nome_empresa?: string | null
+          profile_id: string
+          ramo?: string | null
+        }
+        Update: {
+          cnpj?: string | null
+          endereco?: string | null
+          nome_empresa?: string | null
+          profile_id?: string
+          ramo?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "empresa_dados_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       jobs: {
         Row: {
           address: string
@@ -106,81 +223,207 @@ export type Database = {
         }
         Relationships: []
       }
-      profiles: {
+      mensagens: {
         Row: {
-          bio: string | null
+          contratacao_id: string | null
           created_at: string
-          email: string
+          de_id: string
           id: string
-          jobs_completed: number | null
-          neighborhood: string | null
-          nome: string | null
-          phone: string | null
-          rating: number | null
-          skills: string[] | null
-          tipo: string
+          lida: boolean | null
+          para_id: string
+          texto: string
         }
         Insert: {
-          bio?: string | null
+          contratacao_id?: string | null
           created_at?: string
-          email: string
-          id: string
-          jobs_completed?: number | null
-          neighborhood?: string | null
-          nome?: string | null
-          phone?: string | null
-          rating?: number | null
-          skills?: string[] | null
-          tipo: string
+          de_id: string
+          id?: string
+          lida?: boolean | null
+          para_id: string
+          texto: string
         }
         Update: {
-          bio?: string | null
+          contratacao_id?: string | null
           created_at?: string
-          email?: string
+          de_id?: string
           id?: string
-          jobs_completed?: number | null
-          neighborhood?: string | null
-          nome?: string | null
-          phone?: string | null
-          rating?: number | null
-          skills?: string[] | null
-          tipo?: string
+          lida?: boolean | null
+          para_id?: string
+          texto?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "mensagens_contratacao_id_fkey"
+            columns: ["contratacao_id"]
+            isOneToOne: false
+            referencedRelation: "contratacoes"
+            referencedColumns: ["id"]
+          },
+        ]
       }
-      user_roles: {
+      notificacoes: {
         Row: {
+          created_at: string
           id: string
-          role: Database["public"]["Enums"]["app_role"]
+          lida: boolean | null
+          link: string | null
+          texto: string
+          tipo: string
           user_id: string
         }
         Insert: {
+          created_at?: string
           id?: string
-          role: Database["public"]["Enums"]["app_role"]
+          lida?: boolean | null
+          link?: string | null
+          texto: string
+          tipo: string
           user_id: string
         }
         Update: {
+          created_at?: string
           id?: string
-          role?: Database["public"]["Enums"]["app_role"]
+          lida?: boolean | null
+          link?: string | null
+          texto?: string
+          tipo?: string
           user_id?: string
         }
         Relationships: []
+      }
+      pagamentos: {
+        Row: {
+          contratacao_id: string | null
+          created_at: string
+          id: string
+          status: string
+          stripe_id: string | null
+          tipo: string
+          user_id: string
+          valor: number
+        }
+        Insert: {
+          contratacao_id?: string | null
+          created_at?: string
+          id?: string
+          status?: string
+          stripe_id?: string | null
+          tipo: string
+          user_id: string
+          valor: number
+        }
+        Update: {
+          contratacao_id?: string | null
+          created_at?: string
+          id?: string
+          status?: string
+          stripe_id?: string | null
+          tipo?: string
+          user_id?: string
+          valor?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pagamentos_contratacao_id_fkey"
+            columns: ["contratacao_id"]
+            isOneToOne: false
+            referencedRelation: "contratacoes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          avaliacao_media: number | null
+          cartao_cadastrado: boolean | null
+          cidade: string | null
+          created_at: string
+          email: string
+          foto_url: string | null
+          id: string
+          nome: string | null
+          stripe_customer_id: string | null
+          subscription_end: string | null
+          subscription_status: string | null
+          telefone: string | null
+          tipo: string
+          total_avaliacoes: number | null
+        }
+        Insert: {
+          avaliacao_media?: number | null
+          cartao_cadastrado?: boolean | null
+          cidade?: string | null
+          created_at?: string
+          email: string
+          foto_url?: string | null
+          id: string
+          nome?: string | null
+          stripe_customer_id?: string | null
+          subscription_end?: string | null
+          subscription_status?: string | null
+          telefone?: string | null
+          tipo: string
+          total_avaliacoes?: number | null
+        }
+        Update: {
+          avaliacao_media?: number | null
+          cartao_cadastrado?: boolean | null
+          cidade?: string | null
+          created_at?: string
+          email?: string
+          foto_url?: string | null
+          id?: string
+          nome?: string | null
+          stripe_customer_id?: string | null
+          subscription_end?: string | null
+          subscription_status?: string | null
+          telefone?: string | null
+          tipo?: string
+          total_avaliacoes?: number | null
+        }
+        Relationships: []
+      }
+      profissional_dados: {
+        Row: {
+          bio: string | null
+          disponibilidade: string | null
+          experiencia: string | null
+          profile_id: string
+          profissoes: string[] | null
+        }
+        Insert: {
+          bio?: string | null
+          disponibilidade?: string | null
+          experiencia?: string | null
+          profile_id: string
+          profissoes?: string[] | null
+        }
+        Update: {
+          bio?: string | null
+          disponibilidade?: string | null
+          experiencia?: string | null
+          profile_id?: string
+          profissoes?: string[] | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "profissional_dados_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      has_role: {
-        Args: {
-          _role: Database["public"]["Enums"]["app_role"]
-          _user_id: string
-        }
-        Returns: boolean
-      }
+      [_ in never]: never
     }
     Enums: {
-      app_role: "admin" | "moderator" | "user"
+      [_ in never]: never
     }
     CompositeTypes: {
       [_ in never]: never
@@ -307,8 +550,6 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {
-      app_role: ["admin", "moderator", "user"],
-    },
+    Enums: {},
   },
 } as const

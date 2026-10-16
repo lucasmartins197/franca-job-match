@@ -30,6 +30,7 @@ const Auth = () => {
   const [step, setStep] = useState<Step>("onboarding");
   const [tipo, setTipo] = useState<UserTipo>("freelancer");
   const [nome, setNome] = useState("");
+  const [telefone, setTelefone] = useState("");
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
   const [loading, setLoading] = useState(false);
@@ -43,6 +44,7 @@ const Auth = () => {
   const goToSignUp = (selectedTipo: UserTipo) => {
     setTipo(selectedTipo);
     setNome("");
+    setTelefone("");
     setEmail("");
     setSenha("");
     setStep("signup");
@@ -56,7 +58,11 @@ const Auth = () => {
 
   const handleSignUp = async () => {
     if (!nome.trim() || !email.trim() || !senha.trim()) {
-      toast.error("Preencha todos os campos");
+      toast.error("Preencha nome, email e senha");
+      return;
+    }
+    if (senha.length < 6) {
+      toast.error("A senha precisa ter pelo menos 6 caracteres");
       return;
     }
 
@@ -69,6 +75,7 @@ const Auth = () => {
         data: {
           nome: nome.trim(),
           tipo,
+          telefone: telefone.trim() || null,
         },
       },
     });
@@ -76,6 +83,15 @@ const Auth = () => {
     if (error) {
       setLoading(false);
       toast.error(error.message);
+      return;
+    }
+
+    if (!data.session) {
+      // Supabase com confirmação de email ligada: não há sessão até confirmar.
+      setLoading(false);
+      toast.success("Conta criada! Confirme seu email e depois entre.");
+      setSenha("");
+      setStep("login");
       return;
     }
 
@@ -100,7 +116,7 @@ const Auth = () => {
 
     if (error) {
       setLoading(false);
-      toast.error(error.message);
+      toast.error(error.message === "Invalid login credentials" ? "Email ou senha incorretos" : error.message);
       return;
     }
 
@@ -124,7 +140,7 @@ const Auth = () => {
   if (authLoading && !session) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="text-primary font-display text-2xl animate-pulse">ELOOPS</div>
+        <div className="text-primary font-display text-2xl animate-pulse">FreLa</div>
       </div>
     );
   }
@@ -136,14 +152,14 @@ const Auth = () => {
   return (
     <div className="min-h-screen bg-background flex flex-col px-6 pt-16 pb-8">
       <div className="text-center mb-10">
-        <h1 className="text-3xl font-display font-extrabold gradient-brand-text">ELOOPS</h1>
+        <h1 className="text-3xl font-display font-extrabold gradient-brand-text">FreLa</h1>
       </div>
 
       <AnimatePresence mode="wait">
         {step === "choose" && (
           <motion.div key="choose" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} className="flex-1">
             <h2 className="text-xl font-display font-bold text-foreground text-center mb-8">
-              Como você quer usar o ELOOPS?
+              Como você quer usar o FreLa?
             </h2>
             <div className="space-y-4">
               <button onClick={() => goToSignUp("freelancer")}
@@ -180,16 +196,18 @@ const Auth = () => {
             </button>
             <div className="flex justify-center mb-6">
               <span className="px-4 py-1.5 rounded-full text-xs font-medium gradient-brand text-primary-foreground">
-                {tipo === "freelancer" ? "Freelancer" : "Empresa"}
+                {tipo === "freelancer" ? "Profissional" : "Empresa"}
               </span>
             </div>
             <h2 className="text-xl font-display font-bold text-foreground text-center mb-8">Criar conta</h2>
             <div className="space-y-4">
-              <Input placeholder="Nome completo" value={nome} onChange={(e) => setNome(e.target.value)}
+              <Input placeholder={tipo === "empresa" ? "Nome da empresa" : "Nome completo"} value={nome} onChange={(e) => setNome(e.target.value)}
+                className="h-13 rounded-xl bg-card border-border text-foreground placeholder:text-muted-foreground" />
+              <Input type="tel" placeholder="Telefone / WhatsApp (opcional)" value={telefone} onChange={(e) => setTelefone(e.target.value)}
                 className="h-13 rounded-xl bg-card border-border text-foreground placeholder:text-muted-foreground" />
               <Input type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)}
                 className="h-13 rounded-xl bg-card border-border text-foreground placeholder:text-muted-foreground" />
-              <Input type="password" placeholder="Senha" value={senha} onChange={(e) => setSenha(e.target.value)}
+              <Input type="password" placeholder="Senha (mín. 6 caracteres)" value={senha} onChange={(e) => setSenha(e.target.value)}
                 className="h-13 rounded-xl bg-card border-border text-foreground placeholder:text-muted-foreground" />
             </div>
             <Button onClick={handleSignUp} disabled={loading}

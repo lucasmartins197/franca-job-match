@@ -1,27 +1,31 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import type { Tables, TablesInsert } from "@/integrations/supabase/types";
 import { useAuth } from "./useAuth";
 
-export interface DbJob {
-  id: string;
-  user_id: string;
-  company_name: string;
-  title: string;
-  category: string;
-  skill: string;
-  description: string;
-  date: string;
-  time_start: string;
-  time_end: string;
-  payment: number;
-  slots: number;
-  slots_remaining: number;
-  neighborhood: string;
-  address: string;
-  status: string;
-  created_at: string;
-}
+export type DbJob = Tables<"jobs">;
+export type DbApplication = Tables<"applications">;
 
+export const JOB_STATUS_LABEL: Record<string, string> = {
+  aberta: "Aberta",
+  preenchida: "Preenchida",
+  finalizada: "Finalizada",
+  cancelada: "Cancelada",
+};
+
+export const APPLICATION_STATUS_LABEL: Record<string, string> = {
+  pendente: "Pendente",
+  aceita: "Aceita",
+  recusada: "Recusada",
+};
+
+const todayISO = () => {
+  const d = new Date();
+  const local = new Date(d.getTime() - d.getTimezoneOffset() * 60000);
+  return local.toISOString().slice(0, 10);
+};
+
+/** Feed do profissional: vagas abertas, de hoje em diante. */
 export const useJobs = () => {
   return useQuery({
     queryKey: ["jobs"],
@@ -29,10 +33,24 @@ export const useJobs = () => {
       const { data, error } = await supabase
         .from("jobs")
         .select("*")
-        .order("created_at", { ascending: false });
+        .eq("status", "aberta")
+        .gte("date", todayISO())
+        .order("date", { ascending: true });
       if (error) throw error;
-      return data as DbJob[];
+      return data;
     },
+  });
+};
+
+export const useJob = (id?: string) => {
+  return useQuery({
+    queryKey: ["job", id],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("jobs").select("*").eq("id", id!).maybeSingle();
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!id,
   });
 };
 
@@ -48,7 +66,7 @@ export const useMyJobs = () => {
         .eq("user_id", user.id)
         .order("created_at", { ascending: false });
       if (error) throw error;
-      return data as DbJob[];
+      return data;
     },
     enabled: !!user,
   });
@@ -57,7 +75,18 @@ export const useMyJobs = () => {
 export const useCreateJob = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async (job: Omit<DbJob, "id" | "created_at">) => {
+    mutationFn: async (job: TablesInsert<"jobs">) => {
+      // TRAVA: confere de novo no momento de publicar (o botão já fica bloqueado na tela)
+      const { count, error: travaError } = await supabase
+        .from("contratacoes")
+        .select("id", { count: "exact", head: true })
+        .eq("empresa_id", job.user_id)
+        .eq("status", "em_andamento");
+      if (travaError) throw travaError;
+      if ((count ?? 0) > 0) {
+        throw new Error("Confirme a finalização da contratação em andamento antes de criar uma nova vaga.");
+      }
+
       const { data, error } = await supabase.from("jobs").insert(job).select().single();
       if (error) throw error;
       return data;
@@ -74,7 +103,11 @@ export const useApply = () => {
   return useMutation({
     mutationFn: async ({ jobId, userId }: { jobId: string; userId: string }) => {
       const { error } = await supabase.from("applications").insert({ job_id: jobId, user_id: userId });
-      if (error) throw error;
+      if (error) {
+        if (error.code === "23505") throw new Error("Você já se candidatou a esta vaga.");
+        throw error;
+      }
+      // A notificação para a empresa é criada pelo trigger frela_on_application_insert.
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["my-applications"] });
@@ -82,6 +115,7 @@ export const useApply = () => {
   });
 };
 
+/** Candidaturas do profissional logado, com a vaga de cada uma. */
 export const useMyApplications = () => {
   const { user } = useAuth();
   return useQuery({
@@ -90,10 +124,11 @@ export const useMyApplications = () => {
       if (!user) return [];
       const { data, error } = await supabase
         .from("applications")
-        .select("job_id")
-        .eq("user_id", user.id);
+        .select("*, jobs(*)")
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: false });
       if (error) throw error;
-      return data.map((a) => a.job_id);
+      return data;
     },
     enabled: !!user,
   });
@@ -107,7 +142,8 @@ export const useJobApplications = (jobId?: string) => {
       const { data, error } = await supabase
         .from("applications")
         .select("*")
-        .eq("job_id", jobId);
+        .eq("job_id", jobId)
+        .order("created_at", { ascending: true });
       if (error) throw error;
       return data;
     },

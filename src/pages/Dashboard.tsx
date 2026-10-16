@@ -1,25 +1,76 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Navigate, useNavigate } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
+import { toast } from "sonner";
+import { Plus, LogOut, Users, Briefcase, Loader2, Lock, User, Star, ChevronRight, Clock } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useMyJobs } from "@/hooks/useJobs";
+import {
+  useMinhasContratacoes, useMyProfile, useProfilesByIds, useTravaNovaVaga, formatBRL, formatDate,
+} from "@/hooks/useFrela";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import PostJobTab from "@/components/PostJobTab";
-import { Plus, LogOut, Users, Briefcase, TrendingUp, Loader2 } from "lucide-react";
+import NotificationBell from "@/components/frela/NotificationBell";
+import StatusBadge from "@/components/frela/StatusBadge";
+import FinalizarContratacaoButton from "@/components/frela/FinalizarContratacaoButton";
 
+const STATUS_TABS = [
+  { value: "aberta", label: "Abertas" },
+  { value: "preenchida", label: "Preenchidas" },
+  { value: "finalizada", label: "Finalizadas" },
+  { value: "cancelada", label: "Canceladas" },
+];
+
+/** Painel da empresa. */
 const Dashboard = () => {
   const { user, signOut, userTipo } = useAuth();
   const navigate = useNavigate();
+  const { data: profile } = useMyProfile();
   const { data: myJobs = [], isLoading } = useMyJobs();
+  const { data: contratacoes = [] } = useMinhasContratacoes();
+  const { bloqueado, pendentes } = useTravaNovaVaga();
   const [showPostModal, setShowPostModal] = useState(false);
 
-  if (userTipo === "freelancer") {
-    navigate("/", { replace: true });
-    return null;
-  }
+  const jobIds = myJobs.map((j) => j.id);
+  const { data: candidaturas = [] } = useQuery({
+    queryKey: ["job-applications", "empresa", jobIds],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("applications").select("job_id, status").in("job_id", jobIds);
+      if (error) throw error;
+      return data;
+    },
+    enabled: jobIds.length > 0,
+  });
 
-  const nome = user?.user_metadata?.nome || "Empresa";
-  const activeJobs = myJobs.filter((j) => j.status === "aberta");
+  const { data: minhasAvaliacoes = [] } = useQuery({
+    queryKey: ["avaliacoes", "feitas", user?.id],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("avaliacoes").select("contratacao_id").eq("de_id", user!.id);
+      if (error) throw error;
+      return data.map((a) => a.contratacao_id);
+    },
+    enabled: !!user,
+  });
+
+  const { data: profissionais = {} } = useProfilesByIds(contratacoes.map((c) => c.profissional_id));
+
+  if (userTipo === "freelancer") return <Navigate to="/" replace />;
+
+  const nome = profile?.nome || user?.user_metadata?.nome || "Empresa";
+  const abertas = myJobs.filter((j) => j.status === "aberta");
+  const aAvaliar = contratacoes.filter((c) => c.status === "finalizada" && !minhasAvaliacoes.includes(c.id));
+  const pendentesPorVaga = (jobId: string) => candidaturas.filter((a) => a.job_id === jobId && a.status === "pendente").length;
+
+  const abrirNovaVaga = () => {
+    if (bloqueado) {
+      toast.error("Confirme a finalização da contratação em andamento antes de criar uma nova vaga.");
+      return;
+    }
+    setShowPostModal(true);
+  };
 
   const handleSignOut = async () => {
     await signOut();
@@ -27,29 +78,43 @@ const Dashboard = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background pb-8">
-      <div className="px-5 pt-12 pb-6 flex items-center justify-between">
-        <div>
+    <div className="min-h-screen bg-background pb-28 max-w-2xl mx-auto">
+      <div className="px-5 pt-12 pb-6 flex items-center justify-between gap-3">
+        <div className="min-w-0">
           <p className="text-muted-foreground text-sm">Painel da Empresa</p>
-          <h1 className="text-2xl font-display font-bold text-foreground">Olá, {nome.split(" ")[0]}</h1>
+          <h1 className="text-2xl font-display font-bold text-foreground truncate">Olá, {nome.split(" ")[0]}</h1>
         </div>
-        <div className="flex gap-2">
-          <button onClick={() => setShowPostModal(true)}
-            className="w-10 h-10 rounded-xl gradient-brand flex items-center justify-center shadow-brand">
-            <Plus className="h-5 w-5 text-primary-foreground" />
+        <div className="flex gap-2 shrink-0">
+          <NotificationBell />
+          <button onClick={() => navigate("/profile")} aria-label="Perfil"
+            className="w-10 h-10 rounded-xl bg-card border border-border flex items-center justify-center shadow-sm">
+            <User className="h-4 w-4 text-muted-foreground" />
           </button>
-          <button onClick={handleSignOut}
+          <button onClick={handleSignOut} aria-label="Sair"
             className="w-10 h-10 rounded-xl bg-card border border-border flex items-center justify-center shadow-sm">
             <LogOut className="h-4 w-4 text-muted-foreground" />
           </button>
         </div>
       </div>
 
+      {bloqueado && (
+        <div className="mx-5 mb-6 rounded-xl border border-amber-300 bg-amber-50 p-4 flex gap-3">
+          <Lock className="h-5 w-5 text-amber-600 shrink-0 mt-0.5" />
+          <div className="text-sm text-amber-900">
+            <p className="font-bold mb-0.5">Criação de vagas bloqueada</p>
+            <p>
+              Você tem {pendentes.length === 1 ? "uma contratação" : `${pendentes.length} contratações`} em andamento.
+              Depois que o serviço acontecer, clique em <b>Confirmar finalização</b> para liberar novas vagas.
+            </p>
+          </div>
+        </div>
+      )}
+
       <div className="px-5 grid grid-cols-3 gap-3 mb-8">
         {[
-          { label: "Vagas Ativas", value: activeJobs.length, icon: Briefcase },
-          { label: "Total Vagas", value: myJobs.length, icon: TrendingUp },
-          { label: "Candidatos", value: "—", icon: Users },
+          { label: "Vagas abertas", value: abertas.length, icon: Briefcase },
+          { label: "Em andamento", value: pendentes.length, icon: Clock },
+          { label: "Candidatos novos", value: candidaturas.filter((a) => a.status === "pendente").length, icon: Users },
         ].map((m) => (
           <div key={m.label} className="bg-card rounded-xl p-4 border border-border text-center shadow-sm">
             <m.icon className="h-5 w-5 text-primary mx-auto mb-2" />
@@ -59,56 +124,120 @@ const Dashboard = () => {
         ))}
       </div>
 
-      <div className="px-5">
-        <h2 className="font-display font-bold text-foreground mb-4">Suas Vagas</h2>
+      {pendentes.length > 0 && (
+        <section className="px-5 mb-8">
+          <h2 className="font-display font-bold text-foreground mb-3">Contratações em andamento</h2>
+          <div className="space-y-3">
+            {pendentes.map((c) => (
+              <div key={c.id} className="bg-card rounded-xl p-4 border border-blue-200 shadow-sm">
+                <button onClick={() => navigate(`/contratacao/${c.id}`)} className="w-full text-left">
+                  <div className="flex items-center justify-between gap-2 mb-1">
+                    <h3 className="font-display font-bold text-foreground truncate">{c.jobs?.title}</h3>
+                    <StatusBadge status={c.status} />
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    Profissional: <span className="text-foreground font-medium">{profissionais[c.profissional_id]?.nome || "—"}</span>
+                  </p>
+                  <div className="flex items-center justify-between mt-1 text-sm">
+                    <span className="font-display font-bold text-primary">{formatBRL(c.valor)}</span>
+                    {c.jobs && <span className="text-xs text-muted-foreground">{formatDate(c.jobs.date)} · {c.jobs.time_start}–{c.jobs.time_end}</span>}
+                  </div>
+                </button>
+                <FinalizarContratacaoButton contratacao={c} className="w-full h-11 mt-3" />
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {aAvaliar.length > 0 && (
+        <section className="px-5 mb-8">
+          <h2 className="font-display font-bold text-foreground mb-3">Avalie quem trabalhou com você</h2>
+          <div className="space-y-3">
+            {aAvaliar.map((c) => (
+              <button key={c.id} onClick={() => navigate(`/contratacao/${c.id}`)}
+                className="w-full text-left bg-card rounded-xl p-4 border border-amber-200 shadow-sm flex items-center gap-3">
+                <Star className="h-5 w-5 fill-amber-400 text-amber-400 shrink-0" />
+                <div className="flex-1 min-w-0">
+                  <p className="font-display font-bold text-foreground truncate">{profissionais[c.profissional_id]?.nome || "Profissional"}</p>
+                  <p className="text-xs text-muted-foreground truncate">{c.jobs?.title}</p>
+                </div>
+                <ChevronRight className="h-4 w-4 text-muted-foreground" />
+              </button>
+            ))}
+          </div>
+        </section>
+      )}
+
+      <section className="px-5">
+        <div className="flex items-center justify-between mb-3">
+          <h2 className="font-display font-bold text-foreground">Minhas vagas</h2>
+          <Button size="sm" onClick={abrirNovaVaga} disabled={bloqueado}
+            className="rounded-lg gradient-brand text-primary-foreground font-display font-bold disabled:opacity-50">
+            {bloqueado ? <Lock className="h-3.5 w-3.5 mr-1" /> : <Plus className="h-3.5 w-3.5 mr-1" />} Criar vaga
+          </Button>
+        </div>
         {isLoading ? (
           <div className="flex justify-center py-8"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>
         ) : myJobs.length === 0 ? (
           <div className="text-center py-12">
             <p className="text-muted-foreground mb-4">Nenhuma vaga publicada ainda</p>
-            <Button onClick={() => setShowPostModal(true)} className="gradient-brand text-primary-foreground rounded-xl font-display font-bold shadow-brand">
+            <Button onClick={abrirNovaVaga} disabled={bloqueado} className="gradient-brand text-primary-foreground rounded-xl font-display font-bold shadow-brand">
               <Plus className="h-4 w-4 mr-2" /> Publicar primeira vaga
             </Button>
           </div>
         ) : (
-          <div className="space-y-3">
-            {myJobs.map((job) => (
-              <div key={job.id} className="bg-card rounded-xl p-4 border border-border shadow-sm">
-                <div className="flex items-start justify-between mb-2">
-                  <div>
-                    <h3 className="font-display font-bold text-foreground">{job.title}</h3>
-                    <span className="text-xs text-muted-foreground">{job.category}</span>
-                  </div>
-                  <span className={`px-2.5 py-1 rounded-md text-xs font-medium ${
-                    job.status === "aberta" ? "bg-green-100 text-green-700" :
-                    job.status === "em_andamento" ? "bg-blue-100 text-blue-700" :
-                    "bg-muted text-muted-foreground"
-                  }`}>
-                    {job.status === "aberta" ? "Aberta" : job.status === "em_andamento" ? "Em Andamento" : "Finalizada"}
-                  </span>
-                </div>
-                <div className="flex items-center justify-between mt-3">
-                  <span className="font-display font-bold text-primary">R${job.payment}</span>
-                  <Button size="sm" variant="outline" onClick={() => navigate(`/job/${job.id}/candidates`)}
-                    className="h-8 rounded-lg border-border text-muted-foreground hover:text-foreground text-xs">
-                    <Users className="h-3.5 w-3.5 mr-1" /> Ver Candidatos
-                  </Button>
-                </div>
-              </div>
-            ))}
-          </div>
+          <Tabs defaultValue="aberta">
+            <TabsList className="w-full grid grid-cols-4 mb-3">
+              {STATUS_TABS.map((t) => (
+                <TabsTrigger key={t.value} value={t.value} className="text-xs">
+                  {t.label} ({myJobs.filter((j) => j.status === t.value).length})
+                </TabsTrigger>
+              ))}
+            </TabsList>
+            {STATUS_TABS.map((t) => {
+              const lista = myJobs.filter((j) => j.status === t.value);
+              return (
+                <TabsContent key={t.value} value={t.value} className="space-y-3">
+                  {lista.length === 0 && <p className="text-center text-sm text-muted-foreground py-8">Nenhuma vaga aqui</p>}
+                  {lista.map((job) => {
+                    const novos = pendentesPorVaga(job.id);
+                    return (
+                      <div key={job.id} className="bg-card rounded-xl p-4 border border-border shadow-sm">
+                        <div className="flex items-start justify-between gap-2 mb-1">
+                          <div className="min-w-0">
+                            <h3 className="font-display font-bold text-foreground truncate">{job.title}</h3>
+                            <span className="text-xs text-muted-foreground">{formatDate(job.date)} · {job.time_start}–{job.time_end}</span>
+                          </div>
+                          <StatusBadge status={job.status} />
+                        </div>
+                        <div className="flex items-center justify-between mt-3">
+                          <span className="font-display font-bold text-primary">{formatBRL(job.payment)}</span>
+                          <Button size="sm" variant="outline" onClick={() => navigate(`/job/${job.id}/candidates`)}
+                            className="h-8 rounded-lg border-border text-muted-foreground hover:text-foreground text-xs">
+                            <Users className="h-3.5 w-3.5 mr-1" /> Candidatos
+                            {novos > 0 && <span className="ml-1.5 px-1.5 rounded-full bg-primary text-primary-foreground text-[10px]">{novos}</span>}
+                          </Button>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </TabsContent>
+              );
+            })}
+          </Tabs>
         )}
-      </div>
+      </section>
 
-      <button onClick={() => setShowPostModal(true)}
-        className="fixed bottom-6 right-6 w-14 h-14 rounded-xl gradient-brand flex items-center justify-center shadow-brand z-50">
-        <Plus className="h-6 w-6 text-primary-foreground" />
+      <button onClick={abrirNovaVaga} aria-label="Criar vaga" title={bloqueado ? "Confirme a contratação em andamento primeiro" : "Criar vaga"}
+        className={`fixed bottom-6 right-6 w-14 h-14 rounded-xl flex items-center justify-center z-50 ${bloqueado ? "bg-muted border border-border" : "gradient-brand shadow-brand"}`}>
+        {bloqueado ? <Lock className="h-6 w-6 text-muted-foreground" /> : <Plus className="h-6 w-6 text-primary-foreground" />}
       </button>
 
       <Dialog open={showPostModal} onOpenChange={setShowPostModal}>
         <DialogContent className="bg-card border-border max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle className="font-display font-bold text-foreground">Nova Vaga</DialogTitle>
+            <DialogTitle className="font-display font-bold text-foreground">Nova vaga</DialogTitle>
           </DialogHeader>
           <PostJobTab onClose={() => setShowPostModal(false)} />
         </DialogContent>
