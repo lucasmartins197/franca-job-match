@@ -388,6 +388,8 @@ export type Database = {
           bio: string | null
           disponibilidade: string | null
           experiencia: string | null
+          instagram: string | null
+          linkedin: string | null
           profile_id: string
           profissoes: string[] | null
         }
@@ -395,6 +397,8 @@ export type Database = {
           bio?: string | null
           disponibilidade?: string | null
           experiencia?: string | null
+          instagram?: string | null
+          linkedin?: string | null
           profile_id: string
           profissoes?: string[] | null
         }
@@ -402,6 +406,8 @@ export type Database = {
           bio?: string | null
           disponibilidade?: string | null
           experiencia?: string | null
+          instagram?: string | null
+          linkedin?: string | null
           profile_id?: string
           profissoes?: string[] | null
         }
@@ -420,7 +426,29 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      contratacoes_finalizadas_empresa: {
+        Args: { p_id: string }
+        Returns: number
+      }
+      historico_profissional: {
+        Args: { p_id: string }
+        Returns: {
+          comentario: string | null
+          contratacao_id: string
+          data: string
+          empresa: string
+          finalizada_em: string | null
+          nota: number | null
+          titulo: string
+        }[]
+      }
+      trabalhos_finalizados: {
+        Args: { p_ids: string[] }
+        Returns: {
+          profissional_id: string
+          total: number
+        }[]
+      }
     }
     Enums: {
       [_ in never]: never

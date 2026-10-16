@@ -1,11 +1,13 @@
 import { useParams, useNavigate } from "react-router-dom";
-import { MapPin, Clock, Calendar, Building2, CheckCircle2, Loader2, Users } from "lucide-react";
+import { MapPin, Clock, Calendar, Building2, CheckCircle2, Loader2, Users, ChevronRight } from "lucide-react";
 import { motion } from "framer-motion";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { useJob, useApply, useMyApplications } from "@/hooks/useJobs";
 import { useAuth } from "@/hooks/useAuth";
-import { useProfilesByIds, formatBRL, formatDate } from "@/hooks/useFrela";
+import { formatBRL, formatDate } from "@/hooks/useFrela";
+import { usePerfilPublico } from "@/hooks/usePerfil";
+import UserAvatar from "@/components/frela/UserAvatar";
 import PageHeader from "@/components/frela/PageHeader";
 import StatusBadge from "@/components/frela/StatusBadge";
 import Stars from "@/components/frela/Stars";
@@ -17,7 +19,7 @@ const JobDetail = () => {
   const { data: job, isLoading } = useJob(id);
   const applyMutation = useApply();
   const { data: myApplications = [] } = useMyApplications();
-  const { data: perfis = {} } = useProfilesByIds(job ? [job.user_id] : []);
+  const { data: perfilEmpresa } = usePerfilPublico(job?.user_id);
 
   if (isLoading) {
     return <div className="min-h-screen bg-background flex items-center justify-center"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>;
@@ -31,7 +33,8 @@ const JobDetail = () => {
     );
   }
 
-  const empresa = perfis[job.user_id];
+  const empresa = perfilEmpresa?.profile;
+  const empresaDados = perfilEmpresa?.empresa;
   const isDona = job.user_id === user?.id;
   const minhaCandidatura = myApplications.find((a) => a.job_id === job.id);
 
@@ -131,16 +134,24 @@ const JobDetail = () => {
           <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-line">{job.description || "Sem descrição fornecida."}</p>
         </div>
 
-        <div className="bg-card rounded-xl p-4 border border-border mb-6 shadow-sm">
-          <h3 className="font-display font-bold text-foreground mb-2">Sobre a empresa</h3>
-          <p className="text-sm text-muted-foreground mb-2">{job.company_name} — {empresa?.cidade || "Franca"}, SP</p>
-          <div className="flex items-center gap-1.5">
-            <Stars value={Number(empresa?.avaliacao_media ?? 0)} size="sm" />
-            <span className="text-xs text-muted-foreground">
-              {empresa?.total_avaliacoes ? `${Number(empresa.avaliacao_media).toFixed(1)} (${empresa.total_avaliacoes} avaliações)` : "Sem avaliações ainda"}
-            </span>
+        <h3 className="font-display font-bold text-foreground mb-2">Quem está contratando</h3>
+        <button onClick={() => navigate(`/perfil/${job.user_id}`)}
+          className="w-full text-left bg-card rounded-2xl p-4 border border-border mb-6 shadow-sm flex items-center gap-3 hover:border-primary/40 transition-colors">
+          <UserAvatar nome={empresaDados?.nome_empresa || job.company_name} fotoUrl={empresa?.foto_url} size="lg" />
+          <div className="flex-1 min-w-0">
+            <p className="font-display font-bold text-foreground truncate">{empresaDados?.nome_empresa || job.company_name}</p>
+            <p className="text-xs text-muted-foreground truncate">
+              {[empresaDados?.ramo, empresaDados?.endereco || `${empresa?.cidade || "Franca"}, SP`].filter(Boolean).join(" · ")}
+            </p>
+            <div className="flex items-center gap-1.5 mt-1">
+              <Stars value={Number(empresa?.avaliacao_media ?? 0)} size="sm" />
+              <span className="text-xs text-muted-foreground">
+                {empresa?.total_avaliacoes ? `${Number(empresa.avaliacao_media).toFixed(1)} (${empresa.total_avaliacoes})` : "Sem avaliações ainda"}
+              </span>
+            </div>
           </div>
-        </div>
+          <ChevronRight className="h-5 w-5 text-muted-foreground shrink-0" />
+        </button>
       </div>
 
       {acao && (

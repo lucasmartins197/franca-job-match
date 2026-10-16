@@ -28,7 +28,15 @@ const Index = () => {
       case "search": return <SearchTab />;
       case "work": return <MyWorkTab />;
       case "messages": return <MessagesTab />;
-      case "profile": return <ProfileTab />;
+      case "profile":
+        return (
+          <>
+            <div className="px-5 pt-12">
+              <h1 className="text-2xl font-display font-bold text-foreground">Meu perfil</h1>
+            </div>
+            <ProfileTab />
+          </>
+        );
       default: return <HomeTab />;
     }
   };
