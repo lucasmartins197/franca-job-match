@@ -10,7 +10,8 @@ export type DbContratacao = Tables<"contratacoes">;
 export type DbAvaliacao = Tables<"avaliacoes">;
 export type DbNotificacao = Tables<"notificacoes">;
 
-export const TAXA_PLATAFORMA = 0.05;
+import { TAXA_PLATAFORMA } from "@/lib/pagamentos";
+export { TAXA_PLATAFORMA };
 
 export const formatBRL = (valor: number | null | undefined) =>
   (valor ?? 0).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });

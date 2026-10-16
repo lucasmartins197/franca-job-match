@@ -39,7 +39,8 @@ const FinalizarContratacaoButton = ({ contratacao, className, onDone }: Props) =
           <AlertDialogTitle>Confirmar que o serviço foi realizado?</AlertDialogTitle>
           <AlertDialogDescription>
             Ao confirmar, a contratação é encerrada e vocês poderão se avaliar.
-            A taxa da plataforma é de 5% do valor ({formatBRL(contratacao.taxa_5pct ?? contratacao.valor * 0.05)}).
+            A taxa da plataforma é de 5% do valor ({formatBRL(contratacao.taxa_5pct ?? contratacao.valor * 0.05)}), cobrada depois, fora do app.
+            Durante o lançamento ela não está sendo cobrada.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>

@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { ChevronRight, Edit2, Headset, Loader2, LogOut, ShieldCheck } from "lucide-react";
+import { ChevronRight, Crown, Edit2, Headset, Loader2, LogOut, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import { useMeuPerfil } from "@/hooks/usePerfil";
@@ -31,6 +31,7 @@ const ProfileTab = () => {
 
       <nav className="bg-card border border-border rounded-2xl divide-y divide-border overflow-hidden shadow-card">
         {[
+          { to: "/planos", icon: Crown, titulo: "Meu plano", sub: perfil.profile.subscription_status === "active" ? "Assinatura ativa" : "Lançamento gratuito · ver planos", badge: 0, mostrar: true },
           { to: "/suporte", icon: Headset, titulo: "Falar com a equipe", sub: "Dúvidas, problemas ou sugestões", badge: perfil.profile.is_admin ? 0 : suporteNaoLidas, mostrar: true },
           { to: "/admin/suporte", icon: ShieldCheck, titulo: "Atendimento (ADM)", sub: "Responder chamados de suporte", badge: suporteNaoLidas, mostrar: !!perfil.profile.is_admin },
         ].filter((i) => i.mostrar).map((item) => (
