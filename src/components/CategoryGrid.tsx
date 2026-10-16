@@ -1,40 +1,31 @@
 import { JobCategory } from "@/types";
-import { motion } from "framer-motion";
+import { categoryIcons } from "@/lib/icons";
+import { cn } from "@/lib/utils";
 
 interface CategoryGridProps {
-  onSelect?: (category: JobCategory) => void;
+  onSelect?: (category: JobCategory | null) => void;
   selected?: JobCategory | null;
 }
 
-const categories: { name: JobCategory; emoji: string }[] = [
-  { name: "Bares e Restaurantes", emoji: "🍽️" },
-  { name: "Eventos", emoji: "🎉" },
-  { name: "Comércio", emoji: "🛍️" },
-  { name: "Beleza e Estética", emoji: "💇" },
-  { name: "Logística", emoji: "🚛" },
-  { name: "Indústria", emoji: "🏭" },
-];
+const CATEGORIAS = Object.keys(categoryIcons) as JobCategory[];
 
+/** Faixa horizontal de categorias (rolável no celular). */
 const CategoryGrid = ({ onSelect, selected }: CategoryGridProps) => (
-  <div className="grid grid-cols-3 gap-3">
-    {categories.map((cat, i) => {
-      const isSelected = selected === cat.name;
+  <div className="flex gap-2 overflow-x-auto no-scrollbar -mx-5 px-5 pb-1">
+    <button onClick={() => onSelect?.(null)}
+      className={cn("shrink-0 px-3.5 h-9 rounded-full text-sm font-medium border transition-colors",
+        !selected ? "bg-primary text-primary-foreground border-primary" : "bg-card text-foreground border-border")}>
+      Todas
+    </button>
+    {CATEGORIAS.map((cat) => {
+      const Icon = categoryIcons[cat];
+      const ativo = selected === cat;
       return (
-        <motion.button
-          key={cat.name}
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: i * 0.04 }}
-          onClick={() => onSelect?.(cat.name)}
-          className={`flex flex-col items-center gap-2 p-4 rounded-xl border transition-all ${
-            isSelected
-              ? "bg-primary/10 border-primary/40 text-primary"
-              : "bg-card border-border text-foreground hover:border-primary/20 shadow-sm"
-          }`}
-        >
-          <span className="text-2xl">{cat.emoji}</span>
-          <span className="text-[11px] font-medium leading-tight text-center">{cat.name}</span>
-        </motion.button>
+        <button key={cat} onClick={() => onSelect?.(ativo ? null : cat)}
+          className={cn("shrink-0 inline-flex items-center gap-1.5 px-3.5 h-9 rounded-full text-sm font-medium border transition-colors",
+            ativo ? "bg-primary text-primary-foreground border-primary" : "bg-card text-foreground border-border hover:border-primary/40")}>
+          <Icon className="h-4 w-4" /> {cat}
+        </button>
       );
     })}
   </div>

@@ -2,6 +2,7 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowRight, Briefcase, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import Logo from "@/components/frela/Logo";
 
 interface OnboardingScreenProps {
   onComplete: () => void;
@@ -16,13 +17,13 @@ const slides = [
   },
   {
     title: "Encontre trabalhos em minutos",
-    subtitle: "Garçom, promotor, vendedor e muito mais. Escolha e receba ofertas.",
+    subtitle: "Garçom, promotor, vendedor e muito mais — vagas presenciais aqui em Franca.",
     icon: Briefcase,
     isLogo: false,
   },
   {
     title: "Contrate rápido",
-    subtitle: "Publique sua vaga e encontre o profissional ideal em menos de 4 horas.",
+    subtitle: "Publique sua vaga, veja o perfil completo de cada candidato e escolha com segurança.",
     icon: Zap,
     isLogo: false,
   },
@@ -58,16 +59,14 @@ const OnboardingScreen = ({ onComplete }: OnboardingScreenProps) => {
           >
             {slide.isLogo ? (
               <>
-                <h1 className="text-5xl font-display font-extrabold gradient-brand-text mb-4">
-                  FreLa
-                </h1>
+                <Logo size="lg" className="block mb-4" />
                 <p className="text-lg text-foreground/70 font-light max-w-xs mx-auto">
                   {slide.subtitle}
                 </p>
               </>
             ) : (
               <>
-                <div className="w-20 h-20 rounded-2xl gradient-brand flex items-center justify-center mx-auto mb-8">
+                <div className="w-20 h-20 rounded-3xl bg-primary flex items-center justify-center mx-auto mb-8">
                   {slide.icon && <slide.icon className="h-10 w-10 text-primary-foreground" />}
                 </div>
                 <h2 className="text-2xl font-display font-bold text-foreground mb-3">
@@ -96,7 +95,7 @@ const OnboardingScreen = ({ onComplete }: OnboardingScreenProps) => {
 
         <Button
           onClick={nextSlide}
-          className="w-full h-14 rounded-xl gradient-brand text-primary-foreground font-display font-bold text-lg hover:opacity-90 shadow-brand transition-opacity"
+          className="w-full h-12 rounded-xl text-primary-foreground font-semibold text-base"
           size="lg"
         >
           {currentSlide < slides.length - 1 ? "Próximo" : "Começar"}

@@ -36,7 +36,7 @@ const CandidateCard = ({ application, perfil, dados, trabalhos, podeDecidir, pro
   const dispTexto = [disp.dias.join(", "), disp.periodos.join(", "), disp.obs].filter(Boolean).join(" · ");
 
   return (
-    <article className="bg-card rounded-2xl border border-border shadow-sm overflow-hidden">
+    <article className="bg-card rounded-2xl border border-border shadow-card overflow-hidden">
       <button onClick={onVerPerfil} className="w-full text-left p-4">
         <div className="flex gap-3">
           <UserAvatar nome={nome} fotoUrl={perfil?.foto_url} size="lg" />

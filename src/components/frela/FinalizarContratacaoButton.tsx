@@ -30,7 +30,7 @@ const FinalizarContratacaoButton = ({ contratacao, className, onDone }: Props) =
     <AlertDialog>
       <AlertDialogTrigger asChild>
         <Button disabled={finalizar.isPending}
-          className={`rounded-xl gradient-brand text-primary-foreground font-display font-bold shadow-brand ${className ?? ""}`}>
+          className={`rounded-xl text-primary-foreground font-semibold ${className ?? ""}`}>
           {finalizar.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <><CheckCircle2 className="h-4 w-4 mr-2" /> Confirmar finalização</>}
         </Button>
       </AlertDialogTrigger>

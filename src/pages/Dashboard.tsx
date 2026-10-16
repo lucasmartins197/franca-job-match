@@ -2,12 +2,12 @@ import { useState } from "react";
 import { Navigate, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { Plus, LogOut, Users, Briefcase, Loader2, Lock, User, Star, ChevronRight, Clock } from "lucide-react";
+import { Plus, LogOut, Users, Briefcase, Lock, Star, ChevronRight, Clock } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useMyJobs } from "@/hooks/useJobs";
 import {
-  useMinhasContratacoes, useMyProfile, useProfilesByIds, useTravaNovaVaga, formatBRL, formatDate,
+  useMinhasContratacoes, useProfilesByIds, useTravaNovaVaga, formatBRL, formatDate,
 } from "@/hooks/useFrela";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -15,6 +15,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import PostJobTab from "@/components/PostJobTab";
 import NotificationBell from "@/components/frela/NotificationBell";
 import StatusBadge from "@/components/frela/StatusBadge";
+import UserAvatar from "@/components/frela/UserAvatar";
+import EmptyState from "@/components/frela/EmptyState";
+import { JobListSkeleton } from "@/components/frela/JobCardSkeleton";
+import { useMeuPerfil } from "@/hooks/usePerfil";
 import FinalizarContratacaoButton from "@/components/frela/FinalizarContratacaoButton";
 
 const STATUS_TABS = [
@@ -28,7 +32,7 @@ const STATUS_TABS = [
 const Dashboard = () => {
   const { user, signOut, userTipo } = useAuth();
   const navigate = useNavigate();
-  const { data: profile } = useMyProfile();
+  const { data: perfil } = useMeuPerfil();
   const { data: myJobs = [], isLoading } = useMyJobs();
   const { data: contratacoes = [] } = useMinhasContratacoes();
   const { bloqueado, pendentes } = useTravaNovaVaga();
@@ -59,7 +63,7 @@ const Dashboard = () => {
 
   if (userTipo === "freelancer") return <Navigate to="/" replace />;
 
-  const nome = profile?.nome || user?.user_metadata?.nome || "Empresa";
+  const empresaNome = perfil?.empresa?.nome_empresa || perfil?.profile.nome || user?.user_metadata?.nome || "Empresa";
   const abertas = myJobs.filter((j) => j.status === "aberta");
   const aAvaliar = contratacoes.filter((c) => c.status === "finalizada" && !minhasAvaliacoes.includes(c.id));
   const pendentesPorVaga = (jobId: string) => candidaturas.filter((a) => a.job_id === jobId && a.status === "pendente").length;
@@ -79,19 +83,18 @@ const Dashboard = () => {
 
   return (
     <div className="min-h-screen bg-background pb-28 max-w-2xl mx-auto">
-      <div className="px-5 pt-12 pb-6 flex items-center justify-between gap-3">
-        <div className="min-w-0">
-          <p className="text-muted-foreground text-sm">Painel da Empresa</p>
-          <h1 className="text-2xl font-display font-bold text-foreground truncate">Olá, {nome.split(" ")[0]}</h1>
-        </div>
+      <div className="px-5 pt-10 pb-6 flex items-center justify-between gap-3 bg-gradient-to-b from-primary/10 to-transparent">
+        <button onClick={() => navigate("/profile")} className="flex items-center gap-3 min-w-0 text-left" aria-label="Meu perfil">
+          <UserAvatar nome={empresaNome} fotoUrl={perfil?.profile.foto_url} size="md" />
+          <div className="min-w-0">
+            <p className="text-muted-foreground text-xs">Painel da empresa</p>
+            <h1 className="text-xl font-display font-bold text-foreground truncate">{empresaNome}</h1>
+          </div>
+        </button>
         <div className="flex gap-2 shrink-0">
           <NotificationBell />
-          <button onClick={() => navigate("/profile")} aria-label="Perfil"
-            className="w-10 h-10 rounded-xl bg-card border border-border flex items-center justify-center shadow-sm">
-            <User className="h-4 w-4 text-muted-foreground" />
-          </button>
           <button onClick={handleSignOut} aria-label="Sair"
-            className="w-10 h-10 rounded-xl bg-card border border-border flex items-center justify-center shadow-sm">
+            className="w-10 h-10 rounded-xl bg-card border border-border flex items-center justify-center shadow-card">
             <LogOut className="h-4 w-4 text-muted-foreground" />
           </button>
         </div>
@@ -116,7 +119,7 @@ const Dashboard = () => {
           { label: "Em andamento", value: pendentes.length, icon: Clock },
           { label: "Candidatos novos", value: candidaturas.filter((a) => a.status === "pendente").length, icon: Users },
         ].map((m) => (
-          <div key={m.label} className="bg-card rounded-xl p-4 border border-border text-center shadow-sm">
+          <div key={m.label} className="bg-card rounded-2xl p-3 border border-border text-center shadow-card">
             <m.icon className="h-5 w-5 text-primary mx-auto mb-2" />
             <div className="text-xl font-display font-bold text-foreground">{m.value}</div>
             <div className="text-[10px] text-muted-foreground">{m.label}</div>
@@ -129,7 +132,7 @@ const Dashboard = () => {
           <h2 className="font-display font-bold text-foreground mb-3">Contratações em andamento</h2>
           <div className="space-y-3">
             {pendentes.map((c) => (
-              <div key={c.id} className="bg-card rounded-xl p-4 border border-blue-200 shadow-sm">
+              <div key={c.id} className="bg-card rounded-2xl p-4 border border-primary/30 shadow-card">
                 <button onClick={() => navigate(`/contratacao/${c.id}`)} className="w-full text-left">
                   <div className="flex items-center justify-between gap-2 mb-1">
                     <h3 className="font-display font-bold text-foreground truncate">{c.jobs?.title}</h3>
@@ -156,7 +159,7 @@ const Dashboard = () => {
           <div className="space-y-3">
             {aAvaliar.map((c) => (
               <button key={c.id} onClick={() => navigate(`/contratacao/${c.id}`)}
-                className="w-full text-left bg-card rounded-xl p-4 border border-amber-200 shadow-sm flex items-center gap-3">
+                className="w-full text-left bg-card rounded-xl p-4 border border-amber-200 shadow-card flex items-center gap-3">
                 <Star className="h-5 w-5 fill-amber-400 text-amber-400 shrink-0" />
                 <div className="flex-1 min-w-0">
                   <p className="font-display font-bold text-foreground truncate">{profissionais[c.profissional_id]?.nome || "Profissional"}</p>
@@ -173,27 +176,30 @@ const Dashboard = () => {
         <div className="flex items-center justify-between mb-3">
           <h2 className="font-display font-bold text-foreground">Minhas vagas</h2>
           <Button size="sm" onClick={abrirNovaVaga} disabled={bloqueado}
-            className="rounded-lg gradient-brand text-primary-foreground font-display font-bold disabled:opacity-50">
+            className="rounded-lg text-primary-foreground font-semibold disabled:opacity-50">
             {bloqueado ? <Lock className="h-3.5 w-3.5 mr-1" /> : <Plus className="h-3.5 w-3.5 mr-1" />} Criar vaga
           </Button>
         </div>
         {isLoading ? (
-          <div className="flex justify-center py-8"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>
+          <JobListSkeleton n={2} />
         ) : myJobs.length === 0 ? (
-          <div className="text-center py-12">
-            <p className="text-muted-foreground mb-4">Nenhuma vaga publicada ainda</p>
-            <Button onClick={abrirNovaVaga} disabled={bloqueado} className="gradient-brand text-primary-foreground rounded-xl font-display font-bold shadow-brand">
+          <EmptyState icon={Briefcase} titulo="Nenhuma vaga publicada ainda"
+            descricao="Publique sua primeira vaga e receba candidatos de Franca em poucas horas."
+            acao={<Button onClick={abrirNovaVaga} disabled={bloqueado} className="text-primary-foreground rounded-xl font-semibold">
               <Plus className="h-4 w-4 mr-2" /> Publicar primeira vaga
-            </Button>
-          </div>
+            </Button>} />
         ) : (
           <Tabs defaultValue="aberta">
-            <TabsList className="w-full grid grid-cols-4 mb-3">
-              {STATUS_TABS.map((t) => (
-                <TabsTrigger key={t.value} value={t.value} className="text-xs">
-                  {t.label} ({myJobs.filter((j) => j.status === t.value).length})
-                </TabsTrigger>
-              ))}
+            <TabsList className="w-full justify-start overflow-x-auto no-scrollbar mb-3 h-auto p-1">
+              {STATUS_TABS.map((t) => {
+                const n = myJobs.filter((j) => j.status === t.value).length;
+                return (
+                  <TabsTrigger key={t.value} value={t.value} className="text-xs shrink-0 gap-1.5">
+                    {t.label}
+                    <span className="min-w-[18px] h-[18px] px-1 rounded-full bg-muted-foreground/15 text-[10px] font-semibold flex items-center justify-center">{n}</span>
+                  </TabsTrigger>
+                );
+              })}
             </TabsList>
             {STATUS_TABS.map((t) => {
               const lista = myJobs.filter((j) => j.status === t.value);
@@ -203,7 +209,7 @@ const Dashboard = () => {
                   {lista.map((job) => {
                     const novos = pendentesPorVaga(job.id);
                     return (
-                      <div key={job.id} className="bg-card rounded-xl p-4 border border-border shadow-sm">
+                      <div key={job.id} className="bg-card rounded-2xl p-4 border border-border shadow-card">
                         <div className="flex items-start justify-between gap-2 mb-1">
                           <div className="min-w-0">
                             <h3 className="font-display font-bold text-foreground truncate">{job.title}</h3>
@@ -229,10 +235,12 @@ const Dashboard = () => {
         )}
       </section>
 
-      <button onClick={abrirNovaVaga} aria-label="Criar vaga" title={bloqueado ? "Confirme a contratação em andamento primeiro" : "Criar vaga"}
-        className={`fixed bottom-6 right-6 w-14 h-14 rounded-xl flex items-center justify-center z-50 ${bloqueado ? "bg-muted border border-border" : "gradient-brand shadow-brand"}`}>
-        {bloqueado ? <Lock className="h-6 w-6 text-muted-foreground" /> : <Plus className="h-6 w-6 text-primary-foreground" />}
-      </button>
+      {!bloqueado && (
+        <button onClick={abrirNovaVaga} aria-label="Criar vaga"
+          className="fixed bottom-6 right-6 w-14 h-14 rounded-2xl flex items-center justify-center z-50 bg-primary shadow-brand">
+          <Plus className="h-6 w-6 text-primary-foreground" />
+        </button>
+      )}
 
       <Dialog open={showPostModal} onOpenChange={setShowPostModal}>
         <DialogContent className="bg-card border-border max-h-[90vh] overflow-y-auto">
