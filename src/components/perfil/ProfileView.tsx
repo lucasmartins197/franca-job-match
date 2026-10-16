@@ -1,21 +1,30 @@
 import { ReactNode } from "react";
-import { Briefcase, Building2, Calendar, Clock, Instagram, Linkedin, MapPin, Phone, Star } from "lucide-react";
-import { PerfilCompleto, instagramUrl, parseDisponibilidade, useContratacoesEmpresa, useHistoricoProfissional } from "@/hooks/usePerfil";
+import { Building2, Calendar, Clock, FileText, Instagram, Linkedin, MapPin, Phone, Star } from "lucide-react";
+import {
+  PerfilCompleto, instagramUrl, parseDisponibilidade, selosDe, useContratacoesEmpresa, useHistoricoProfissional, usePortfolio,
+} from "@/hooks/usePerfil";
 import { useAvaliacoesRecebidas, useProfilesByIds, formatDate } from "@/hooks/useFrela";
 import UserAvatar from "@/components/frela/UserAvatar";
 import Stars from "@/components/frela/Stars";
+import MapaEndereco from "@/components/frela/MapaEndereco";
+import Selos from "./Selos";
+import RatingSummary from "./RatingSummary";
+import PortfolioGallery from "./PortfolioGallery";
 
 interface Props {
   perfil: PerfilCompleto;
   /** Mostra telefone (próprio perfil ou contratação confirmada). */
   mostrarContato?: boolean;
-  /** Conteúdo extra no fim (ex.: vagas abertas da empresa). */
+  /** Conteúdo extra antes das avaliações (ex.: vagas abertas da empresa). */
   children?: ReactNode;
 }
 
-const Bloco = ({ titulo, children }: { titulo: string; children: ReactNode }) => (
-  <section className="bg-card border border-border rounded-2xl p-4">
-    <h3 className="font-display font-bold text-foreground mb-2">{titulo}</h3>
+const Bloco = ({ titulo, children, extra }: { titulo: string; children: ReactNode; extra?: ReactNode }) => (
+  <section className="bg-card border border-border rounded-2xl p-4 shadow-card">
+    <div className="flex items-center justify-between mb-3">
+      <h3 className="font-display font-bold text-foreground">{titulo}</h3>
+      {extra}
+    </div>
     {children}
   </section>
 );
@@ -31,6 +40,7 @@ const ProfileView = ({ perfil, mostrarContato, children }: Props) => {
   const isEmpresa = profile.tipo === "empresa";
   const { data: historico } = useHistoricoProfissional(profile.id, !isEmpresa);
   const { data: contratacoesEmpresa } = useContratacoesEmpresa(profile.id, isEmpresa);
+  const { data: portfolio = [] } = usePortfolio(isEmpresa ? undefined : profile.id);
   const { data: avaliacoes = [] } = useAvaliacoesRecebidas(profile.id);
   const { data: avaliadores = {} } = useProfilesByIds(avaliacoes.map((a) => a.de_id));
 
@@ -39,73 +49,91 @@ const ProfileView = ({ perfil, mostrarContato, children }: Props) => {
   const totalAval = profile.total_avaliacoes ?? 0;
   const trabalhos = isEmpresa ? contratacoesEmpresa : historico?.length;
   const disp = parseDisponibilidade(profissional?.disponibilidade);
+  const selos = selosDe(profile, trabalhos);
 
   return (
     <div className="space-y-4">
-      <section className="bg-card border border-border rounded-2xl p-5 text-center">
-        <UserAvatar nome={nomeExibido} fotoUrl={profile.foto_url} size="xl" className="mx-auto mb-3" />
-        <h2 className="text-xl font-display font-bold text-foreground">{nomeExibido}</h2>
-        <p className="text-sm text-muted-foreground flex items-center justify-center gap-1 mt-0.5">
-          {isEmpresa && empresa?.ramo && <><Building2 className="h-3.5 w-3.5" /> {empresa.ramo} · </>}
-          <MapPin className="h-3.5 w-3.5" /> {profile.cidade || "Franca"}
-        </p>
-        {isEmpresa && profile.nome && <p className="text-xs text-muted-foreground mt-1">Responsável: {profile.nome}</p>}
+      {/* Cabeçalho */}
+      <section className="bg-card border border-border rounded-2xl overflow-hidden shadow-card">
+        <div className="h-20 bg-gradient-to-br from-primary to-brand-light" />
+        <div className="px-5 pb-5 -mt-12 text-center">
+          <UserAvatar nome={nomeExibido} fotoUrl={profile.foto_url} size="xl" className="mx-auto mb-3 ring-4 ring-card" />
+          <h2 className="text-xl font-display font-bold text-foreground">{nomeExibido}</h2>
+          <p className="text-sm text-muted-foreground flex items-center justify-center gap-1 mt-0.5">
+            {isEmpresa && empresa?.ramo && <><Building2 className="h-3.5 w-3.5" /> {empresa.ramo} · </>}
+            <MapPin className="h-3.5 w-3.5" /> {profile.cidade || "Franca"}
+          </p>
+          {isEmpresa && profile.nome && <p className="text-xs text-muted-foreground mt-1">Responsável: {profile.nome}</p>}
+          <Selos selos={selos} className="justify-center mt-3" />
 
-        <div className="grid grid-cols-3 gap-2 mt-4">
-          <div className="rounded-xl bg-muted/60 py-2.5">
-            <p className="font-display font-bold text-foreground flex items-center justify-center gap-1">
-              <Star className="h-4 w-4 fill-amber-400 text-amber-400" /> {totalAval > 0 ? media.toFixed(1) : "—"}
-            </p>
-            <p className="text-[11px] text-muted-foreground">Avaliação</p>
+          <div className="grid grid-cols-3 gap-2 mt-4">
+            <div className="rounded-xl bg-amber-50 py-2.5">
+              <p className="font-display font-bold text-foreground flex items-center justify-center gap-1">
+                <Star className="h-4 w-4 fill-amber-400 text-amber-400" /> {totalAval > 0 ? media.toFixed(1) : "—"}
+              </p>
+              <p className="text-[11px] text-muted-foreground">Nota média</p>
+            </div>
+            <div className="rounded-xl bg-muted/70 py-2.5">
+              <p className="font-display font-bold text-foreground">{totalAval}</p>
+              <p className="text-[11px] text-muted-foreground">Avaliações</p>
+            </div>
+            <div className="rounded-xl bg-muted/70 py-2.5">
+              <p className="font-display font-bold text-foreground">{trabalhos ?? "—"}</p>
+              <p className="text-[11px] text-muted-foreground">{isEmpresa ? "Contratações" : "Trabalhos"}</p>
+            </div>
           </div>
-          <div className="rounded-xl bg-muted/60 py-2.5">
-            <p className="font-display font-bold text-foreground">{totalAval}</p>
-            <p className="text-[11px] text-muted-foreground">Avaliações</p>
-          </div>
-          <div className="rounded-xl bg-muted/60 py-2.5">
-            <p className="font-display font-bold text-foreground">{trabalhos ?? "—"}</p>
-            <p className="text-[11px] text-muted-foreground">{isEmpresa ? "Contratações" : "Trabalhos"}</p>
-          </div>
+
+          {!isEmpresa && profissional?.profissoes && profissional.profissoes.length > 0 && (
+            <div className="flex flex-wrap justify-center gap-1.5 mt-4">
+              {profissional.profissoes.map((p) => <Chip key={p}>{p}</Chip>)}
+            </div>
+          )}
+
+          {(profissional?.instagram || profissional?.linkedin || (mostrarContato && profile.telefone)) && (
+            <div className="flex flex-wrap justify-center gap-2 mt-4">
+              {profissional?.instagram && (
+                <a href={instagramUrl(profissional.instagram)} target="_blank" rel="noopener noreferrer"
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-border text-sm text-foreground hover:border-primary/40">
+                  <Instagram className="h-4 w-4 text-pink-600" /> @{profissional.instagram}
+                </a>
+              )}
+              {profissional?.linkedin && (
+                <a href={profissional.linkedin} target="_blank" rel="noopener noreferrer"
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-border text-sm text-foreground hover:border-primary/40">
+                  <Linkedin className="h-4 w-4 text-sky-700" /> LinkedIn
+                </a>
+              )}
+              {mostrarContato && profile.telefone && (
+                <a href={`tel:${profile.telefone}`}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-border text-sm text-foreground hover:border-primary/40">
+                  <Phone className="h-4 w-4 text-primary" /> {profile.telefone}
+                </a>
+              )}
+            </div>
+          )}
         </div>
-
-        {!isEmpresa && profissional?.profissoes && profissional.profissoes.length > 0 && (
-          <div className="flex flex-wrap justify-center gap-1.5 mt-4">
-            {profissional.profissoes.map((p) => <Chip key={p}>{p}</Chip>)}
-          </div>
-        )}
-
-        {(profissional?.instagram || profissional?.linkedin || (mostrarContato && profile.telefone)) && (
-          <div className="flex flex-wrap justify-center gap-2 mt-4">
-            {profissional?.instagram && (
-              <a href={instagramUrl(profissional.instagram)} target="_blank" rel="noopener noreferrer"
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-border text-sm text-foreground hover:border-primary/40">
-                <Instagram className="h-4 w-4 text-pink-600" /> @{profissional.instagram}
-              </a>
-            )}
-            {profissional?.linkedin && (
-              <a href={profissional.linkedin} target="_blank" rel="noopener noreferrer"
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-border text-sm text-foreground hover:border-primary/40">
-                <Linkedin className="h-4 w-4 text-sky-700" /> LinkedIn
-              </a>
-            )}
-            {mostrarContato && profile.telefone && (
-              <a href={`tel:${profile.telefone}`}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-border text-sm text-foreground hover:border-primary/40">
-                <Phone className="h-4 w-4 text-primary" /> {profile.telefone}
-              </a>
-            )}
-          </div>
-        )}
       </section>
 
       {isEmpresa ? (
-        <Bloco titulo="Sobre a empresa">
-          <div className="space-y-1.5 text-sm text-muted-foreground">
-            {empresa?.endereco && <p className="flex gap-2"><MapPin className="h-4 w-4 text-primary shrink-0 mt-0.5" /> {empresa.endereco}</p>}
-            {empresa?.ramo && <p className="flex gap-2"><Building2 className="h-4 w-4 text-primary shrink-0 mt-0.5" /> {empresa.ramo}</p>}
-            {empresa?.cnpj && <p className="flex gap-2"><Briefcase className="h-4 w-4 text-primary shrink-0 mt-0.5" /> CNPJ {empresa.cnpj}</p>}
-          </div>
-        </Bloco>
+        <>
+          {empresa?.bio && (
+            <Bloco titulo="Sobre a empresa">
+              <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-line">{empresa.bio}</p>
+            </Bloco>
+          )}
+          {empresa?.endereco && (
+            <Bloco titulo="Onde fica">
+              <MapaEndereco
+                endereco={empresa.endereco}
+                cidade={profile.cidade}
+                coordenadas={empresa.latitude != null && empresa.longitude != null ? { lat: empresa.latitude, lon: empresa.longitude } : null}
+              />
+              {empresa.cnpj && (
+                <p className="text-xs text-muted-foreground flex items-center gap-1.5 mt-3"><FileText className="h-3.5 w-3.5" /> CNPJ {empresa.cnpj}</p>
+              )}
+            </Bloco>
+          )}
+        </>
       ) : (
         <>
           {profissional?.bio && (
@@ -113,6 +141,9 @@ const ProfileView = ({ perfil, mostrarContato, children }: Props) => {
               <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-line">{profissional.bio}</p>
             </Bloco>
           )}
+          <Bloco titulo="Portfólio" extra={portfolio.length > 0 ? <span className="text-xs text-muted-foreground">{portfolio.length} foto{portfolio.length === 1 ? "" : "s"}</span> : undefined}>
+            <PortfolioGallery fotos={portfolio} />
+          </Bloco>
           {profissional?.experiencia && (
             <Bloco titulo="Experiência">
               <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-line">{profissional.experiencia}</p>
@@ -153,11 +184,12 @@ const ProfileView = ({ perfil, mostrarContato, children }: Props) => {
 
       {children}
 
-      <Bloco titulo="Avaliações recebidas">
+      <Bloco titulo="Avaliações">
+        <RatingSummary media={media} total={totalAval} notas={avaliacoes.map((a) => a.nota)} />
         {avaliacoes.length === 0 ? (
-          <p className="text-sm text-muted-foreground">Nenhuma avaliação ainda.</p>
+          <p className="text-sm text-muted-foreground mt-4">Nenhuma avaliação ainda. As avaliações aparecem após cada trabalho finalizado.</p>
         ) : (
-          <ul className="space-y-3">
+          <ul className="space-y-4 mt-5 pt-4 border-t border-border">
             {avaliacoes.slice(0, 20).map((a) => {
               const autor = avaliadores[a.de_id];
               return (
@@ -165,7 +197,7 @@ const ProfileView = ({ perfil, mostrarContato, children }: Props) => {
                   <UserAvatar nome={autor?.nome} fotoUrl={autor?.foto_url} size="sm" />
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between gap-2">
-                      <p className="text-sm font-medium text-foreground truncate">{autor?.nome || "Usuário"}</p>
+                      <p className="text-sm font-semibold text-foreground truncate">{autor?.nome || "Usuário"}</p>
                       <span className="text-xs text-muted-foreground shrink-0">{new Date(a.created_at).toLocaleDateString("pt-BR")}</span>
                     </div>
                     <Stars value={a.nota} size="sm" />

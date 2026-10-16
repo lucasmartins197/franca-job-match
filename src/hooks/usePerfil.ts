@@ -5,6 +5,7 @@ import { useAuth } from "./useAuth";
 
 export type DbEmpresaDados = Tables<"empresa_dados">;
 export type DbProfissionalDados = Tables<"profissional_dados">;
+export type DbPortfolioFoto = Tables<"portfolio_fotos">;
 
 export interface PerfilCompleto {
   profile: Tables<"profiles">;
@@ -140,7 +141,7 @@ export const useInvalidatePerfil = () => {
 // ─────────────────────────────────────────────
 
 /** Reduz a foto para no máx. 640px (JPEG) antes de enviar — fotos de celular costumam ter 4MB+. */
-const redimensionar = (file: File, max = 640): Promise<Blob> =>
+export const redimensionar = (file: File, max = 640): Promise<Blob> =>
   new Promise((resolve, reject) => {
     const img = new Image();
     const url = URL.createObjectURL(file);
@@ -208,3 +209,108 @@ export const parseDisponibilidade = (texto: string | null | undefined) => {
 
 export const formatDisponibilidade = (dias: string[], periodos: string[], obs: string) =>
   [dias.join(", "), periodos.join(", "), obs.trim()].filter(Boolean).join(" · ");
+
+// ─────────────────────────────────────────────
+// Portfólio (galeria de trabalhos do profissional)
+// ─────────────────────────────────────────────
+
+export const MAX_PORTFOLIO = 12;
+
+export const usePortfolio = (profileId?: string) => {
+  return useQuery({
+    queryKey: ["portfolio", profileId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("portfolio_fotos")
+        .select("*")
+        .eq("profile_id", profileId!)
+        .order("created_at", { ascending: false });
+      if (error) {
+        console.warn("portfolio_fotos indisponível — rode o SQL da Fase 3", error);
+        return [] as DbPortfolioFoto[];
+      }
+      return data;
+    },
+    enabled: !!profileId,
+  });
+};
+
+/** Envia uma foto para <user>/portfolio/ no bucket "avatars" e registra em portfolio_fotos. */
+export const adicionarFotoPortfolio = async (userId: string, file: File) => {
+  if (!file.type.startsWith("image/")) throw new Error("Escolha arquivos de imagem");
+  const blob = await redimensionar(file, 1280);
+  const path = `${userId}/portfolio/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.jpg`;
+  const { error } = await supabase.storage.from("avatars").upload(path, blob, { contentType: "image/jpeg" });
+  if (error) throw error;
+  const url = supabase.storage.from("avatars").getPublicUrl(path).data.publicUrl;
+  const { error: e2 } = await supabase.from("portfolio_fotos").insert({ profile_id: userId, url });
+  if (e2) {
+    await supabase.storage.from("avatars").remove([path]);
+    throw new Error(e2.message.includes("portfolio_fotos") ? "Banco desatualizado: rode o SQL da Fase 3." : e2.message);
+  }
+};
+
+export const removerFotoPortfolio = async (foto: DbPortfolioFoto) => {
+  const { error } = await supabase.from("portfolio_fotos").delete().eq("id", foto.id);
+  if (error) throw error;
+  const marcador = "/object/public/avatars/";
+  const i = foto.url.indexOf(marcador);
+  if (i >= 0) await supabase.storage.from("avatars").remove([decodeURIComponent(foto.url.slice(i + marcador.length))]);
+};
+
+// ─────────────────────────────────────────────
+// Selos
+// ─────────────────────────────────────────────
+
+export type Selo = { id: string; texto: string; tipo: "verificado" | "top" | "trabalhos" | "novo" };
+
+export const selosDe = (profile: Tables<"profiles">, trabalhos?: number | null): Selo[] => {
+  const isEmpresa = profile.tipo === "empresa";
+  const media = Number(profile.avaliacao_media ?? 0);
+  const total = profile.total_avaliacoes ?? 0;
+  const selos: Selo[] = [];
+  if (profile.verificado) selos.push({ id: "verificado", texto: isEmpresa ? "Empresa verificada" : "Verificado", tipo: "verificado" });
+  if (total >= 3 && media >= 4.7) selos.push({ id: "top", texto: isEmpresa ? "Top avaliada" : "Top avaliado", tipo: "top" });
+  if (trabalhos && trabalhos > 0) {
+    selos.push({ id: "trabalhos", texto: `${trabalhos} ${isEmpresa ? (trabalhos === 1 ? "contratação" : "contratações") : trabalhos === 1 ? "trabalho" : "trabalhos"}`, tipo: "trabalhos" });
+  } else if (total === 0) {
+    selos.push({ id: "novo", texto: "Novo no FreLa", tipo: "novo" });
+  }
+  return selos;
+};
+
+// ─────────────────────────────────────────────
+// Geocodificação (endereço → lat/long) via OpenStreetMap Nominatim — sem chave
+// ─────────────────────────────────────────────
+
+export interface Coordenadas {
+  lat: number;
+  lon: number;
+}
+
+export const geocodificar = async (endereco: string, cidade = "Franca"): Promise<Coordenadas | null> => {
+  const q = `${endereco}, ${cidade}, SP, Brasil`;
+  try {
+    const res = await fetch(
+      `https://nominatim.openstreetmap.org/search?format=json&limit=1&countrycodes=br&accept-language=pt-BR&q=${encodeURIComponent(q)}`
+    );
+    if (!res.ok) return null;
+    const [hit] = (await res.json()) as { lat: string; lon: string }[];
+    return hit ? { lat: Number(hit.lat), lon: Number(hit.lon) } : null;
+  } catch {
+    return null;
+  }
+};
+
+/** Coordenadas de um endereço (usa lat/long salvos quando houver). */
+export const useCoordenadas = (endereco?: string | null, cidade?: string | null, salvas?: Coordenadas | null) => {
+  return useQuery({
+    queryKey: ["geocode", endereco, cidade],
+    queryFn: () => geocodificar(endereco!, cidade || "Franca"),
+    enabled: !salvas && !!endereco && endereco.trim().length > 3,
+    staleTime: Infinity,
+    gcTime: 24 * 60 * 60 * 1000,
+    retry: false,
+    initialData: salvas ?? undefined,
+  });
+};

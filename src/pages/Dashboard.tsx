@@ -2,12 +2,12 @@ import { useState } from "react";
 import { Navigate, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { Plus, LogOut, Users, Briefcase, Lock, Star, ChevronRight, Clock, MessageCircle } from "lucide-react";
+import { Plus, LogOut, Users, Briefcase, Lock, Star, ChevronRight, Clock, MessageCircle, Crown } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useMyJobs } from "@/hooks/useJobs";
 import {
-  useMinhasContratacoes, useProfilesByIds, useTravaNovaVaga, formatBRL, formatDate,
+  useMinhasContratacoes, useProfilesByIds, useAvaliacoesFeitas, useTravaNovaVaga, formatBRL, formatDate,
 } from "@/hooks/useFrela";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -20,6 +20,7 @@ import EmptyState from "@/components/frela/EmptyState";
 import { JobListSkeleton } from "@/components/frela/JobCardSkeleton";
 import { useMeuPerfil } from "@/hooks/usePerfil";
 import { useChatNaoLidas } from "@/hooks/useChat";
+import { PLANOS } from "@/lib/pagamentos";
 import FinalizarContratacaoButton from "@/components/frela/FinalizarContratacaoButton";
 
 const STATUS_TABS = [
@@ -51,15 +52,8 @@ const Dashboard = () => {
     enabled: jobIds.length > 0,
   });
 
-  const { data: minhasAvaliacoes = [] } = useQuery({
-    queryKey: ["avaliacoes", "feitas", user?.id],
-    queryFn: async () => {
-      const { data, error } = await supabase.from("avaliacoes").select("contratacao_id").eq("de_id", user!.id);
-      if (error) throw error;
-      return data.map((a) => a.contratacao_id);
-    },
-    enabled: !!user,
-  });
+  const { data: minhasAvaliacoes = [] } = useAvaliacoesFeitas();
+
 
   const { data: profissionais = {} } = useProfilesByIds(contratacoes.map((c) => c.profissional_id));
 
@@ -137,6 +131,16 @@ const Dashboard = () => {
           </div>
         ))}
       </div>
+
+      <button onClick={() => navigate("/planos")}
+        className="mx-5 mb-8 w-[calc(100%-2.5rem)] flex items-center gap-3 rounded-2xl border border-primary/20 bg-primary/5 p-3.5 text-left">
+        <span className="w-10 h-10 rounded-xl bg-primary text-primary-foreground flex items-center justify-center shrink-0"><Crown className="h-5 w-5" /></span>
+        <span className="flex-1 min-w-0">
+          <span className="block text-sm font-semibold text-foreground">FreLa Empresa · {formatBRL(PLANOS.empresa.preco)}/mês</span>
+          <span className="block text-xs text-muted-foreground">Lançamento gratuito em Franca · ver plano e taxa</span>
+        </span>
+        <ChevronRight className="h-4 w-4 text-muted-foreground" />
+      </button>
 
       {pendentes.length > 0 && (
         <section className="px-5 mb-8">

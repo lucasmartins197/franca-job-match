@@ -11,12 +11,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useCreateJob } from "@/hooks/useJobs";
 import { useMyProfile, useTravaNovaVaga } from "@/hooks/useFrela";
-import { SKILLS } from "@/data/mockData";
+import { CATEGORIAS } from "@/lib/categorias";
 
-const CATEGORIES = [
-  "Bares e Restaurantes", "Eventos", "Comércio", "Beleza e Estética",
-  "Logística", "Indústria", "Construção Civil", "Marketing e Promoção", "Serviços Gerais",
-];
 
 const PostJobTab = ({ onClose }: { onClose?: () => void }) => {
   const { user } = useAuth();
@@ -128,19 +124,19 @@ const PostJobTab = ({ onClose }: { onClose?: () => void }) => {
         <label className="text-sm text-muted-foreground mb-1 block">Título da vaga *</label>
         <Input placeholder="Ex: Garçom para evento" value={title} onChange={(e) => setTitle(e.target.value)} className={field} />
       </div>
-      <div className="grid grid-cols-2 gap-3">
+      <div className="space-y-4">
         <div>
           <label className="text-sm text-muted-foreground mb-1 block">Categoria *</label>
-          <Select value={category} onValueChange={setCategory}>
+          <Select value={category} onValueChange={(v) => { setCategory(v); setSkill(""); }}>
             <SelectTrigger className="h-12 rounded-xl bg-card border-border"><SelectValue placeholder="Selecione" /></SelectTrigger>
-            <SelectContent>{CATEGORIES.map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent>
+            <SelectContent>{CATEGORIAS.map((c) => <SelectItem key={c.id} value={c.nome}>{c.nome}</SelectItem>)}</SelectContent>
           </Select>
         </div>
         <div>
           <label className="text-sm text-muted-foreground mb-1 block">Função</label>
           <Select value={skill} onValueChange={setSkill}>
-            <SelectTrigger className="h-12 rounded-xl bg-card border-border"><SelectValue placeholder="Opcional" /></SelectTrigger>
-            <SelectContent>{SKILLS.map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
+            <SelectTrigger className="h-12 rounded-xl bg-card border-border" disabled={!category}><SelectValue placeholder={category ? "Opcional" : "Escolha a categoria"} /></SelectTrigger>
+            <SelectContent>{(CATEGORIAS.find((c) => c.nome === category)?.funcoes ?? []).map((f) => <SelectItem key={f} value={f}>{f}</SelectItem>)}</SelectContent>
           </Select>
         </div>
       </div>

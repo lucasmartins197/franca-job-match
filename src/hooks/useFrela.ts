@@ -10,7 +10,8 @@ export type DbContratacao = Tables<"contratacoes">;
 export type DbAvaliacao = Tables<"avaliacoes">;
 export type DbNotificacao = Tables<"notificacoes">;
 
-export const TAXA_PLATAFORMA = 0.05;
+import { TAXA_PLATAFORMA } from "@/lib/pagamentos";
+export { TAXA_PLATAFORMA };
 
 export const formatBRL = (valor: number | null | undefined) =>
   (valor ?? 0).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
@@ -182,11 +183,14 @@ export const useFinalizarContratacao = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (contratacao: DbContratacao) => {
-      // TODO (Fase 3 — Stripe): cobrar aqui os 5% da empresa (contratacao.taxa_5pct)
-      //   1. chamar edge function que cria o PaymentIntent no cartão salvo (profiles.stripe_customer_id)
-      //   2. registrar em `pagamentos` { tipo: 'taxa_5pct', valor: taxa_5pct, contratacao_id, stripe_id }
-      //   3. marcar contratacoes.taxa_cobrada = true quando o webhook confirmar
-      //   Só finalizar a contratação depois que a cobrança for criada com sucesso.
+      // TODO (PAGAMENTO — TAXA 5%): a cobrança NÃO acontece aqui no app (regra das lojas).
+      //   O valor já está calculado em contratacoes.taxa_5pct (ver useAceitarCandidato).
+      //   Plugar no BACKEND, disparado por esta mudança de status para 'finalizada':
+      //     • trigger/webhook no Supabase → Edge Function `cobrar-taxa` (a criar)
+      //     • a função cobra a empresa pelo meio escolhido (boleto/Pix/cartão via gateway)
+      //     • registra em `pagamentos` { tipo: 'taxa_5pct', valor: taxa_5pct, contratacao_id }
+      //     • marca contratacoes.taxa_cobrada = true quando o gateway confirmar
+      //   Detalhes em src/lib/pagamentos.ts.
       const { error } = await supabase
         .from("contratacoes")
         .update({ status: "finalizada", finalizada_em: new Date().toISOString() })
@@ -236,6 +240,20 @@ export const useAvaliacoesRecebidas = (userId?: string) => {
       return data;
     },
     enabled: !!userId,
+  });
+};
+
+/** IDs das contratações que o usuário logado já avaliou. */
+export const useAvaliacoesFeitas = () => {
+  const { user } = useAuth();
+  return useQuery({
+    queryKey: ["avaliacoes", "feitas", user?.id],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("avaliacoes").select("contratacao_id").eq("de_id", user!.id);
+      if (error) throw error;
+      return data.map((a) => a.contratacao_id);
+    },
+    enabled: !!user,
   });
 };
 

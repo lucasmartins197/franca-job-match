@@ -138,6 +138,9 @@ export type Database = {
           nome_empresa: string | null
           profile_id: string
           ramo: string | null
+          bio: string | null
+          latitude: number | null
+          longitude: number | null
         }
         Insert: {
           cnpj?: string | null
@@ -145,6 +148,9 @@ export type Database = {
           nome_empresa?: string | null
           profile_id: string
           ramo?: string | null
+          bio?: string | null
+          latitude?: number | null
+          longitude?: number | null
         }
         Update: {
           cnpj?: string | null
@@ -152,6 +158,9 @@ export type Database = {
           nome_empresa?: string | null
           profile_id?: string
           ramo?: string | null
+          bio?: string | null
+          latitude?: number | null
+          longitude?: number | null
         }
         Relationships: [
           {
@@ -332,6 +341,68 @@ export type Database = {
           },
         ]
       }
+      portfolio_fotos: {
+        Row: {
+          created_at: string
+          id: string
+          legenda: string | null
+          profile_id: string
+          url: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          legenda?: string | null
+          profile_id: string
+          url: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          legenda?: string | null
+          profile_id?: string
+          url?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "portfolio_fotos_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      suporte_mensagens: {
+        Row: {
+          autor_id: string
+          created_at: string
+          id: string
+          lida_admin: boolean
+          lida_usuario: boolean
+          texto: string
+          user_id: string
+        }
+        Insert: {
+          autor_id: string
+          created_at?: string
+          id?: string
+          lida_admin?: boolean
+          lida_usuario?: boolean
+          texto: string
+          user_id: string
+        }
+        Update: {
+          autor_id?: string
+          created_at?: string
+          id?: string
+          lida_admin?: boolean
+          lida_usuario?: boolean
+          texto?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avaliacao_media: number | null
@@ -348,6 +419,9 @@ export type Database = {
           telefone: string | null
           tipo: string
           total_avaliacoes: number | null
+          is_admin: boolean
+          is_demo: boolean
+          verificado: boolean
         }
         Insert: {
           avaliacao_media?: number | null
@@ -364,6 +438,9 @@ export type Database = {
           telefone?: string | null
           tipo: string
           total_avaliacoes?: number | null
+          is_admin?: boolean
+          is_demo?: boolean
+          verificado?: boolean
         }
         Update: {
           avaliacao_media?: number | null
@@ -380,6 +457,9 @@ export type Database = {
           telefone?: string | null
           tipo?: string
           total_avaliacoes?: number | null
+          is_admin?: boolean
+          is_demo?: boolean
+          verificado?: boolean
         }
         Relationships: []
       }
@@ -426,6 +506,14 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      admin_set_verificado: {
+        Args: { p_id: string; p_valor: boolean }
+        Returns: undefined
+      }
+      is_admin: {
+        Args: Record<PropertyKey, never>
+        Returns: boolean
+      }
       contratacoes_finalizadas_empresa: {
         Args: { p_id: string }
         Returns: number

@@ -1,11 +1,11 @@
 import { useState } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { Check, Loader2, X } from "lucide-react";
+import { BadgeCheck, Check, Headset, Loader2, X } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { usePerfilPublico } from "@/hooks/usePerfil";
+import { useMeuPerfil, useInvalidatePerfil, usePerfilPublico } from "@/hooks/usePerfil";
 import { useJob, useJobApplications } from "@/hooks/useJobs";
 import { useAceitarCandidato, useMinhasContratacoes, useRecusarCandidato, formatBRL } from "@/hooks/useFrela";
 import { Button } from "@/components/ui/button";
@@ -38,6 +38,22 @@ const PerfilPublico = () => {
   const aceitar = useAceitarCandidato();
   const recusar = useRecusarCandidato();
   const [confirmando, setConfirmando] = useState(false);
+  const { data: meuPerfil } = useMeuPerfil();
+  const souAdmin = !!meuPerfil?.profile.is_admin;
+  const invalidatePerfil = useInvalidatePerfil();
+  const [alterandoSelo, setAlterandoSelo] = useState(false);
+
+  const alternarVerificado = async () => {
+    if (!perfil) return;
+    setAlterandoSelo(true);
+    const { error } = await supabase.rpc("admin_set_verificado", { p_id: perfil.profile.id, p_valor: !perfil.profile.verificado });
+    setAlterandoSelo(false);
+    if (error) toast.error("Não foi possível alterar o selo");
+    else {
+      toast.success(perfil.profile.verificado ? "Selo removido" : "Perfil verificado!");
+      await invalidatePerfil();
+    }
+  };
 
   const isEmpresa = perfil?.profile.tipo === "empresa";
   const { data: vagasAbertas = [] } = useQuery({
@@ -105,6 +121,18 @@ const PerfilPublico = () => {
             </section>
           )}
         </ProfileView>
+
+        {souAdmin && !souEu && (
+          <section className="mt-4 rounded-2xl border border-dashed border-primary/40 p-4 space-y-2">
+            <p className="text-xs font-semibold uppercase tracking-wide text-primary">Ações de administrador</p>
+            <Button variant="outline" onClick={alternarVerificado} disabled={alterandoSelo} className="w-full h-11 rounded-xl">
+              {alterandoSelo ? <Loader2 className="h-4 w-4 animate-spin" /> : <><BadgeCheck className="h-4 w-4 mr-2" /> {perfil.profile.verificado ? "Remover selo Verificado" : "Marcar como Verificado"}</>}
+            </Button>
+            <Button variant="outline" onClick={() => navigate(`/admin/suporte/${perfil.profile.id}`)} className="w-full h-11 rounded-xl">
+              <Headset className="h-4 w-4 mr-2" /> Mensagem de suporte para este usuário
+            </Button>
+          </section>
+        )}
       </div>
 
       {podeDecidir && (

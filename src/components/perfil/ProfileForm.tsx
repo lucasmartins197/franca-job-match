@@ -8,10 +8,11 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useAuth } from "@/hooks/useAuth";
 import {
-  DIAS, PERIODOS, PerfilCompleto, camposFaltando, formatDisponibilidade, normalizarInstagram,
+  DIAS, PERIODOS, PerfilCompleto, camposFaltando, formatDisponibilidade, geocodificar, normalizarInstagram,
   normalizarLinkedin, parseDisponibilidade, useInvalidatePerfil,
 } from "@/hooks/usePerfil";
-import { SKILLS } from "@/data/mockData";
+import { TODAS_FUNCOES } from "@/lib/categorias";
+import PortfolioEditor from "@/components/perfil/PortfolioEditor";
 import PhotoUpload from "@/components/frela/PhotoUpload";
 import ChipSelect from "@/components/frela/ChipSelect";
 
@@ -65,6 +66,7 @@ const ProfileForm = ({ perfil, submitLabel = "Salvar perfil", onSaved }: Props) 
   const [cnpj, setCnpj] = useState("");
   const [ramo, setRamo] = useState<string[]>([]);
   const [endereco, setEndereco] = useState("");
+  const [bioEmpresa, setBioEmpresa] = useState("");
 
   useEffect(() => {
     const { profile, profissional: d, empresa: e } = perfil;
@@ -85,6 +87,7 @@ const ProfileForm = ({ perfil, submitLabel = "Salvar perfil", onSaved }: Props) 
     setCnpj(e?.cnpj ?? "");
     setRamo(e?.ramo ? [e.ramo] : []);
     setEndereco(e?.endereco ?? "");
+    setBioEmpresa(e?.bio ?? "");
   }, [perfil]);
 
   const handleSubmit = async (ev: React.FormEvent) => {
@@ -95,7 +98,16 @@ const ProfileForm = ({ perfil, submitLabel = "Salvar perfil", onSaved }: Props) 
     const rascunho: PerfilCompleto = {
       profile: { ...perfil.profile, foto_url: foto, nome: nome.trim(), telefone: telefone.trim(), cidade: cidade.trim() },
       empresa: isEmpresa
-        ? { profile_id: user.id, nome_empresa: nomeEmpresa.trim(), cnpj: cnpj.trim() || null, ramo: ramo[0] ?? null, endereco: endereco.trim() }
+        ? {
+            profile_id: user.id,
+            nome_empresa: nomeEmpresa.trim(),
+            cnpj: cnpj.trim() || null,
+            ramo: ramo[0] ?? null,
+            endereco: endereco.trim(),
+            bio: bioEmpresa.trim() || null,
+            latitude: perfil.empresa?.latitude ?? null,
+            longitude: perfil.empresa?.longitude ?? null,
+          }
         : null,
       profissional: isEmpresa
         ? null
@@ -118,6 +130,16 @@ const ProfileForm = ({ perfil, submitLabel = "Salvar perfil", onSaved }: Props) 
 
     setSaving(true);
     try {
+      // Mapa: geocodifica o endereço da empresa quando ele muda (OpenStreetMap, sem chave)
+      if (rascunho.empresa) {
+        const mudou = rascunho.empresa.endereco !== perfil.empresa?.endereco || rascunho.profile.cidade !== perfil.profile.cidade;
+        if (mudou || rascunho.empresa.latitude == null) {
+          const coords = await geocodificar(rascunho.empresa.endereco ?? "", rascunho.profile.cidade ?? "Franca");
+          rascunho.empresa.latitude = coords?.lat ?? null;
+          rascunho.empresa.longitude = coords?.lon ?? null;
+        }
+      }
+
       const { error } = await supabase
         .from("profiles")
         .update({ foto_url: foto, nome: rascunho.profile.nome, telefone: rascunho.profile.telefone, cidade: rascunho.profile.cidade })
@@ -130,6 +152,9 @@ const ProfileForm = ({ perfil, submitLabel = "Salvar perfil", onSaved }: Props) 
       if (e2) {
         if (e2.message.includes("instagram") || e2.message.includes("linkedin")) {
           throw new Error("Banco desatualizado: rode o SQL da Fase 2 (colunas instagram/linkedin).");
+        }
+        if (e2.message.includes("bio") || e2.message.includes("latitude")) {
+          throw new Error("Banco desatualizado: rode o SQL da Fase 3.");
         }
         throw e2;
       }
@@ -157,7 +182,11 @@ const ProfileForm = ({ perfil, submitLabel = "Salvar perfil", onSaved }: Props) 
             <ChipSelect options={RAMOS} value={ramo} onChange={(v) => setRamo(v.slice(-1))} />
           </Campo>
           <Campo id="endereco" label="Endereço" obrigatorio>
-            <Input id="endereco" placeholder="Rua, número, bairro" value={endereco} onChange={(e) => setEndereco(e.target.value)} className="h-11 rounded-xl" />
+            <Input id="endereco" placeholder="Rua, número - bairro" value={endereco} onChange={(e) => setEndereco(e.target.value)} className="h-11 rounded-xl" />
+          </Campo>
+          <Campo id="bio-empresa" label="Sobre a empresa" dica="O que vocês fazem, ambiente de trabalho, o que valorizam.">
+            <Textarea id="bio-empresa" value={bioEmpresa} onChange={(e) => setBioEmpresa(e.target.value)} maxLength={600}
+              placeholder="Ex: Bar com música ao vivo no Centro há 10 anos. Equipe animada e pagamento no mesmo dia." className="rounded-xl min-h-[80px]" />
           </Campo>
           <Campo id="cnpj" label="CNPJ" dica="Opcional, mas passa mais confiança aos profissionais.">
             <Input id="cnpj" inputMode="numeric" placeholder="00.000.000/0000-00" value={cnpj} onChange={(e) => setCnpj(e.target.value)} className="h-11 rounded-xl" />
@@ -186,7 +215,7 @@ const ProfileForm = ({ perfil, submitLabel = "Salvar perfil", onSaved }: Props) 
         <>
           <Secao titulo="O que você faz">
             <Campo label="Profissões" obrigatorio dica="Escolha todas que você faz.">
-              <ChipSelect options={[...SKILLS]} value={profissoes} onChange={setProfissoes} allowCustom />
+              <ChipSelect options={TODAS_FUNCOES} value={profissoes} onChange={setProfissoes} allowCustom limite={14} />
             </Campo>
             <Campo id="experiencia" label="Experiência" obrigatorio dica="Onde já trabalhou e por quanto tempo.">
               <Textarea id="experiencia" placeholder="Ex: 2 anos como garçom no Restaurante X; eventos de formatura..." value={experiencia}
@@ -209,6 +238,13 @@ const ProfileForm = ({ perfil, submitLabel = "Salvar perfil", onSaved }: Props) 
               <Input id="obs-disp" placeholder="Ex: só depois das 18h durante a semana" value={obsDisp} onChange={(e) => setObsDisp(e.target.value)} className="h-11 rounded-xl" />
             </Campo>
           </Secao>
+
+          {user && (
+            <Secao titulo="Portfólio (opcional)">
+              <p className="text-xs text-muted-foreground -mt-2">Fotos de trabalhos que você já fez: eventos, pratos, unhas, obras... Perfis com fotos recebem mais convites.</p>
+              <PortfolioEditor userId={user.id} />
+            </Secao>
+          )}
 
           <Secao titulo="Redes sociais (opcional)">
             <Campo id="instagram" label="Instagram">
