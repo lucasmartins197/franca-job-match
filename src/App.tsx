@@ -20,6 +20,8 @@ import EditarPerfil from "./pages/EditarPerfil";
 import PerfilPublico from "./pages/PerfilPublico";
 import Conversas from "./pages/Conversas";
 import Conversa from "./pages/Conversa";
+import Suporte from "./pages/Suporte";
+import AdminSuporte from "./pages/AdminSuporte";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient({
@@ -75,6 +77,9 @@ const App = () => (
             <Route path="/contratacao/:id" element={<ProtectedRoute><ContratacaoDetail /></ProtectedRoute>} />
             <Route path="/chat" element={<ProtectedRoute><Conversas /></ProtectedRoute>} />
             <Route path="/chat/:id" element={<ProtectedRoute><Conversa /></ProtectedRoute>} />
+            <Route path="/suporte" element={<ProtectedRoute><Suporte /></ProtectedRoute>} />
+            <Route path="/admin/suporte" element={<ProtectedRoute><AdminSuporte /></ProtectedRoute>} />
+            <Route path="/admin/suporte/:userId" element={<ProtectedRoute><Suporte /></ProtectedRoute>} />
             <Route path="/notificacoes" element={<ProtectedRoute><Notificacoes /></ProtectedRoute>} />
             <Route path="*" element={<NotFound />} />
           </Routes>

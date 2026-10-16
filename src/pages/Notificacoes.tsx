@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { Bell, Loader2, UserPlus, CheckCircle2, Star, MessageSquare, Flag } from "lucide-react";
+import { Bell, Loader2, UserPlus, CheckCircle2, Star, MessageSquare, Flag, Headset } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { DbNotificacao, useMarcarNotificacaoLida, useNotificacoes } from "@/hooks/useFrela";
@@ -12,6 +12,7 @@ const ICONES: Record<string, typeof Bell> = {
   finalizacao: Flag,
   avaliacao: Star,
   mensagem: MessageSquare,
+  suporte: Headset,
 };
 
 const Notificacoes = () => {
