@@ -100,7 +100,7 @@ const PostJobTab = ({ onClose }: { onClose?: () => void }) => {
           <CheckCircle2 className="h-16 w-16 text-green-500 mx-auto mb-4" />
           <h2 className="text-xl font-display font-bold text-foreground mb-2">Vaga publicada!</h2>
           <p className="text-muted-foreground mb-6 text-sm">Você será notificado quando alguém se candidatar.</p>
-          <Button onClick={() => { setSubmitted(false); onClose?.(); }} className="gradient-brand text-primary-foreground rounded-xl font-display font-bold">
+          <Button onClick={() => { setSubmitted(false); onClose?.(); }} className="text-primary-foreground rounded-xl font-semibold">
             Fechar
           </Button>
         </motion.div>
@@ -178,7 +178,7 @@ const PostJobTab = ({ onClose }: { onClose?: () => void }) => {
         <Input placeholder="Rua, número — Franca/SP" value={address} onChange={(e) => setAddress(e.target.value)} className={field} />
       </div>
       <Button type="submit" disabled={createJob.isPending}
-        className="w-full h-14 rounded-xl gradient-brand text-primary-foreground font-display font-bold text-lg shadow-brand hover:opacity-90 transition-opacity">
+        className="w-full h-12 rounded-xl text-primary-foreground font-semibold text-base">
         {createJob.isPending ? <Loader2 className="h-5 w-5 animate-spin" /> : "Publicar vaga"}
       </Button>
     </form>

@@ -4,50 +4,52 @@
 
 @layer base {
   :root {
-    --background: 210 40% 98%;
-    --foreground: 222 47% 11%;
+    /* FreLa — paleta: verde-petróleo (confiança) + neutros quentes */
+    --background: 150 16% 97%;
+    --foreground: 200 28% 12%;
 
     --card: 0 0% 100%;
-    --card-foreground: 222 47% 11%;
+    --card-foreground: 200 28% 12%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 222 47% 11%;
+    --popover-foreground: 200 28% 12%;
 
-    --primary: 221 83% 53%;
-    --primary-foreground: 210 40% 98%;
+    --primary: 173 74% 28%;
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: 210 40% 96%;
-    --secondary-foreground: 222 47% 11%;
+    --secondary: 165 32% 93%;
+    --secondary-foreground: 173 74% 20%;
 
-    --muted: 210 40% 96%;
-    --muted-foreground: 215 16% 47%;
+    --muted: 150 14% 93%;
+    --muted-foreground: 200 9% 40%;
 
-    --accent: 221 83% 53%;
-    --accent-foreground: 210 40% 98%;
+    --accent: 165 40% 92%;
+    --accent-foreground: 173 74% 20%;
 
-    --destructive: 0 72% 51%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 0 72% 48%;
+    --destructive-foreground: 0 0% 100%;
 
-    --border: 214 32% 91%;
-    --input: 214 32% 91%;
-    --ring: 221 83% 53%;
+    --border: 150 12% 87%;
+    --input: 150 12% 85%;
+    --ring: 173 74% 28%;
 
-    --radius: 0.75rem;
+    --radius: 0.875rem;
 
-    --brand: 221 83% 53%;
-    --brand-light: 217 91% 60%;
-    --brand-dim: 224 76% 40%;
-    --success: 152 69% 45%;
-    --surface: 210 40% 96%;
+    --brand: 173 74% 28%;
+    --brand-light: 160 58% 40%;
+    --brand-dim: 175 80% 18%;
+    --success: 152 62% 34%;
+    --warning: 36 92% 48%;
+    --surface: 150 14% 95%;
 
     --sidebar-background: 0 0% 100%;
-    --sidebar-foreground: 222 47% 11%;
-    --sidebar-primary: 221 83% 53%;
-    --sidebar-primary-foreground: 210 40% 98%;
-    --sidebar-accent: 210 40% 96%;
-    --sidebar-accent-foreground: 222 47% 11%;
-    --sidebar-border: 214 32% 91%;
-    --sidebar-ring: 221 83% 53%;
+    --sidebar-foreground: 200 28% 12%;
+    --sidebar-primary: 173 74% 28%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 165 32% 93%;
+    --sidebar-accent-foreground: 173 74% 20%;
+    --sidebar-border: 150 12% 87%;
+    --sidebar-ring: 173 74% 28%;
   }
 }
 
@@ -57,20 +59,28 @@
   }
   body {
     @apply bg-background text-foreground antialiased;
-    font-family: 'DM Sans', system-ui, sans-serif;
+    font-family: 'Inter', system-ui, sans-serif;
+    -webkit-tap-highlight-color: transparent;
   }
   h1, h2, h3, h4, h5, h6 {
-    font-family: 'Syne', system-ui, sans-serif;
+    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+    letter-spacing: -0.01em;
   }
 }
 
 @layer utilities {
   .font-display {
-    font-family: 'Syne', system-ui, sans-serif;
+    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
   }
   .font-body {
-    font-family: 'DM Sans', system-ui, sans-serif;
+    font-family: 'Inter', system-ui, sans-serif;
   }
+  .shadow-card {
+    box-shadow: 0 1px 2px hsl(200 28% 12% / 0.04), 0 4px 16px -6px hsl(200 28% 12% / 0.08);
+  }
+  .no-scrollbar::-webkit-scrollbar { display: none; }
+  .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+  .pb-safe { padding-bottom: max(env(safe-area-inset-bottom), 0px); }
   .text-brand {
     color: hsl(var(--brand));
   }
@@ -93,7 +103,7 @@
     border-color: hsl(var(--brand) / 0.2);
   }
   .shadow-brand {
-    box-shadow: 0 4px 20px -4px hsl(var(--brand) / 0.25);
+    box-shadow: 0 6px 20px -6px hsl(var(--brand) / 0.45);
   }
   .gradient-brand {
     background: linear-gradient(135deg, hsl(var(--brand)), hsl(var(--brand-light)));

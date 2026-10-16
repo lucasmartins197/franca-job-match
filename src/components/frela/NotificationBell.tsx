@@ -11,7 +11,7 @@ const NotificationBell = () => {
     <button
       onClick={() => navigate("/notificacoes")}
       aria-label={naoLidas > 0 ? `Notificações (${naoLidas} não lidas)` : "Notificações"}
-      className="relative w-10 h-10 bg-card border border-border rounded-xl flex items-center justify-center shadow-sm"
+      className="relative w-10 h-10 bg-card border border-border rounded-xl flex items-center justify-center shadow-card"
     >
       <Bell className="h-5 w-5 text-muted-foreground" />
       {naoLidas > 0 && (

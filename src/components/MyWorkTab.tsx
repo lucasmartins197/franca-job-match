@@ -1,9 +1,11 @@
 import { useNavigate } from "react-router-dom";
-import { Loader2, ChevronRight, Briefcase } from "lucide-react";
+import { ChevronRight, Briefcase } from "lucide-react";
 import { useMyApplications } from "@/hooks/useJobs";
 import { useMinhasContratacoes, formatBRL, formatDate } from "@/hooks/useFrela";
 import NotificationBell from "@/components/frela/NotificationBell";
 import StatusBadge from "@/components/frela/StatusBadge";
+import EmptyState from "@/components/frela/EmptyState";
+import { JobListSkeleton } from "@/components/frela/JobCardSkeleton";
 
 /** Aba "Trabalhos" do profissional: contratações + candidaturas. */
 const MyWorkTab = () => {
@@ -20,7 +22,7 @@ const MyWorkTab = () => {
     <button
       key={c.id}
       onClick={() => navigate(`/contratacao/${c.id}`)}
-      className="w-full text-left bg-card rounded-xl p-4 border border-border shadow-sm flex items-center gap-3"
+      className="w-full text-left bg-card rounded-2xl p-4 border border-border shadow-card flex items-center gap-3"
     >
       <div className="flex-1 min-w-0">
         <div className="flex items-center justify-between gap-2 mb-1">
@@ -45,7 +47,7 @@ const MyWorkTab = () => {
     <button
       key={a.id}
       onClick={() => navigate(`/job/${a.job_id}`)}
-      className="w-full text-left bg-card rounded-xl p-4 border border-border shadow-sm"
+      className="w-full text-left bg-card rounded-2xl p-4 border border-border shadow-card"
     >
       <div className="flex items-center justify-between gap-2 mb-1">
         <h3 className="font-display font-bold text-foreground truncate">{a.jobs?.title ?? "Vaga"}</h3>
@@ -62,22 +64,17 @@ const MyWorkTab = () => {
   const vazio = applications.length === 0 && contratacoes.length === 0;
 
   return (
-    <div className="pb-20 pt-12 px-5">
+    <div className="pb-24 pt-10 px-5">
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-display font-bold text-foreground">Meus trabalhos</h1>
         <NotificationBell />
       </div>
 
       {loading ? (
-        <div className="flex justify-center py-12"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>
+        <JobListSkeleton n={2} />
       ) : vazio ? (
-        <div className="flex flex-col items-center justify-center py-20 text-center">
-          <div className="w-16 h-16 rounded-2xl bg-card border border-border flex items-center justify-center mb-4">
-            <Briefcase className="h-8 w-8 text-muted-foreground" />
-          </div>
-          <p className="text-muted-foreground font-medium">Você ainda não se candidatou a nenhuma vaga</p>
-          <p className="text-sm text-muted-foreground/60 mt-1">Encontre vagas na aba Início</p>
-        </div>
+        <EmptyState icon={Briefcase} titulo="Nenhum trabalho por aqui ainda"
+          descricao="Quando você se candidatar a uma vaga, ela aparece aqui com o status." />
       ) : (
         <div className="space-y-8">
           {ativas.length > 0 && (

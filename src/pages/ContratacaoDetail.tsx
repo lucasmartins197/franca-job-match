@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { Loader2, Calendar, Clock, MapPin, Phone, Info } from "lucide-react";
+import { Loader2, Calendar, Clock, MapPin, Phone, Info, ChevronRight, MessageCircle } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -9,6 +9,7 @@ import {
   useContratacao, useAvaliacoesDaContratacao, useAvaliar, useProfilesByIds, formatBRL, formatDate,
 } from "@/hooks/useFrela";
 import PageHeader from "@/components/frela/PageHeader";
+import UserAvatar from "@/components/frela/UserAvatar";
 import StatusBadge from "@/components/frela/StatusBadge";
 import Stars from "@/components/frela/Stars";
 import FinalizarContratacaoButton from "@/components/frela/FinalizarContratacaoButton";
@@ -62,7 +63,7 @@ const ContratacaoDetail = () => {
       <PageHeader title="Contratação" right={<StatusBadge status={contratacao.status} />} />
 
       <div className="px-5 space-y-4">
-        <div className="bg-card rounded-xl p-4 border border-border shadow-sm">
+        <div className="bg-card rounded-2xl p-4 border border-border shadow-card">
           <button onClick={() => job && navigate(`/job/${job.id}`)} className="text-left w-full">
             <h2 className="text-xl font-display font-bold text-foreground">{job?.title ?? "Vaga"}</h2>
             <p className="text-sm text-muted-foreground">{job?.company_name}</p>
@@ -86,13 +87,11 @@ const ContratacaoDetail = () => {
           )}
         </div>
 
-        <div className="bg-card rounded-xl p-4 border border-border shadow-sm">
+        <div className="bg-card rounded-2xl p-4 border border-border shadow-card">
           <p className="text-xs text-muted-foreground mb-2">{souEmpresa ? "Profissional" : "Empresa"}</p>
-          <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-xl gradient-brand flex items-center justify-center text-lg font-display font-bold text-primary-foreground shrink-0">
-              {outroNome.charAt(0).toUpperCase()}
-            </div>
-            <div className="min-w-0">
+          <button onClick={() => navigate(`/perfil/${outroId}`)} className="w-full flex items-center gap-3 text-left">
+            <UserAvatar nome={outroNome} fotoUrl={outro?.foto_url} size="md" />
+            <div className="min-w-0 flex-1">
               <p className="font-display font-bold text-foreground truncate">{outroNome}</p>
               <div className="flex items-center gap-1.5">
                 <Stars value={Number(outro?.avaliacao_media ?? 0)} size="sm" />
@@ -101,12 +100,18 @@ const ContratacaoDetail = () => {
                 </span>
               </div>
             </div>
+            <ChevronRight className="h-5 w-5 text-muted-foreground" />
+          </button>
+          <div className="flex gap-2 mt-4">
+            <Button onClick={() => navigate(`/chat/${contratacao.id}`)} className="flex-1 h-11 rounded-xl font-semibold">
+              <MessageCircle className="h-4 w-4 mr-2" /> Abrir chat
+            </Button>
+            {outro?.telefone && (
+              <Button asChild variant="outline" className="h-11 rounded-xl">
+                <a href={`tel:${outro.telefone}`} aria-label={`Ligar para ${outro.telefone}`}><Phone className="h-4 w-4" /></a>
+              </Button>
+            )}
           </div>
-          {outro?.telefone && (
-            <a href={`tel:${outro.telefone}`} className="mt-3 flex items-center gap-2 text-sm text-primary">
-              <Phone className="h-4 w-4" /> {outro.telefone}
-            </a>
-          )}
         </div>
 
         {!finalizada && (
@@ -126,7 +131,7 @@ const ContratacaoDetail = () => {
         )}
 
         {finalizada && (
-          <div className="bg-card rounded-xl p-4 border border-border shadow-sm">
+          <div className="bg-card rounded-2xl p-4 border border-border shadow-card">
             <h3 className="font-display font-bold text-foreground mb-1">Avaliação</h3>
             {contratacao.finalizada_em && (
               <p className="text-xs text-muted-foreground mb-3">
@@ -146,7 +151,7 @@ const ContratacaoDetail = () => {
                 <Textarea placeholder="Deixe um comentário (opcional)" value={comentario} onChange={(e) => setComentario(e.target.value)}
                   className="rounded-xl bg-background border-border min-h-[80px]" maxLength={500} />
                 <Button onClick={handleAvaliar} disabled={avaliar.isPending || nota < 1}
-                  className="w-full h-12 rounded-xl gradient-brand text-primary-foreground font-display font-bold">
+                  className="w-full h-12 rounded-xl text-primary-foreground font-semibold">
                   {avaliar.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : "Enviar avaliação"}
                 </Button>
               </div>

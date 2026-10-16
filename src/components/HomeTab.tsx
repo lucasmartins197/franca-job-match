@@ -1,90 +1,93 @@
 import { useState } from "react";
-import { Search, Loader2 } from "lucide-react";
+import { Search, SearchX, MapPin } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import JobCard from "@/components/JobCard";
 import CategoryGrid from "@/components/CategoryGrid";
 import NotificationBell from "@/components/frela/NotificationBell";
+import EmptyState from "@/components/frela/EmptyState";
+import { JobListSkeleton } from "@/components/frela/JobCardSkeleton";
+import UserAvatar from "@/components/frela/UserAvatar";
 import { JobCategory } from "@/types";
 import { useJobs } from "@/hooks/useJobs";
-import { useAuth } from "@/hooks/useAuth";
-import { useMyProfile } from "@/hooks/useFrela";
+import { useProfilesByIds } from "@/hooks/useFrela";
+import { useMeuPerfil } from "@/hooks/usePerfil";
+
+const saudacao = () => {
+  const h = new Date().getHours();
+  return h < 12 ? "Bom dia" : h < 18 ? "Boa tarde" : "Boa noite";
+};
 
 const HomeTab = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<JobCategory | null>(null);
-  const { user } = useAuth();
-  const { data: profile } = useMyProfile();
+  const { data: perfil } = useMeuPerfil();
   const { data: jobs = [], isLoading } = useJobs();
+  const { data: empresas = {} } = useProfilesByIds(jobs.map((j) => j.user_id));
 
-  const nome = profile?.nome || user?.user_metadata?.nome || "Usuário";
-  const cidade = profile?.cidade || "Franca";
+  const profile = perfil?.profile;
+  const nome = profile?.nome || "Usuário";
 
   const filteredJobs = jobs.filter((job) => {
-    const q = searchQuery.toLowerCase();
-    const matchesSearch = !q || job.title.toLowerCase().includes(q) || job.company_name.toLowerCase().includes(q);
+    const q = searchQuery.trim().toLowerCase();
+    const matchesSearch = !q || [job.title, job.company_name, job.skill, job.neighborhood].some((t) => t?.toLowerCase().includes(q));
     const matchesCategory = !selectedCategory || job.category === selectedCategory;
     return matchesSearch && matchesCategory;
   });
 
   return (
-    <div className="pb-20">
-      <div className="px-5 pt-12 pb-6">
-        <div className="flex items-center justify-between mb-5">
-          <div>
-            <p className="text-muted-foreground text-sm">📍 {cidade}, SP</p>
-            <h1 className="text-2xl font-display font-bold text-foreground">
-              Olá, {nome.split(" ")[0]} 👋
-            </h1>
+    <div className="pb-24">
+      <header className="px-5 pt-10 pb-5 bg-gradient-to-b from-primary/10 to-transparent">
+        <div className="flex items-center gap-3 mb-5">
+          <UserAvatar nome={nome} fotoUrl={profile?.foto_url} size="md" />
+          <div className="flex-1 min-w-0">
+            <p className="text-sm text-muted-foreground">{saudacao()},</p>
+            <h1 className="text-xl font-display font-bold text-foreground truncate">{nome.split(" ")[0]} 👋</h1>
           </div>
           <NotificationBell />
         </div>
         <div className="relative">
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
-            placeholder="Buscar vagas, empresas..."
+            placeholder="Buscar por vaga, empresa ou bairro"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-11 h-12 rounded-xl bg-card border-border text-foreground placeholder:text-muted-foreground shadow-sm"
+            className="pl-11 h-12 rounded-2xl bg-card border-border shadow-card"
           />
         </div>
-      </div>
+      </header>
 
-      <div className="px-5 space-y-6">
-        <div>
-          <div className="flex items-center justify-between mb-3">
-            <h2 className="font-display font-bold text-foreground">Categorias</h2>
-            {selectedCategory && (
-              <button onClick={() => setSelectedCategory(null)} className="text-xs text-primary font-medium">
-                Limpar
-              </button>
-            )}
-          </div>
-          <CategoryGrid onSelect={setSelectedCategory} selected={selectedCategory} />
-        </div>
+      <div className="px-5 space-y-5">
+        <CategoryGrid onSelect={setSelectedCategory} selected={selectedCategory} />
 
-        <div>
-          <div className="flex items-center justify-between mb-3">
-            <h2 className="font-display font-bold text-foreground">
-              Vagas abertas
-              {selectedCategory && <span className="text-sm font-normal text-muted-foreground ml-2">em {selectedCategory}</span>}
-            </h2>
-            <span className="text-xs text-muted-foreground">{filteredJobs.length} vagas</span>
-          </div>
-          {isLoading ? (
-            <div className="flex justify-center py-12"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>
-          ) : filteredJobs.length === 0 ? (
-            <div className="text-center py-12">
-              <p className="text-muted-foreground">Nenhuma vaga aberta no momento</p>
-              <p className="text-xs text-muted-foreground/70 mt-1">Volte mais tarde — novas vagas aparecem aqui.</p>
+        <section>
+          <div className="flex items-end justify-between mb-3">
+            <div>
+              <h2 className="font-display font-bold text-lg text-foreground">Vagas abertas</h2>
+              <p className="text-xs text-muted-foreground flex items-center gap-1">
+                <MapPin className="h-3 w-3" /> {profile?.cidade || "Franca"}, SP
+              </p>
             </div>
+            {!isLoading && <span className="text-xs font-medium text-muted-foreground">{filteredJobs.length} vaga{filteredJobs.length === 1 ? "" : "s"}</span>}
+          </div>
+
+          {isLoading ? (
+            <JobListSkeleton />
+          ) : filteredJobs.length === 0 ? (
+            jobs.length === 0 ? (
+              <EmptyState icon={Search} titulo="Nenhuma vaga aberta agora"
+                descricao="Novas vagas aparecem aqui assim que as empresas publicarem. Deixe seu perfil caprichado enquanto isso!" />
+            ) : (
+              <EmptyState icon={SearchX} titulo="Nada encontrado com esse filtro"
+                acao={<button onClick={() => { setSearchQuery(""); setSelectedCategory(null); }} className="text-sm font-semibold text-primary">Limpar filtros</button>} />
+            )
           ) : (
             <div className="space-y-3">
               {filteredJobs.map((job, i) => (
-                <JobCard key={job.id} job={job} index={i} />
+                <JobCard key={job.id} job={job} index={i} fotoEmpresa={empresas[job.user_id]?.foto_url} />
               ))}
             </div>
           )}
-        </div>
+        </section>
       </div>
     </div>
   );

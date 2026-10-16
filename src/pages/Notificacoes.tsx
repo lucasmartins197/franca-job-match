@@ -4,6 +4,7 @@ import { formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { DbNotificacao, useMarcarNotificacaoLida, useNotificacoes } from "@/hooks/useFrela";
 import PageHeader from "@/components/frela/PageHeader";
+import EmptyState from "@/components/frela/EmptyState";
 
 const ICONES: Record<string, typeof Bell> = {
   candidatura: UserPlus,
@@ -38,18 +39,14 @@ const Notificacoes = () => {
       <div className="px-5 space-y-2">
         {isLoading && <div className="flex justify-center py-12"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>}
         {!isLoading && notificacoes.length === 0 && (
-          <div className="flex flex-col items-center py-20 text-center">
-            <div className="w-16 h-16 rounded-2xl bg-card border border-border flex items-center justify-center mb-4">
-              <Bell className="h-8 w-8 text-muted-foreground" />
-            </div>
-            <p className="text-muted-foreground font-medium">Nenhuma notificação</p>
-          </div>
+          <EmptyState icon={Bell} titulo="Tudo em dia por aqui"
+            descricao="Avisos sobre candidaturas, confirmações, mensagens e avaliações aparecem aqui." />
         )}
         {notificacoes.map((n) => {
           const Icone = ICONES[n.tipo] ?? Bell;
           return (
             <button key={n.id} onClick={() => abrir(n)}
-              className={`w-full text-left rounded-xl p-4 border flex gap-3 transition-colors ${
+              className={`w-full text-left rounded-2xl p-4 border flex gap-3 transition-colors ${
                 n.lida ? "bg-card border-border" : "bg-primary/5 border-primary/30"
               }`}>
               <div className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 ${n.lida ? "bg-muted" : "bg-primary/10"}`}>

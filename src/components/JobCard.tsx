@@ -1,60 +1,71 @@
-import { MapPin, Clock, Calendar } from "lucide-react";
+import { MapPin, Clock, CalendarDays } from "lucide-react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import type { DbJob } from "@/hooks/useJobs";
-import { formatBRL, formatDate } from "@/hooks/useFrela";
+import { formatBRL } from "@/hooks/useFrela";
+import UserAvatar from "@/components/frela/UserAvatar";
 
 interface JobCardProps {
   job: DbJob;
   index?: number;
+  fotoEmpresa?: string | null;
   onClick?: () => void;
 }
 
-const JobCard = ({ job, index = 0, onClick }: JobCardProps) => {
-  const navigate = useNavigate();
+/** "Hoje", "Amanhã" ou "sex, 24/10". */
+const dataAmigavel = (date: string) => {
+  const d = new Date(`${date}T12:00:00`);
+  const hoje = new Date();
+  hoje.setHours(12, 0, 0, 0);
+  const diff = Math.round((d.getTime() - hoje.getTime()) / 86_400_000);
+  if (diff === 0) return "Hoje";
+  if (diff === 1) return "Amanhã";
+  return d.toLocaleDateString("pt-BR", { weekday: "short", day: "2-digit", month: "2-digit" }).replace(".", "");
+};
 
-  const handleClick = () => {
-    if (onClick) onClick();
-    else navigate(`/job/${job.id}`);
-  };
+const JobCard = ({ job, index = 0, fotoEmpresa, onClick }: JobCardProps) => {
+  const navigate = useNavigate();
+  const quando = dataAmigavel(job.date);
+  const urgente = quando === "Hoje" || quando === "Amanhã";
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 12 }}
+    <motion.button
+      type="button"
+      initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: index * 0.04, duration: 0.3 }}
-      onClick={handleClick}
-      className="bg-card rounded-xl p-4 cursor-pointer border border-border hover:border-primary/30 transition-colors shadow-sm"
+      transition={{ delay: Math.min(index, 8) * 0.04, duration: 0.25 }}
+      onClick={onClick ?? (() => navigate(`/job/${job.id}`))}
+      className="w-full text-left bg-card rounded-2xl p-4 border border-border shadow-card hover:border-primary/40 active:scale-[0.99] transition-all"
     >
-      <div className="flex items-start justify-between mb-3">
+      <div className="flex items-start gap-3">
+        <UserAvatar nome={job.company_name} fotoUrl={fotoEmpresa} size="md" />
         <div className="flex-1 min-w-0">
-          <h3 className="font-display font-bold text-foreground truncate">{job.title}</h3>
-          <p className="text-sm text-muted-foreground">{job.company_name}</p>
+          <h3 className="font-display font-bold text-foreground leading-snug line-clamp-2">{job.title}</h3>
+          <p className="text-sm text-muted-foreground truncate">{job.company_name}</p>
         </div>
-        <span className="ml-2 shrink-0 px-2.5 py-1 rounded-md text-xs font-medium bg-primary/10 text-primary">
-          {job.category}
-        </span>
+        <div className="text-right shrink-0">
+          <p className="font-display font-extrabold text-lg text-primary leading-none">{formatBRL(job.payment)}</p>
+          <p className="text-[11px] text-muted-foreground mt-1">pelo serviço</p>
+        </div>
       </div>
-      <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mb-3 text-sm text-muted-foreground">
-        {job.neighborhood && (
-          <span className="flex items-center gap-1">
-            <MapPin className="h-3.5 w-3.5 text-primary/60" />
-            {job.neighborhood}
+
+      <div className="flex flex-wrap items-center gap-1.5 mt-3">
+        <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-medium ${urgente ? "bg-warning/15 text-amber-800" : "bg-muted text-foreground/80"}`}>
+          <CalendarDays className="h-3.5 w-3.5" /> {quando}
+        </span>
+        <span className="inline-flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-medium bg-muted text-foreground/80">
+          <Clock className="h-3.5 w-3.5" /> {job.time_start}–{job.time_end}
+        </span>
+        {(job.neighborhood || job.address) && (
+          <span className="inline-flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-medium bg-muted text-foreground/80 max-w-full">
+            <MapPin className="h-3.5 w-3.5 shrink-0" /> <span className="truncate">{job.neighborhood || job.address}</span>
           </span>
         )}
-        <span className="flex items-center gap-1">
-          <Clock className="h-3.5 w-3.5 text-primary/60" />
-          {job.time_start} – {job.time_end}
+        <span className="inline-flex items-center px-2 py-1 rounded-lg text-xs font-medium bg-primary/10 text-primary">
+          {job.skill && job.skill !== job.category ? job.skill : job.category}
         </span>
       </div>
-      <div className="flex items-center justify-between">
-        <span className="font-display font-bold text-lg text-primary">{formatBRL(job.payment)}</span>
-        <span className="flex items-center gap-1 text-xs text-muted-foreground">
-          <Calendar className="h-3.5 w-3.5" />
-          {formatDate(job.date)}
-        </span>
-      </div>
-    </motion.div>
+    </motion.button>
   );
 };
 

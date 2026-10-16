@@ -1,5 +1,6 @@
 import { Navigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
+import { useChatNaoLidas } from "@/hooks/useChat";
 import BottomNav from "@/components/BottomNav";
 import HomeTab from "@/components/HomeTab";
 import SearchTab from "@/components/SearchTab";
@@ -12,6 +13,7 @@ const TABS = ["home", "search", "work", "messages", "profile"];
 /** Área do profissional (feed + abas). Empresas são mandadas para o painel. */
 const Index = () => {
   const { userTipo } = useAuth();
+  const chatNaoLidas = useChatNaoLidas();
   const [searchParams, setSearchParams] = useSearchParams();
   const tabParam = searchParams.get("tab") ?? "home";
   const activeTab = TABS.includes(tabParam) ? tabParam : "home";
@@ -28,7 +30,15 @@ const Index = () => {
       case "search": return <SearchTab />;
       case "work": return <MyWorkTab />;
       case "messages": return <MessagesTab />;
-      case "profile": return <ProfileTab />;
+      case "profile":
+        return (
+          <>
+            <div className="px-5 pt-12">
+              <h1 className="text-2xl font-display font-bold text-foreground">Meu perfil</h1>
+            </div>
+            <ProfileTab />
+          </>
+        );
       default: return <HomeTab />;
     }
   };
@@ -36,7 +46,7 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-background max-w-lg mx-auto relative">
       {renderTab()}
-      <BottomNav activeTab={activeTab} onTabChange={handleTabChange} />
+      <BottomNav activeTab={activeTab} onTabChange={handleTabChange} badges={{ messages: chatNaoLidas }} />
     </div>
   );
 };
