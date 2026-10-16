@@ -1,3 +1,32 @@
+# FreLa — marketplace de freelancers presenciais em Franca/SP
+
+## Configuração do banco (obrigatório)
+
+1. O schema (11 tabelas) já está no Supabase `modnamtaatcafqtjfzsd`.
+2. **Rode uma vez no SQL Editor** o arquivo
+   `supabase/migrations/20261016120000_fase1_automacoes.sql`.
+   Ele não cria tabelas — só adiciona triggers que o app precisa:
+   - notificações (candidatura, confirmação, finalização, avaliação) — o RLS não deixa o app inserir em `notificacoes`;
+   - média de avaliações no perfil de quem recebeu (`avaliacao_media` / `total_avaliacoes`);
+   - trava no banco: empresa não cria vaga com contratação `em_andamento`;
+   - realtime da tabela `notificacoes` (sino atualiza na hora).
+3. As migrations antigas (`20260324…`, `20260404…`, `20260618…`) são do projeto Supabase anterior — **não rode** no FreLa.
+
+## Rotas
+
+| Rota | Quem | O quê |
+|---|---|---|
+| `/auth` | todos | cadastro (empresa/profissional) e login |
+| `/` | profissional | feed, busca, trabalhos (candidaturas + contratações), chat (Fase 2), perfil |
+| `/dashboard` | empresa | painel, trava, contratações em andamento, minhas vagas por status |
+| `/job/:id` | todos | detalhe da vaga / candidatar-se |
+| `/job/:id/candidates` | empresa | candidatos → aceitar/recusar |
+| `/contratacao/:id` | as duas partes | confirmar finalização, avaliações |
+| `/notificacoes` | todos | lista, marcar como lida |
+| `/profile` | empresa | perfil (o profissional usa a aba Perfil) |
+
+---
+
 # Franca Jobs Now
 
 Criar aplicativo Freelancer Franca

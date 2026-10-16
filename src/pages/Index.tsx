@@ -1,37 +1,32 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Navigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import BottomNav from "@/components/BottomNav";
 import HomeTab from "@/components/HomeTab";
 import SearchTab from "@/components/SearchTab";
-import PostJobTab from "@/components/PostJobTab";
+import MyWorkTab from "@/components/MyWorkTab";
 import MessagesTab from "@/components/MessagesTab";
 import ProfileTab from "@/components/ProfileTab";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
+const TABS = ["home", "search", "work", "messages", "profile"];
+
+/** Área do profissional (feed + abas). Empresas são mandadas para o painel. */
 const Index = () => {
-  const [activeTab, setActiveTab] = useState("home");
-  const [showPostModal, setShowPostModal] = useState(false);
   const { userTipo } = useAuth();
-  const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const tabParam = searchParams.get("tab") ?? "home";
+  const activeTab = TABS.includes(tabParam) ? tabParam : "home";
 
-  if (userTipo === "empresa") {
-    navigate("/dashboard", { replace: true });
-    return null;
-  }
+  if (userTipo === "empresa") return <Navigate to="/dashboard" replace />;
 
   const handleTabChange = (tab: string) => {
-    if (tab === "post") {
-      setShowPostModal(true);
-      return;
-    }
-    setActiveTab(tab);
+    setSearchParams(tab === "home" ? {} : { tab }, { replace: true });
+    window.scrollTo(0, 0);
   };
 
   const renderTab = () => {
     switch (activeTab) {
-      case "home": return <HomeTab />;
       case "search": return <SearchTab />;
+      case "work": return <MyWorkTab />;
       case "messages": return <MessagesTab />;
       case "profile": return <ProfileTab />;
       default: return <HomeTab />;
@@ -42,14 +37,6 @@ const Index = () => {
     <div className="min-h-screen bg-background max-w-lg mx-auto relative">
       {renderTab()}
       <BottomNav activeTab={activeTab} onTabChange={handleTabChange} />
-      <Dialog open={showPostModal} onOpenChange={setShowPostModal}>
-        <DialogContent className="bg-card border-border max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle className="font-display font-bold text-foreground">Nova Vaga</DialogTitle>
-          </DialogHeader>
-          <PostJobTab onClose={() => setShowPostModal(false)} />
-        </DialogContent>
-      </Dialog>
     </div>
   );
 };

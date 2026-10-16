@@ -2,28 +2,19 @@ import { useState } from "react";
 import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import JobCard from "@/components/JobCard";
-import { mockJobs, SKILLS } from "@/data/mockData";
-import { Job, Skill, JobCategory } from "@/types";
-import { useJobs, DbJob } from "@/hooks/useJobs";
-
-const dbJobToJob = (j: DbJob): Job => ({
-  id: j.id, companyId: j.user_id, companyName: j.company_name, title: j.title,
-  category: j.category as JobCategory, skill: j.skill as any, description: j.description,
-  date: j.date, timeStart: j.time_start, timeEnd: j.time_end, payment: j.payment,
-  slots: j.slots, slotsRemaining: j.slots_remaining, neighborhood: j.neighborhood,
-  address: j.address, status: j.status as any, postedAt: j.created_at,
-});
+import { SKILLS } from "@/data/mockData";
+import { Skill } from "@/types";
+import { useJobs } from "@/hooks/useJobs";
 
 const SearchTab = () => {
   const [query, setQuery] = useState("");
   const [selectedSkill, setSelectedSkill] = useState<Skill | null>(null);
-  const { data: dbJobs } = useJobs();
+  const { data: jobs = [] } = useJobs();
 
-  const allJobs = dbJobs && dbJobs.length > 0 ? dbJobs.map(dbJobToJob) : mockJobs;
-
-  const filtered = allJobs.filter((job) => {
-    const matchQ = !query || job.title.toLowerCase().includes(query.toLowerCase()) || job.companyName.toLowerCase().includes(query.toLowerCase());
-    const matchS = !selectedSkill || job.skill === selectedSkill;
+  const filtered = jobs.filter((job) => {
+    const q = query.toLowerCase();
+    const matchQ = !q || job.title.toLowerCase().includes(q) || job.company_name.toLowerCase().includes(q) || job.description.toLowerCase().includes(q);
+    const matchS = !selectedSkill || job.skill === selectedSkill || job.title.toLowerCase().includes(selectedSkill.toLowerCase());
     return matchQ && matchS;
   });
 
