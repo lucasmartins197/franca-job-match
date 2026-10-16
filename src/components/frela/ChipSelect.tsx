@@ -8,11 +8,17 @@ interface Props {
   onChange: (v: string[]) => void;
   /** Permite adicionar opção que não está na lista. */
   allowCustom?: boolean;
+  /** Mostra só as N primeiras opções (+ selecionadas) até clicar em "ver todas". */
+  limite?: number;
 }
 
-const ChipSelect = ({ options, value, onChange, allowCustom }: Props) => {
+const ChipSelect = ({ options, value, onChange, allowCustom, limite }: Props) => {
   const [custom, setCustom] = useState("");
-  const todas = [...options, ...value.filter((v) => !options.includes(v))];
+  const [expandido, setExpandido] = useState(false);
+  const extras = value.filter((v) => !options.includes(v));
+  const cortar = !!limite && !expandido && options.length > limite;
+  const base = cortar ? [...options.slice(0, limite), ...options.slice(limite).filter((o) => value.includes(o))] : options;
+  const todas = [...base, ...extras];
 
   const toggle = (opt: string) =>
     onChange(value.includes(opt) ? value.filter((v) => v !== opt) : [...value, opt]);
@@ -38,6 +44,11 @@ const ChipSelect = ({ options, value, onChange, allowCustom }: Props) => {
             </button>
           );
         })}
+        {!!limite && options.length > limite && (
+          <button type="button" onClick={() => setExpandido(!expandido)} className="px-3 py-1.5 rounded-full text-sm font-semibold text-primary">
+            {expandido ? "Ver menos" : `+ ${options.length - limite} opções`}
+          </button>
+        )}
       </div>
       {allowCustom && (
         <div className="flex gap-2 mt-3">

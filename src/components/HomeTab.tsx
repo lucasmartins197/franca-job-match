@@ -7,7 +7,7 @@ import NotificationBell from "@/components/frela/NotificationBell";
 import EmptyState from "@/components/frela/EmptyState";
 import { JobListSkeleton } from "@/components/frela/JobCardSkeleton";
 import UserAvatar from "@/components/frela/UserAvatar";
-import { JobCategory } from "@/types";
+import { CATEGORIAS, categoriaDe } from "@/lib/categorias";
 import { useJobs } from "@/hooks/useJobs";
 import { useProfilesByIds } from "@/hooks/useFrela";
 import { useMeuPerfil } from "@/hooks/usePerfil";
@@ -19,18 +19,24 @@ const saudacao = () => {
 
 const HomeTab = () => {
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState<JobCategory | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const { data: perfil } = useMeuPerfil();
   const { data: jobs = [], isLoading } = useJobs();
   const { data: empresas = {} } = useProfilesByIds(jobs.map((j) => j.user_id));
 
+  const contagem: Record<string, number> = {};
+  for (const j of jobs) {
+    const id = categoriaDe(j.category)?.id;
+    if (id) contagem[id] = (contagem[id] ?? 0) + 1;
+  }
+  const nomeCategoria = CATEGORIAS.find((c) => c.id === selectedCategory)?.nome;
   const profile = perfil?.profile;
   const nome = profile?.nome || "Usuário";
 
   const filteredJobs = jobs.filter((job) => {
     const q = searchQuery.trim().toLowerCase();
     const matchesSearch = !q || [job.title, job.company_name, job.skill, job.neighborhood].some((t) => t?.toLowerCase().includes(q));
-    const matchesCategory = !selectedCategory || job.category === selectedCategory;
+    const matchesCategory = !selectedCategory || categoriaDe(job.category)?.id === selectedCategory;
     return matchesSearch && matchesCategory;
   });
 
@@ -57,12 +63,15 @@ const HomeTab = () => {
       </header>
 
       <div className="px-5 space-y-5">
-        <CategoryGrid onSelect={setSelectedCategory} selected={selectedCategory} />
+        <section>
+          <h2 className="font-display font-bold text-lg text-foreground mb-3">O que você procura?</h2>
+          <CategoryGrid onSelect={setSelectedCategory} selected={selectedCategory} contagem={contagem} />
+        </section>
 
         <section>
           <div className="flex items-end justify-between mb-3">
             <div>
-              <h2 className="font-display font-bold text-lg text-foreground">Vagas abertas</h2>
+              <h2 className="font-display font-bold text-lg text-foreground">{nomeCategoria ?? "Vagas abertas"}</h2>
               <p className="text-xs text-muted-foreground flex items-center gap-1">
                 <MapPin className="h-3 w-3" /> {profile?.cidade || "Franca"}, SP
               </p>
@@ -83,7 +92,8 @@ const HomeTab = () => {
           ) : (
             <div className="space-y-3">
               {filteredJobs.map((job, i) => (
-                <JobCard key={job.id} job={job} index={i} fotoEmpresa={empresas[job.user_id]?.foto_url} />
+                <JobCard key={job.id} job={job} index={i} fotoEmpresa={empresas[job.user_id]?.foto_url}
+                  notaEmpresa={empresas[job.user_id]?.avaliacao_media} totalAvaliacoesEmpresa={empresas[job.user_id]?.total_avaliacoes} />
               ))}
             </div>
           )}

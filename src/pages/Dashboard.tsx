@@ -7,7 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useMyJobs } from "@/hooks/useJobs";
 import {
-  useMinhasContratacoes, useProfilesByIds, useTravaNovaVaga, formatBRL, formatDate,
+  useMinhasContratacoes, useProfilesByIds, useAvaliacoesFeitas, useTravaNovaVaga, formatBRL, formatDate,
 } from "@/hooks/useFrela";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -51,15 +51,8 @@ const Dashboard = () => {
     enabled: jobIds.length > 0,
   });
 
-  const { data: minhasAvaliacoes = [] } = useQuery({
-    queryKey: ["avaliacoes", "feitas", user?.id],
-    queryFn: async () => {
-      const { data, error } = await supabase.from("avaliacoes").select("contratacao_id").eq("de_id", user!.id);
-      if (error) throw error;
-      return data.map((a) => a.contratacao_id);
-    },
-    enabled: !!user,
-  });
+  const { data: minhasAvaliacoes = [] } = useAvaliacoesFeitas();
+
 
   const { data: profissionais = {} } = useProfilesByIds(contratacoes.map((c) => c.profissional_id));
 
