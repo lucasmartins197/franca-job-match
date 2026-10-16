@@ -13,8 +13,22 @@
 3. **Fase 2 — rode também, nesta ordem:**
    - `supabase/migrations/20261017120000_fase2_perfil.sql` — colunas `instagram`/`linkedin` em `profissional_dados`, bucket `avatars` (fotos) com policies, funções de histórico de trabalhos;
    - `supabase/migrations/20261018120000_fase2_chat.sql` — validação de mensagens, notificação de nova mensagem, realtime de `mensagens`.
-4. **Auth → URL Configuration:** coloque a URL do app em *Site URL* (e em *Redirect URLs*), para o link de confirmação de email voltar para `/auth`.
-5. As migrations antigas (`20260324…`, `20260404…`, `20260618…`) são do projeto Supabase anterior — **não rode** no FreLa.
+4. **Fase 3 — rode:** `supabase/migrations/20261019120000_fase3.sql` (selos/ADM/demo no perfil + proteção desses campos, bio e lat/long da empresa, `portfolio_fotos`, `suporte_mensagens`, `admin_set_verificado`). Depois defina os ADMs:
+   ```sql
+   update public.profiles set is_admin = true where email in ('email-do-lucas@...', 'email-do-socio@...');
+   ```
+5. **Auth → URL Configuration:** coloque a URL do app em *Site URL* (e em *Redirect URLs*), para o link de confirmação de email voltar para `/auth`.
+6. As migrations antigas (`20260324…`, `20260404…`, `20260618…`) são do projeto Supabase anterior — **não rode** no FreLa.
+
+## Dados de demonstração (apresentação)
+
+- **Popular:** rode `supabase/demo/seed_demo.sql` (6 empresas, 6 profissionais com foto e portfólio, 10 vagas abertas, 20 trabalhos finalizados com avaliações, candidaturas). As datas são relativas a hoje — rode na véspera.
+- **Logins demo** (senha `demo1234`): `bar@demo.frela` (empresa), `ana@demo.frela` (profissional); outros: `calcados@`, `ecommerce@`, `cantina@`, `mercado@`, `eventos@`, `carlos@`, `juliana@`, `rafael@`, `mariana@`, `diego@` — todos `@demo.frela`.
+- **Limpar:** rode `supabase/demo/seed_demo_LIMPAR.sql`. Remove tudo de usuários `@demo.frela` / `is_demo` (e interações de usuários reais com dados demo), sem tocar no resto.
+
+## Pagamentos (preparado, desativado)
+
+Ver `src/lib/pagamentos.ts`: mensalidade via IAP (App Store/Google Play) e taxa de 5% no backend — pontos de integração marcados com `TODO`. Nada é cobrado hoje.
 
 ## Rotas
 
@@ -33,6 +47,9 @@
 | `/perfil/:id` | todos | perfil público (currículo do profissional / perfil da empresa) |
 | `/chat` | todos | lista de conversas (uma por contratação) |
 | `/chat/:id` | as duas partes | conversa em tempo real |
+| `/planos` | todos | planos e modelo de receita ("assinar" → em breve) |
+| `/suporte` | todos | chat com a equipe FreLa |
+| `/admin/suporte` | ADM | chamados de suporte; `/admin/suporte/:userId` responde |
 
 ---
 
