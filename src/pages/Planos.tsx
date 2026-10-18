@@ -1,9 +1,11 @@
 import { useState } from "react";
-import { Check, Crown, Loader2, Percent, Rocket, Smartphone } from "lucide-react";
+import { Check, Crown, Loader2, Lock, Percent, Rocket, Smartphone } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { useResumoTaxas } from "@/hooks/useTaxas";
 import { useAuth } from "@/hooks/useAuth";
 import { useMeuPerfil } from "@/hooks/usePerfil";
 import { formatBRL } from "@/hooks/useFrela";
-import { PLANOS, Plano, TipoPlano, TAXA_PLATAFORMA, calcularTaxa, iniciarAssinatura } from "@/lib/pagamentos";
+import { PLANOS, Plano, TipoPlano, TAXA_PLATAFORMA, TETO_TAXAS, calcularTaxa, iniciarAssinatura } from "@/lib/pagamentos";
 import { Button } from "@/components/ui/button";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -20,14 +22,19 @@ const Planos = () => {
   const [aba, setAba] = useState<TipoPlano>(meuTipo);
   const [emBreve, setEmBreve] = useState<Plano | null>(null);
   const [carregando, setCarregando] = useState(false);
+  const [taxasPendentes, setTaxasPendentes] = useState(false);
+  const { resumo: taxas } = useResumoTaxas();
+  const navigate = useNavigate();
   const plano = PLANOS[aba];
   const assinante = perfil?.profile.subscription_status === "active";
 
   const assinar = async () => {
     setCarregando(true);
-    const r = await iniciarAssinatura(plano); // TODO (IAP): fluxo de compra da App Store / Google Play
+    // Empresa com taxas em aberto não assina/renova (regra da Fase 4)
+    const r = await iniciarAssinatura(plano, { podeRenovar: meuTipo === "empresa" ? taxas.pode_renovar : true }); // TODO (IAP)
     setCarregando(false);
-    if (r.status === "em_breve") setEmBreve(plano);
+    if (r.status === "taxas_pendentes") setTaxasPendentes(true);
+    else if (r.status === "em_breve") setEmBreve(plano);
   };
 
   return (
@@ -70,6 +77,12 @@ const Planos = () => {
               </li>
             ))}
           </ul>
+          {aba === "empresa" && meuTipo === "empresa" && !taxas.pode_renovar && (
+            <button onClick={() => navigate("/taxas")} className="w-full mt-5 rounded-xl border border-amber-300 bg-amber-50 p-3 text-left text-xs text-amber-900 flex gap-2">
+              <Lock className="h-4 w-4 shrink-0" />
+              <span>Você tem taxas em aberto. Para assinar ou renovar, quite-as primeiro em <b>Minhas taxas</b>.</span>
+            </button>
+          )}
           <Button onClick={assinar} disabled={carregando || aba !== meuTipo} className="w-full h-12 rounded-xl font-semibold text-base mt-6">
             {carregando ? <Loader2 className="h-5 w-5 animate-spin" /> : aba === meuTipo ? `Assinar ${plano.nome}` : "Plano para outro tipo de conta"}
           </Button>
@@ -100,7 +113,7 @@ const Planos = () => {
               ))}
             </div>
             <p className="text-xs text-muted-foreground mt-3">
-              A taxa é cobrada da empresa, fora do app, em fatura própria — o profissional recebe o valor cheio combinado.
+              A taxa acumula numa conta de taxas da empresa (até {formatBRL(TETO_TAXAS)}) e é quitada por Pix/cartão, fora da assinatura — o profissional recebe o valor cheio combinado.
             </p>
           </section>
         )}
@@ -127,6 +140,19 @@ const Planos = () => {
           </Accordion>
         </section>
       </div>
+
+      <Dialog open={taxasPendentes} onOpenChange={setTaxasPendentes}>
+        <DialogContent className="max-w-sm rounded-2xl">
+          <DialogHeader>
+            <div className="w-14 h-14 rounded-2xl bg-amber-100 text-amber-800 flex items-center justify-center mx-auto mb-2"><Lock className="h-7 w-7" /></div>
+            <DialogTitle className="text-center">Quite as taxas para renovar</DialogTitle>
+            <DialogDescription className="text-center">
+              Você tem {formatBRL(taxas.saldo + taxas.em_divergencia)} em taxas em aberto. A assinatura só pode ser renovada com a conta de taxas em dia.
+            </DialogDescription>
+          </DialogHeader>
+          <Button onClick={() => navigate("/taxas")} className="w-full h-11 rounded-xl">Ver minhas taxas</Button>
+        </DialogContent>
+      </Dialog>
 
       <Dialog open={!!emBreve} onOpenChange={(o) => !o && setEmBreve(null)}>
         <DialogContent className="max-w-sm rounded-2xl">

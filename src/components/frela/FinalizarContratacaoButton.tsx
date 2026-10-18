@@ -79,6 +79,11 @@ const FinalizarContratacaoButton = ({ contratacao, className, onDone }: Props) =
               <span>{formatBRL(resumo.saldo + (valido ? calcularTaxa(valorNum) : 0))} de {formatBRL(resumo.teto)}</span>
             </div>
           </div>
+          {valido && resumo.saldo + calcularTaxa(valorNum) >= resumo.teto && (
+            <p className="text-xs font-medium text-amber-800 bg-amber-50 border border-amber-200 rounded-lg p-2">
+              Com esta finalização você atinge o limite de taxas: novas vagas e finalizações ficarão travadas até quitar.
+            </p>
+          )}
           <p className="text-xs text-muted-foreground">
             A taxa não é cobrada agora: ela entra no seu saldo de taxas, que você quita depois em "Minhas taxas".
           </p>

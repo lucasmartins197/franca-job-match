@@ -42,13 +42,13 @@ const ConfirmarValorCard = ({ contratacao, empresaNome }: { contratacao: DbContr
           <p className="text-2xl font-display font-extrabold text-amber-950 mt-1">{formatBRL(contratacao.valor)}</p>
         </div>
       </div>
-      <div className="flex gap-2 mt-4">
-        <Button variant="outline" onClick={() => setContestando(true)} disabled={confirmar.isPending}
-          className="h-11 rounded-xl border-amber-400 bg-white text-amber-900 hover:bg-amber-100">
-          <X className="h-4 w-4 mr-1" /> Valor diferente
-        </Button>
-        <Button onClick={() => enviar(true)} disabled={confirmar.isPending} className="flex-1 h-11 rounded-xl font-semibold">
+      <div className="flex flex-col gap-2 mt-4">
+        <Button onClick={() => enviar(true)} disabled={confirmar.isPending} className="w-full h-11 rounded-xl font-semibold">
           {confirmar.isPending && !contestando ? <Loader2 className="h-4 w-4 animate-spin" /> : <><Check className="h-4 w-4 mr-1" /> Sim, recebi esse valor</>}
+        </Button>
+        <Button variant="outline" onClick={() => setContestando(true)} disabled={confirmar.isPending}
+          className="w-full h-11 rounded-xl border-amber-400 bg-white text-amber-900 hover:bg-amber-100">
+          <X className="h-4 w-4 mr-1" /> Recebi um valor diferente
         </Button>
       </div>
       <p className="text-[11px] text-amber-800 mt-2">Sua confirmação é confidencial e ajuda a manter o FreLa justo para todos.</p>
