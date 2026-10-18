@@ -6,8 +6,11 @@ import { Button } from "@/components/ui/button";
 import { useJob, useApply, useMyApplications } from "@/hooks/useJobs";
 import { useAuth } from "@/hooks/useAuth";
 import { formatBRL } from "@/hooks/useFrela";
-import { usePerfilPublico } from "@/hooks/usePerfil";
+import { selosDe, usePerfilPublico } from "@/hooks/usePerfil";
 import UserAvatar from "@/components/frela/UserAvatar";
+import MapaEndereco from "@/components/frela/MapaEndereco";
+import Selos from "@/components/perfil/Selos";
+import { categoriaDe } from "@/lib/categorias";
 import PageHeader from "@/components/frela/PageHeader";
 import StatusBadge from "@/components/frela/StatusBadge";
 import Stars from "@/components/frela/Stars";
@@ -35,6 +38,7 @@ const JobDetail = () => {
 
   const empresa = perfilEmpresa?.profile;
   const empresaDados = perfilEmpresa?.empresa;
+  const cat = categoriaDe(job.category);
   const isDona = job.user_id === user?.id;
   const minhaCandidatura = myApplications.find((a) => a.job_id === job.id);
 
@@ -101,7 +105,9 @@ const JobDetail = () => {
             <StatusBadge status={job.status} />
           </div>
           <div className="flex flex-wrap gap-1.5 mt-3">
-            <span className="px-2.5 py-1 rounded-lg text-xs font-medium bg-primary/10 text-primary">{job.category}</span>
+            <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium ${cat?.cor ?? "bg-primary/10 text-primary"}`}>
+              {cat && <cat.icon className="h-3.5 w-3.5" />} {cat?.nome ?? job.category}
+            </span>
             {job.skill && job.skill !== job.category && (
               <span className="px-2.5 py-1 rounded-lg text-xs font-medium bg-muted text-foreground/80">{job.skill}</span>
             )}
@@ -125,6 +131,17 @@ const JobDetail = () => {
           <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-line">{job.description || "Sem descrição fornecida."}</p>
         </section>
 
+        {(job.address || empresaDados?.endereco) && (
+          <section className="mb-5">
+            <h3 className="font-display font-bold text-foreground mb-2">Local do trabalho</h3>
+            <MapaEndereco
+              endereco={[job.address || empresaDados?.endereco, job.neighborhood].filter(Boolean).join(" - ")}
+              cidade={empresa?.cidade || "Franca"}
+              coordenadas={!job.address && empresaDados?.latitude != null && empresaDados?.longitude != null ? { lat: empresaDados.latitude, lon: empresaDados.longitude } : null}
+            />
+          </section>
+        )}
+
         <h3 className="font-display font-bold text-foreground mb-2">Quem está contratando</h3>
         <button onClick={() => navigate(`/perfil/${job.user_id}`)}
           className="w-full text-left bg-card rounded-2xl p-4 border border-border mb-6 shadow-card flex items-center gap-3 hover:border-primary/40 transition-colors">
@@ -140,6 +157,7 @@ const JobDetail = () => {
                 {empresa?.total_avaliacoes ? `${Number(empresa.avaliacao_media).toFixed(1)} (${empresa.total_avaliacoes})` : "Sem avaliações ainda"}
               </span>
             </div>
+            {empresa && <Selos selos={selosDe(empresa).filter((x) => x.tipo !== "novo")} size="sm" className="mt-1.5" />}
           </div>
           <ChevronRight className="h-5 w-5 text-muted-foreground shrink-0" />
         </button>

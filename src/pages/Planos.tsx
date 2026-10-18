@@ -1,0 +1,147 @@
+import { useState } from "react";
+import { Check, Crown, Loader2, Percent, Rocket, Smartphone } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
+import { useMeuPerfil } from "@/hooks/usePerfil";
+import { formatBRL } from "@/hooks/useFrela";
+import { PLANOS, Plano, TipoPlano, TAXA_PLATAFORMA, calcularTaxa, iniciarAssinatura } from "@/lib/pagamentos";
+import { Button } from "@/components/ui/button";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import PageHeader from "@/components/frela/PageHeader";
+import { cn } from "@/lib/utils";
+
+const EXEMPLOS = [100, 150, 250];
+
+/** Planos e modelo de receita. Botões de assinatura levam a "em breve" — nada é cobrado. */
+const Planos = () => {
+  const { userTipo } = useAuth();
+  const { data: perfil } = useMeuPerfil();
+  const meuTipo: TipoPlano = userTipo === "empresa" ? "empresa" : "freelancer";
+  const [aba, setAba] = useState<TipoPlano>(meuTipo);
+  const [emBreve, setEmBreve] = useState<Plano | null>(null);
+  const [carregando, setCarregando] = useState(false);
+  const plano = PLANOS[aba];
+  const assinante = perfil?.profile.subscription_status === "active";
+
+  const assinar = async () => {
+    setCarregando(true);
+    const r = await iniciarAssinatura(plano); // TODO (IAP): fluxo de compra da App Store / Google Play
+    setCarregando(false);
+    if (r.status === "em_breve") setEmBreve(plano);
+  };
+
+  return (
+    <div className="min-h-screen bg-background max-w-lg mx-auto pb-12">
+      <PageHeader title="Planos FreLa" />
+      <div className="px-5 space-y-5">
+        <section className="rounded-2xl bg-gradient-to-br from-primary to-brand-dim text-primary-foreground p-5 shadow-brand">
+          <div className="flex items-center gap-2 text-sm font-semibold opacity-90"><Rocket className="h-4 w-4" /> Seu acesso hoje</div>
+          <p className="text-2xl font-display font-extrabold mt-1">{assinante ? PLANOS[meuTipo].nome : "Lançamento gratuito"}</p>
+          <p className="text-sm opacity-90 mt-1">
+            {assinante
+              ? `Ativo${perfil?.profile.subscription_end ? ` até ${new Date(perfil.profile.subscription_end).toLocaleDateString("pt-BR")}` : ""}.`
+              : "Durante o lançamento em Franca, todos os recursos estão liberados sem custo."}
+          </p>
+        </section>
+
+        <div className="grid grid-cols-2 bg-muted rounded-xl p-1">
+          {(["freelancer", "empresa"] as TipoPlano[]).map((t) => (
+            <button key={t} onClick={() => setAba(t)}
+              className={cn("h-10 rounded-lg text-sm font-semibold transition-colors", aba === t ? "bg-card shadow-sm text-foreground" : "text-muted-foreground")}>
+              {PLANOS[t].publico}
+            </button>
+          ))}
+        </div>
+
+        <section className="relative bg-card border-2 border-primary rounded-3xl p-5 shadow-card">
+          {aba === meuTipo && (
+            <span className="absolute -top-3 left-5 px-3 py-1 rounded-full bg-primary text-primary-foreground text-xs font-bold">Seu plano</span>
+          )}
+          <div className="flex items-center gap-2 text-primary"><Crown className="h-5 w-5" /><span className="font-display font-bold">{plano.nome}</span></div>
+          <div className="flex items-end gap-1 mt-3">
+            <span className="text-4xl font-display font-extrabold text-foreground">{formatBRL(plano.preco)}</span>
+            <span className="text-muted-foreground mb-1">/mês</span>
+          </div>
+          <ul className="mt-5 space-y-2.5">
+            {plano.beneficios.map((b) => (
+              <li key={b} className="flex gap-2.5 text-sm text-foreground">
+                <span className="w-5 h-5 rounded-full bg-primary/10 text-primary flex items-center justify-center shrink-0 mt-0.5"><Check className="h-3.5 w-3.5" /></span>
+                {b}
+              </li>
+            ))}
+          </ul>
+          <Button onClick={assinar} disabled={carregando || aba !== meuTipo} className="w-full h-12 rounded-xl font-semibold text-base mt-6">
+            {carregando ? <Loader2 className="h-5 w-5 animate-spin" /> : aba === meuTipo ? `Assinar ${plano.nome}` : "Plano para outro tipo de conta"}
+          </Button>
+          <p className="text-[11px] text-muted-foreground text-center mt-2 flex items-center justify-center gap-1">
+            <Smartphone className="h-3 w-3" /> Assinatura pela App Store / Google Play. Cancele quando quiser.
+          </p>
+        </section>
+
+        {aba === "empresa" && (
+          <section className="bg-card border border-border rounded-2xl p-5 shadow-card">
+            <div className="flex items-center gap-2">
+              <span className="w-9 h-9 rounded-xl bg-amber-100 text-amber-800 flex items-center justify-center"><Percent className="h-5 w-5" /></span>
+              <div>
+                <p className="font-display font-bold text-foreground">Taxa de {TAXA_PLATAFORMA * 100}% por contratação</p>
+                <p className="text-xs text-muted-foreground">Só quando o serviço é finalizado. Sem contratação, sem taxa.</p>
+              </div>
+            </div>
+            <div className="mt-4 rounded-xl border border-border overflow-hidden text-sm">
+              <div className="grid grid-cols-3 bg-muted/60 px-3 py-2 text-xs font-semibold text-muted-foreground">
+                <span>Valor do serviço</span><span className="text-center">Taxa FreLa</span><span className="text-right">Profissional recebe</span>
+              </div>
+              {EXEMPLOS.map((v) => (
+                <div key={v} className="grid grid-cols-3 px-3 py-2 border-t border-border">
+                  <span className="font-medium">{formatBRL(v)}</span>
+                  <span className="text-center text-amber-800">{formatBRL(calcularTaxa(v))}</span>
+                  <span className="text-right font-semibold text-primary">{formatBRL(v)}</span>
+                </div>
+              ))}
+            </div>
+            <p className="text-xs text-muted-foreground mt-3">
+              A taxa é cobrada da empresa, fora do app, em fatura própria — o profissional recebe o valor cheio combinado.
+            </p>
+          </section>
+        )}
+
+        <section>
+          <h2 className="font-display font-bold text-foreground mb-2">Perguntas frequentes</h2>
+          <Accordion type="single" collapsible className="bg-card border border-border rounded-2xl px-4">
+            <AccordionItem value="1">
+              <AccordionTrigger className="text-sm text-left">Preciso pagar agora?</AccordionTrigger>
+              <AccordionContent className="text-sm text-muted-foreground">Não. No lançamento em Franca o FreLa está liberado. Avisaremos com antecedência antes de qualquer cobrança.</AccordionContent>
+            </AccordionItem>
+            <AccordionItem value="2">
+              <AccordionTrigger className="text-sm text-left">Como vou pagar a assinatura?</AccordionTrigger>
+              <AccordionContent className="text-sm text-muted-foreground">Pela própria loja do seu celular (App Store ou Google Play), com renovação mensal e cancelamento a qualquer momento.</AccordionContent>
+            </AccordionItem>
+            <AccordionItem value="3">
+              <AccordionTrigger className="text-sm text-left">O profissional paga taxa sobre o que recebe?</AccordionTrigger>
+              <AccordionContent className="text-sm text-muted-foreground">Não. A taxa de 5% é da empresa e só existe quando uma contratação é finalizada.</AccordionContent>
+            </AccordionItem>
+            <AccordionItem value="4" className="border-b-0">
+              <AccordionTrigger className="text-sm text-left">Como o profissional recebe pelo serviço?</AccordionTrigger>
+              <AccordionContent className="text-sm text-muted-foreground">Diretamente da empresa, no valor combinado na vaga. O FreLa conecta, organiza e dá segurança com perfis e avaliações.</AccordionContent>
+            </AccordionItem>
+          </Accordion>
+        </section>
+      </div>
+
+      <Dialog open={!!emBreve} onOpenChange={(o) => !o && setEmBreve(null)}>
+        <DialogContent className="max-w-sm rounded-2xl">
+          <DialogHeader>
+            <div className="w-14 h-14 rounded-2xl bg-primary/10 text-primary flex items-center justify-center mx-auto mb-2"><Rocket className="h-7 w-7" /></div>
+            <DialogTitle className="text-center">Assinaturas em breve</DialogTitle>
+            <DialogDescription className="text-center">
+              O {emBreve?.nome} será assinado direto pela App Store / Google Play. Enquanto isso, aproveite o FreLa liberado durante o lançamento — nada será cobrado.
+            </DialogDescription>
+          </DialogHeader>
+          <Button onClick={() => setEmBreve(null)} className="w-full h-11 rounded-xl">Entendi</Button>
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+};
+
+export default Planos;

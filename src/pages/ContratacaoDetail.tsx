@@ -81,7 +81,7 @@ const ContratacaoDetail = () => {
           </div>
           {souEmpresa && (
             <div className="flex items-center justify-between text-xs text-muted-foreground mt-1">
-              <span>Taxa FreLa (5%)</span>
+              <button onClick={() => navigate("/planos")} className="underline decoration-dotted">Taxa FreLa (5%) · cobrada fora do app</button>
               <span>{formatBRL(contratacao.taxa_5pct)}</span>
             </div>
           )}

@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom";
-import { ChevronRight, Briefcase } from "lucide-react";
+import { ChevronRight, Briefcase, Star } from "lucide-react";
 import { useMyApplications } from "@/hooks/useJobs";
-import { useMinhasContratacoes, formatBRL, formatDate } from "@/hooks/useFrela";
+import { useMinhasContratacoes, useAvaliacoesFeitas, formatBRL, formatDate } from "@/hooks/useFrela";
 import NotificationBell from "@/components/frela/NotificationBell";
 import StatusBadge from "@/components/frela/StatusBadge";
 import EmptyState from "@/components/frela/EmptyState";
@@ -12,9 +12,11 @@ const MyWorkTab = () => {
   const navigate = useNavigate();
   const { data: applications = [], isLoading: loadingApps } = useMyApplications();
   const { data: contratacoes = [], isLoading: loadingContratacoes } = useMinhasContratacoes();
+  const { data: avaliadas = [] } = useAvaliacoesFeitas();
 
   const ativas = contratacoes.filter((c) => c.status === "em_andamento");
   const finalizadas = contratacoes.filter((c) => c.status === "finalizada");
+  const aAvaliar = finalizadas.filter((c) => !avaliadas.includes(c.id));
   const pendentes = applications.filter((a) => a.status === "pendente");
   const outras = applications.filter((a) => a.status !== "pendente");
 
@@ -27,7 +29,13 @@ const MyWorkTab = () => {
       <div className="flex-1 min-w-0">
         <div className="flex items-center justify-between gap-2 mb-1">
           <h3 className="font-display font-bold text-foreground truncate">{c.jobs?.title ?? "Vaga"}</h3>
-          <StatusBadge status={c.status} />
+          {aAvaliar.some((x) => x.id === c.id) ? (
+            <span className="shrink-0 inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-semibold bg-amber-100 text-amber-800">
+              <Star className="h-3 w-3 fill-amber-500 text-amber-500" /> Avaliar
+            </span>
+          ) : (
+            <StatusBadge status={c.status} />
+          )}
         </div>
         <p className="text-sm text-muted-foreground truncate">{c.jobs?.company_name}</p>
         <div className="flex items-center justify-between mt-2 text-sm">
@@ -77,6 +85,14 @@ const MyWorkTab = () => {
           descricao="Quando você se candidatar a uma vaga, ela aparece aqui com o status." />
       ) : (
         <div className="space-y-8">
+          {aAvaliar.length > 0 && (
+            <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 flex gap-3 items-center">
+              <Star className="h-6 w-6 fill-amber-400 text-amber-400 shrink-0" />
+              <p className="text-sm text-amber-900">
+                Você tem <b>{aAvaliar.length}</b> trabalho{aAvaliar.length === 1 ? "" : "s"} para avaliar. Sua avaliação ajuda outros profissionais a escolher bons lugares.
+              </p>
+            </div>
+          )}
           {ativas.length > 0 && (
             <section>
               <h2 className="font-display font-bold text-foreground mb-3">Contratações ativas</h2>

@@ -2,7 +2,8 @@ import { Briefcase, Calendar, Check, ChevronRight, Instagram, Linkedin, Loader2,
 import { Button } from "@/components/ui/button";
 import type { DbApplication } from "@/hooks/useJobs";
 import type { DbProfile } from "@/hooks/useFrela";
-import { DbProfissionalDados, instagramUrl, parseDisponibilidade } from "@/hooks/usePerfil";
+import { DbProfissionalDados, instagramUrl, parseDisponibilidade, selosDe } from "@/hooks/usePerfil";
+import Selos from "./Selos";
 import UserAvatar from "@/components/frela/UserAvatar";
 import StatusBadge from "@/components/frela/StatusBadge";
 
@@ -54,6 +55,7 @@ const CandidateCard = ({ application, perfil, dados, trabalhos, podeDecidir, pro
                 <Briefcase className="h-3.5 w-3.5" /> {trabalhos ?? 0} trabalho{trabalhos === 1 ? "" : "s"}
               </span>
             </div>
+            {perfil && <Selos selos={selosDe(perfil, trabalhos).filter((x) => x.tipo === "verificado" || x.tipo === "top")} size="sm" className="mt-1.5" />}
             {dados?.profissoes && dados.profissoes.length > 0 && (
               <div className="flex flex-wrap gap-1 mt-2">
                 {dados.profissoes.slice(0, 4).map((p) => (
