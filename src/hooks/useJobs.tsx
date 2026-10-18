@@ -151,3 +151,23 @@ export const useJobApplications = (jobId?: string) => {
     enabled: !!jobId,
   });
 };
+
+/** Empresa cancela uma vaga ABERTA. O banco recusa as candidaturas pendentes e avisa os candidatos. */
+export const useCancelarVaga = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (jobId: string) => {
+      const { data, error } = await supabase
+        .from("jobs")
+        .update({ status: "cancelada", slots_remaining: 0 })
+        .eq("id", jobId)
+        .eq("status", "aberta")
+        .select("id");
+      if (error) throw error;
+      if (!data?.length) throw new Error("Só é possível cancelar vagas abertas.");
+    },
+    onSuccess: () => {
+      for (const k of ["jobs", "job", "my-jobs", "job-applications"]) queryClient.invalidateQueries({ queryKey: [k] });
+    },
+  });
+};

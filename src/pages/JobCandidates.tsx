@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { Loader2, ChevronRight, Users } from "lucide-react";
+import { Loader2, ChevronRight, Users, XCircle } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { DbApplication, useJob, useJobApplications } from "@/hooks/useJobs";
+import { DbApplication, useCancelarVaga, useJob, useJobApplications } from "@/hooks/useJobs";
 import {
   useAceitarCandidato, useRecusarCandidato, useProfilesByIds, formatBRL, formatDate,
 } from "@/hooks/useFrela";
@@ -52,6 +52,8 @@ const JobCandidates = () => {
   const recusar = useRecusarCandidato();
   const [confirmando, setConfirmando] = useState<DbApplication | null>(null);
   const [processingId, setProcessingId] = useState<string | null>(null);
+  const [cancelando, setCancelando] = useState(false);
+  const cancelarVaga = useCancelarVaga();
 
   if (loadingJob) {
     return <div className="min-h-screen bg-background flex items-center justify-center"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>;
@@ -78,6 +80,16 @@ const JobCandidates = () => {
       toast.error(err instanceof Error && err.message ? err.message : "Erro ao aceitar candidato");
     } finally {
       setProcessingId(null);
+    }
+  };
+
+  const handleCancelar = async () => {
+    try {
+      await cancelarVaga.mutateAsync(job.id);
+      toast.success("Vaga cancelada. Os candidatos foram avisados.");
+      navigate("/dashboard");
+    } catch (err) {
+      toast.error(err instanceof Error && err.message ? err.message : "Erro ao cancelar a vaga");
     }
   };
 
@@ -111,7 +123,14 @@ const JobCandidates = () => {
             </div>
             <StatusBadge status={job.status} />
           </div>
-          <p className="font-display font-bold text-primary mt-2">{formatBRL(job.payment)}</p>
+          <div className="flex items-center justify-between mt-2">
+            <p className="font-display font-bold text-primary">{formatBRL(job.payment)}</p>
+            {job.status === "aberta" && (
+              <button onClick={() => setCancelando(true)} className="text-xs font-semibold text-destructive flex items-center gap-1">
+                <XCircle className="h-3.5 w-3.5" /> Cancelar vaga
+              </button>
+            )}
+          </div>
           {contratacao && (
             <button onClick={() => navigate(`/contratacao/${contratacao.id}`)}
               className="mt-3 w-full flex items-center justify-between text-sm text-primary font-medium">
@@ -153,6 +172,23 @@ const JobCandidates = () => {
           );
         })}
       </div>
+
+      <AlertDialog open={cancelando} onOpenChange={setCancelando}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Cancelar esta vaga?</AlertDialogTitle>
+            <AlertDialogDescription>
+              A vaga sai do feed e {applications.filter((a) => a.status === "pendente").length || "os"} candidato(s) pendente(s) serão avisados do cancelamento. Não dá para desfazer.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Manter vaga</AlertDialogCancel>
+            <AlertDialogAction onClick={handleCancelar} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              Cancelar vaga
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       <AlertDialog open={!!confirmando} onOpenChange={(open) => !open && setConfirmando(null)}>
         <AlertDialogContent>

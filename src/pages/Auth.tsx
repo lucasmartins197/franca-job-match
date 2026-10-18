@@ -6,12 +6,12 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
-import { Briefcase, Building2, ArrowLeft, Loader2, MailCheck, ChevronRight } from "lucide-react";
+import { Briefcase, Building2, ArrowLeft, Loader2, MailCheck, ChevronRight, KeyRound } from "lucide-react";
 import OnboardingScreen from "@/components/OnboardingScreen";
 import Logo from "@/components/frela/Logo";
 import { useAuth } from "@/hooks/useAuth";
 
-type Step = "onboarding" | "choose" | "signup" | "login" | "confirm";
+type Step = "onboarding" | "choose" | "signup" | "login" | "confirm" | "recuperar";
 type UserTipo = "freelancer" | "empresa";
 
 const EMAIL_JA_EXISTE = "Este email já possui uma conta. Faça login.";
@@ -39,6 +39,7 @@ const Auth = () => {
   const [senha, setSenha] = useState("");
   const [loading, setLoading] = useState(false);
   const [reenviando, setReenviando] = useState(false);
+  const [linkEnviado, setLinkEnviado] = useState(false);
 
   useEffect(() => {
     if (!authLoading && session && userTipo) {
@@ -161,6 +162,25 @@ const Auth = () => {
     else toast.success("Email reenviado! Confira também a caixa de spam.");
   };
 
+  const handleRecuperar = async (e?: React.FormEvent) => {
+    e?.preventDefault();
+    if (!email.trim()) {
+      toast.error("Informe seu email");
+      return;
+    }
+    setLoading(true);
+    const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), {
+      redirectTo: `${window.location.origin}/redefinir-senha`,
+    });
+    setLoading(false);
+    if (error) {
+      toast.error(traduzErro(error.message));
+      return;
+    }
+    // Por segurança, a mensagem é a mesma exista ou não uma conta com esse email.
+    setLinkEnviado(true);
+  };
+
   if (authLoading && !session) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
@@ -268,12 +288,48 @@ const Auth = () => {
                 <Input id="login-senha" type="password" autoComplete="current-password" value={senha} onChange={(e) => setSenha(e.target.value)} className="h-12 rounded-xl" />
               </div>
             </div>
-            <Button type="submit" disabled={loading} className="w-full h-12 mt-6 rounded-xl font-semibold text-base">
+            <button type="button" onClick={() => { setLinkEnviado(false); setStep("recuperar"); }} className="block ml-auto mt-3 text-sm font-medium text-primary">
+              Esqueci minha senha
+            </button>
+            <Button type="submit" disabled={loading} className="w-full h-12 mt-4 rounded-xl font-semibold text-base">
               {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : "Entrar"}
             </Button>
             <button type="button" onClick={() => setStep("choose")} className="w-full mt-4 text-center text-sm text-muted-foreground">
               Não tem conta? <span className="text-primary font-semibold">Criar conta</span>
             </button>
+          </motion.form>
+        )}
+
+        {step === "recuperar" && (
+          <motion.form key="recuperar" {...anim} onSubmit={handleRecuperar} className="flex-1">
+            {backButton("login")}
+            <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-4">
+              <KeyRound className="h-8 w-8 text-primary" />
+            </div>
+            <h2 className="text-xl font-display font-bold text-foreground text-center mb-2">Recuperar senha</h2>
+            {linkEnviado ? (
+              <div className="text-center">
+                <p className="text-sm text-muted-foreground">
+                  Se existir uma conta com <b className="text-foreground break-all">{email}</b>, você vai receber um email com o link para criar uma nova senha.
+                </p>
+                <p className="text-xs text-muted-foreground mt-2">Confira também o spam. O link vale por pouco tempo.</p>
+                <Button type="button" onClick={goToLogin} className="w-full h-12 mt-6 rounded-xl font-semibold">Voltar para o login</Button>
+                <Button type="button" variant="ghost" onClick={() => handleRecuperar()} disabled={loading} className="w-full h-11 mt-2 rounded-xl text-primary">
+                  {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Reenviar link"}
+                </Button>
+              </div>
+            ) : (
+              <>
+                <p className="text-sm text-muted-foreground text-center mb-6">Informe o email da sua conta e enviaremos um link para criar uma nova senha.</p>
+                <div className="space-y-1.5">
+                  <Label htmlFor="rec-email">Email</Label>
+                  <Input id="rec-email" type="email" autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} className="h-12 rounded-xl" />
+                </div>
+                <Button type="submit" disabled={loading} className="w-full h-12 mt-6 rounded-xl font-semibold text-base">
+                  {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : "Enviar link"}
+                </Button>
+              </>
+            )}
           </motion.form>
         )}
 

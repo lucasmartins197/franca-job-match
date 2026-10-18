@@ -17,8 +17,9 @@
    ```sql
    update public.profiles set is_admin = true where email in ('email-do-lucas@...', 'email-do-socio@...');
    ```
-5. **Auth → URL Configuration:** coloque a URL do app em *Site URL* (e em *Redirect URLs*), para o link de confirmação de email voltar para `/auth`.
-6. As migrations antigas (`20260324…`, `20260404…`, `20260618…`) são do projeto Supabase anterior — **não rode** no FreLa.
+5. **Fase 4 — rode:** `supabase/migrations/20261020120000_fase4_taxas.sql` (sistema de taxas de 5%: confirmação de valor pelo profissional, saldo, trava no teto de R$ 50, divergências, quitação pelo ADM, cancelamento de vaga). Para mudar o teto ou a porcentagem: `frela_teto_taxas()` / `frela_taxa_percentual()` no SQL e `TETO_TAXAS` / `TAXA_PLATAFORMA` em `src/lib/pagamentos.ts`.
+6. **Auth → URL Configuration:** coloque a URL do app em *Site URL* e adicione em *Redirect URLs* `<url-do-app>/auth` (confirmação de email) e `<url-do-app>/redefinir-senha` (esqueci minha senha).
+7. As migrations antigas (`20260324…`, `20260404…`, `20260618…`) são do projeto Supabase anterior — **não rode** no FreLa.
 
 ## Dados de demonstração (apresentação)
 
@@ -28,7 +29,14 @@
 
 ## Pagamentos (preparado, desativado)
 
-Ver `src/lib/pagamentos.ts`: mensalidade via IAP (App Store/Google Play) e taxa de 5% no backend — pontos de integração marcados com `TODO`. Nada é cobrado hoje.
+Ver `src/lib/pagamentos.ts`: mensalidade via IAP (App Store/Google Play) e quitação das taxas via Stripe (Pix/cartão) com baixa pelo webhook chamando `frela_quitar_taxas` — pontos de integração marcados com `TODO`. Nada é cobrado hoje; o ADM pode registrar pagamentos recebidos manualmente em `/admin/taxas`.
+
+### Ciclo da taxa de 5%
+1. Empresa confirma a finalização **declarando o valor pago** → taxa = 5% (status `pendente`).
+2. Profissional **confirma** (`confirmada`) ou **contesta** (`em_divergencia`, fora do saldo até um ADM resolver).
+3. Saldo = `pendente` + `confirmada` não pagas. **Saldo ≥ R$ 50 → trava**: sem novas vagas e sem confirmar finalizações (garantido no banco).
+4. Renovação da assinatura só com zero taxas em aberto.
+5. Quitação → `paga` (hoje manual pelo ADM; depois automática pelo Stripe).
 
 ## Rotas
 
@@ -47,6 +55,9 @@ Ver `src/lib/pagamentos.ts`: mensalidade via IAP (App Store/Google Play) e taxa 
 | `/perfil/:id` | todos | perfil público (currículo do profissional / perfil da empresa) |
 | `/chat` | todos | lista de conversas (uma por contratação) |
 | `/chat/:id` | as duas partes | conversa em tempo real |
+| `/taxas` | empresa | saldo da taxa de 5%, teto, histórico, "Quitar" (em breve) |
+| `/admin/taxas` | ADM | divergências de valor e saldos por empresa (registrar pagamento) |
+| `/redefinir-senha` | todos | destino do link "esqueci minha senha" |
 | `/planos` | todos | planos e modelo de receita ("assinar" → em breve) |
 | `/suporte` | todos | chat com a equipe FreLa |
 | `/admin/suporte` | ADM | chamados de suporte; `/admin/suporte/:userId` responde |
