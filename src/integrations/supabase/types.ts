@@ -96,6 +96,13 @@ export type Database = {
           taxa_5pct: number | null
           taxa_cobrada: boolean | null
           valor: number
+          confirmado_profissional_em: string | null
+          divergencia_resolvida_em: string | null
+          motivo_divergencia: string | null
+          status_taxa: string | null
+          taxa_paga_em: string | null
+          valor_confirmado_profissional: boolean
+          valor_contestado: number | null
         }
         Insert: {
           created_at?: string
@@ -108,6 +115,13 @@ export type Database = {
           taxa_5pct?: number | null
           taxa_cobrada?: boolean | null
           valor: number
+          confirmado_profissional_em?: string | null
+          divergencia_resolvida_em?: string | null
+          motivo_divergencia?: string | null
+          status_taxa?: string | null
+          taxa_paga_em?: string | null
+          valor_confirmado_profissional?: boolean
+          valor_contestado?: number | null
         }
         Update: {
           created_at?: string
@@ -120,6 +134,13 @@ export type Database = {
           taxa_5pct?: number | null
           taxa_cobrada?: boolean | null
           valor?: number
+          confirmado_profissional_em?: string | null
+          divergencia_resolvida_em?: string | null
+          motivo_divergencia?: string | null
+          status_taxa?: string | null
+          taxa_paga_em?: string | null
+          valor_confirmado_profissional?: boolean
+          valor_contestado?: number | null
         }
         Relationships: [
           {
@@ -503,9 +524,64 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      taxas_saldo_empresas: {
+        Row: {
+          a_confirmar: number
+          confirmado: number
+          em_divergencia: number
+          empresa_id: string
+          pago: number
+          saldo: number
+        }
+        Relationships: []
+      }
     }
     Functions: {
+      admin_registrar_pagamento_taxas: {
+        Args: { p_empresa: string; p_referencia?: string }
+        Returns: number
+      }
+      admin_resolver_divergencia: {
+        Args: { p_id: string; p_valor_final: number }
+        Returns: undefined
+      }
+      admin_saldos_taxas: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          a_confirmar: number
+          bloqueado: boolean
+          em_divergencia: number
+          empresa_id: string
+          nome_empresa: string
+          pago: number
+          saldo: number
+        }[]
+      }
+      confirmar_valor_contratacao: {
+        Args: { p_id: string; p_confirma: boolean; p_valor_recebido?: number; p_motivo?: string }
+        Returns: string
+      }
+      minhas_taxas_resumo: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          a_confirmar: number
+          bloqueado: boolean
+          confirmado: number
+          em_divergencia: number
+          pago: number
+          pode_renovar: boolean
+          saldo: number
+          teto: number
+        }[]
+      }
+      pode_renovar_assinatura: {
+        Args: Record<PropertyKey, never>
+        Returns: boolean
+      }
+      saldo_taxas_empresa: {
+        Args: { p_empresa: string }
+        Returns: number
+      }
       admin_set_verificado: {
         Args: { p_id: string; p_valor: boolean }
         Returns: undefined

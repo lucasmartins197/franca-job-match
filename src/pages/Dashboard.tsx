@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Navigate, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { Plus, LogOut, Users, Briefcase, Lock, Star, ChevronRight, Clock, MessageCircle, Crown } from "lucide-react";
+import { Plus, LogOut, Users, Briefcase, Lock, Star, ChevronRight, Clock, MessageCircle, Crown, Receipt } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useMyJobs } from "@/hooks/useJobs";
@@ -21,6 +21,9 @@ import { JobListSkeleton } from "@/components/frela/JobCardSkeleton";
 import { useMeuPerfil } from "@/hooks/usePerfil";
 import { useChatNaoLidas } from "@/hooks/useChat";
 import { PLANOS } from "@/lib/pagamentos";
+import { useResumoTaxas } from "@/hooks/useTaxas";
+import TaxasAviso from "@/components/taxas/TaxasAviso";
+import { Progress } from "@/components/ui/progress";
 import FinalizarContratacaoButton from "@/components/frela/FinalizarContratacaoButton";
 
 const STATUS_TABS = [
@@ -37,7 +40,8 @@ const Dashboard = () => {
   const { data: perfil } = useMeuPerfil();
   const { data: myJobs = [], isLoading } = useMyJobs();
   const { data: contratacoes = [] } = useMinhasContratacoes();
-  const { bloqueado, pendentes } = useTravaNovaVaga();
+  const { bloqueado, motivo, pendentes } = useTravaNovaVaga();
+  const { resumo: taxas } = useResumoTaxas();
   const [showPostModal, setShowPostModal] = useState(false);
   const chatNaoLidas = useChatNaoLidas();
 
@@ -66,7 +70,7 @@ const Dashboard = () => {
 
   const abrirNovaVaga = () => {
     if (bloqueado) {
-      toast.error("Confirme a finalização da contratação em andamento antes de criar uma nova vaga.");
+      toast.error(motivo === "taxas" ? "Quite as taxas em aberto para criar novas vagas." : "Confirme a finalização da contratação em andamento antes de criar uma nova vaga.");
       return;
     }
     setShowPostModal(true);
@@ -105,7 +109,9 @@ const Dashboard = () => {
         </div>
       </div>
 
-      {bloqueado && (
+      <TaxasAviso className="mx-5 mb-4 w-[calc(100%-2.5rem)]" />
+
+      {motivo === "contratacao" && (
         <div className="mx-5 mb-6 rounded-xl border border-amber-300 bg-amber-50 p-4 flex gap-3">
           <Lock className="h-5 w-5 text-amber-600 shrink-0 mt-0.5" />
           <div className="text-sm text-amber-900">
@@ -131,6 +137,25 @@ const Dashboard = () => {
           </div>
         ))}
       </div>
+
+      <button onClick={() => navigate("/taxas")}
+        className="mx-5 mb-3 w-[calc(100%-2.5rem)] rounded-2xl border border-border bg-card p-4 text-left shadow-card">
+        <div className="flex items-center gap-3">
+          <span className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${taxas.bloqueado ? "bg-destructive/10 text-destructive" : "bg-amber-100 text-amber-800"}`}>
+            <Receipt className="h-5 w-5" />
+          </span>
+          <span className="flex-1 min-w-0">
+            <span className="block text-sm font-semibold text-foreground">Minhas taxas</span>
+            <span className="block text-xs text-muted-foreground">
+              Saldo {formatBRL(taxas.saldo)} de {formatBRL(taxas.teto)}
+              {taxas.em_divergencia > 0 ? ` · ${formatBRL(taxas.em_divergencia)} em análise` : ""}
+            </span>
+          </span>
+          <ChevronRight className="h-4 w-4 text-muted-foreground" />
+        </div>
+        <Progress value={Math.min(100, (taxas.saldo / taxas.teto) * 100)}
+          className={`h-1.5 mt-3 ${taxas.bloqueado ? "[&>div]:bg-destructive" : taxas.perto ? "[&>div]:bg-amber-500" : ""}`} />
+      </button>
 
       <button onClick={() => navigate("/planos")}
         className="mx-5 mb-8 w-[calc(100%-2.5rem)] flex items-center gap-3 rounded-2xl border border-primary/20 bg-primary/5 p-3.5 text-left">

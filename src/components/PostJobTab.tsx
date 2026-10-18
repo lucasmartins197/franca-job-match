@@ -18,7 +18,7 @@ const PostJobTab = ({ onClose }: { onClose?: () => void }) => {
   const { user } = useAuth();
   const createJob = useCreateJob();
   const { data: profile } = useMyProfile();
-  const { bloqueado } = useTravaNovaVaga();
+  const { bloqueado, motivo } = useTravaNovaVaga();
   const { data: empresaDados } = useQuery({
     queryKey: ["empresa-dados", user?.id],
     queryFn: async () => {
@@ -47,7 +47,7 @@ const PostJobTab = ({ onClose }: { onClose?: () => void }) => {
     e.preventDefault();
     if (!user) { toast.error("Faça login primeiro"); return; }
     if (bloqueado) {
-      toast.error("Confirme a finalização da contratação em andamento antes de criar uma nova vaga.");
+      toast.error(motivo === "taxas" ? "Quite as taxas em aberto para criar novas vagas." : "Confirme a finalização da contratação em andamento antes de criar uma nova vaga.");
       return;
     }
     if (!title.trim() || !category || !description.trim() || !date || !timeStart || !timeEnd || !address.trim()) {
@@ -84,8 +84,7 @@ const PostJobTab = ({ onClose }: { onClose?: () => void }) => {
       setSubmitted(true);
       toast.success("Vaga publicada!");
     } catch (err) {
-      const msg = err instanceof Error ? err.message : "";
-      toast.error(msg.includes("TRAVA") || msg.includes("finalização") ? "Confirme a finalização da contratação em andamento antes de criar uma nova vaga." : "Erro ao publicar vaga");
+      toast.error(err instanceof Error && err.message ? err.message : "Erro ao publicar vaga");
     }
   };
 
@@ -110,7 +109,9 @@ const PostJobTab = ({ onClose }: { onClose?: () => void }) => {
         <Lock className="h-12 w-12 text-amber-500 mb-4" />
         <h2 className="font-display font-bold text-foreground mb-2">Criação de vaga bloqueada</h2>
         <p className="text-sm text-muted-foreground">
-          Você tem uma contratação em andamento. Confirme a finalização dela no painel antes de criar uma nova vaga.
+          {motivo === "taxas"
+            ? "Seu saldo de taxas atingiu o limite. Quite as taxas em “Minhas taxas” para voltar a publicar vagas."
+            : "Você tem uma contratação em andamento. Confirme a finalização dela no painel antes de criar uma nova vaga."}
         </p>
       </div>
     );

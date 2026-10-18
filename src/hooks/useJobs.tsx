@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import type { Tables, TablesInsert } from "@/integrations/supabase/types";
 import { useAuth } from "./useAuth";
+import { mensagemTrava } from "./useTaxas";
 
 export type DbJob = Tables<"jobs">;
 export type DbApplication = Tables<"applications">;
@@ -88,7 +89,7 @@ export const useCreateJob = () => {
       }
 
       const { data, error } = await supabase.from("jobs").insert(job).select().single();
-      if (error) throw error;
+      if (error) throw new Error(mensagemTrava(error) ?? error.message);
       return data;
     },
     onSuccess: () => {
@@ -148,5 +149,25 @@ export const useJobApplications = (jobId?: string) => {
       return data;
     },
     enabled: !!jobId,
+  });
+};
+
+/** Empresa cancela uma vaga ABERTA. O banco recusa as candidaturas pendentes e avisa os candidatos. */
+export const useCancelarVaga = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (jobId: string) => {
+      const { data, error } = await supabase
+        .from("jobs")
+        .update({ status: "cancelada", slots_remaining: 0 })
+        .eq("id", jobId)
+        .eq("status", "aberta")
+        .select("id");
+      if (error) throw error;
+      if (!data?.length) throw new Error("Só é possível cancelar vagas abertas.");
+    },
+    onSuccess: () => {
+      for (const k of ["jobs", "job", "my-jobs", "job-applications"]) queryClient.invalidateQueries({ queryKey: [k] });
+    },
   });
 };

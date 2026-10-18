@@ -23,6 +23,9 @@ import Conversa from "./pages/Conversa";
 import Suporte from "./pages/Suporte";
 import AdminSuporte from "./pages/AdminSuporte";
 import Planos from "./pages/Planos";
+import MinhasTaxas from "./pages/MinhasTaxas";
+import AdminTaxas from "./pages/AdminTaxas";
+import RedefinirSenha from "./pages/RedefinirSenha";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient({
@@ -67,6 +70,7 @@ const App = () => (
           <ChatRealtime />
           <Routes>
             <Route path="/auth" element={<Auth />} />
+            <Route path="/redefinir-senha" element={<RedefinirSenha />} />
             <Route path="/completar-perfil" element={<ProtectedRoute perfilIncompletoOk><CompletarPerfil /></ProtectedRoute>} />
             <Route path="/" element={<ProtectedRoute><Index /></ProtectedRoute>} />
             <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
@@ -78,8 +82,10 @@ const App = () => (
             <Route path="/contratacao/:id" element={<ProtectedRoute><ContratacaoDetail /></ProtectedRoute>} />
             <Route path="/chat" element={<ProtectedRoute><Conversas /></ProtectedRoute>} />
             <Route path="/chat/:id" element={<ProtectedRoute><Conversa /></ProtectedRoute>} />
+            <Route path="/taxas" element={<ProtectedRoute><MinhasTaxas /></ProtectedRoute>} />
             <Route path="/planos" element={<ProtectedRoute><Planos /></ProtectedRoute>} />
             <Route path="/suporte" element={<ProtectedRoute><Suporte /></ProtectedRoute>} />
+            <Route path="/admin/taxas" element={<ProtectedRoute><AdminTaxas /></ProtectedRoute>} />
             <Route path="/admin/suporte" element={<ProtectedRoute><AdminSuporte /></ProtectedRoute>} />
             <Route path="/admin/suporte/:userId" element={<ProtectedRoute><Suporte /></ProtectedRoute>} />
             <Route path="/notificacoes" element={<ProtectedRoute><Notificacoes /></ProtectedRoute>} />

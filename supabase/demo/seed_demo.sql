@@ -3,7 +3,7 @@
 --
 -- ⚠️ SÓ PARA DEMONSTRAÇÃO. Para remover tudo depois: seed_demo_LIMPAR.sql
 --
--- Pré-requisito: SQLs das Fases 1, 2 e 3 já rodados.
+-- Pré-requisito: SQLs das Fases 1, 2, 3 e 4 já rodados.
 -- Rode no SQL Editor do Supabase. Pode rodar de novo sem duplicar.
 --
 -- Marcadores dos dados fake (usados pela limpeza):
@@ -192,6 +192,21 @@ from (values ('h01','e-bar','p-ana',160,20),('h02','e-villa','p-ana',180,12),('h
              ('h16','e-villa','p-mariana',280,38),('h17','e-shoes','p-diego',160,22),('h18','e-mercado','p-diego',120,26),
              ('h19','e-mercado','p-juliana',130,50),('h20','e-cantina','p-rafael',150,41)) v(j, e, p, v, d)
 on conflict (id) do nothing;
+
+-- Situação das taxas (requer o SQL da Fase 4): antigas pagas, recentes confirmadas,
+-- uma aguardando o profissional confirmar e uma em divergência (para o painel ADM).
+update public.contratacoes c set
+  status_taxa = case
+    when c.id = pg_temp.did('h08-c') then 'pendente'
+    when c.id = pg_temp.did('h07-c') then 'em_divergencia'
+    when c.finalizada_em < now() - interval '19 days' then 'paga'
+    else 'confirmada' end,
+  valor_confirmado_profissional = c.id not in (pg_temp.did('h08-c'), pg_temp.did('h07-c')),
+  valor_contestado = case when c.id = pg_temp.did('h07-c') then 120 end,
+  motivo_divergencia = case when c.id = pg_temp.did('h07-c') then 'Combinamos R$ 120, não R$ 150.' end,
+  taxa_cobrada = c.finalizada_em < now() - interval '19 days' and c.id not in (pg_temp.did('h08-c'), pg_temp.did('h07-c')),
+  taxa_paga_em = case when c.finalizada_em < now() - interval '19 days' then c.finalizada_em + interval '5 days' end
+where c.id in (select pg_temp.did('h' || lpad(n::text, 2, '0') || '-c') from generate_series(1, 20) n);
 
 -- Avaliações nos dois sentidos (o trigger recalcula as médias)
 insert into public.avaliacoes (id, contratacao_id, de_id, para_id, nota, comentario, created_at)
