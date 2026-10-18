@@ -24,6 +24,7 @@ import Suporte from "./pages/Suporte";
 import AdminSuporte from "./pages/AdminSuporte";
 import Planos from "./pages/Planos";
 import MinhasTaxas from "./pages/MinhasTaxas";
+import AdminTaxas from "./pages/AdminTaxas";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient({
@@ -82,6 +83,7 @@ const App = () => (
             <Route path="/taxas" element={<ProtectedRoute><MinhasTaxas /></ProtectedRoute>} />
             <Route path="/planos" element={<ProtectedRoute><Planos /></ProtectedRoute>} />
             <Route path="/suporte" element={<ProtectedRoute><Suporte /></ProtectedRoute>} />
+            <Route path="/admin/taxas" element={<ProtectedRoute><AdminTaxas /></ProtectedRoute>} />
             <Route path="/admin/suporte" element={<ProtectedRoute><AdminSuporte /></ProtectedRoute>} />
             <Route path="/admin/suporte/:userId" element={<ProtectedRoute><Suporte /></ProtectedRoute>} />
             <Route path="/notificacoes" element={<ProtectedRoute><Notificacoes /></ProtectedRoute>} />

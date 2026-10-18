@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { ChevronRight, Crown, Edit2, Headset, Loader2, LogOut, Receipt, ShieldCheck } from "lucide-react";
+import { ChevronRight, Crown, Edit2, Headset, Loader2, LogOut, Receipt, Scale, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import { useMeuPerfil } from "@/hooks/usePerfil";
@@ -34,6 +34,7 @@ const ProfileTab = () => {
           { to: "/taxas", icon: Receipt, titulo: "Minhas taxas", sub: "Saldo da taxa de 5% e histórico", badge: 0, mostrar: perfil.profile.tipo === "empresa" },
           { to: "/planos", icon: Crown, titulo: "Meu plano", sub: perfil.profile.subscription_status === "active" ? "Assinatura ativa" : "Lançamento gratuito · ver planos", badge: 0, mostrar: true },
           { to: "/suporte", icon: Headset, titulo: "Falar com a equipe", sub: "Dúvidas, problemas ou sugestões", badge: perfil.profile.is_admin ? 0 : suporteNaoLidas, mostrar: true },
+          { to: "/admin/taxas", icon: Scale, titulo: "Taxas e divergências (ADM)", sub: "Resolver valores contestados e registrar pagamentos", badge: 0, mostrar: !!perfil.profile.is_admin },
           { to: "/admin/suporte", icon: ShieldCheck, titulo: "Atendimento (ADM)", sub: "Responder chamados de suporte", badge: suporteNaoLidas, mostrar: !!perfil.profile.is_admin },
         ].filter((i) => i.mostrar).map((item) => (
           <button key={item.to} onClick={() => navigate(item.to)} className="w-full flex items-center gap-3 p-4 text-left hover:bg-muted/50">
