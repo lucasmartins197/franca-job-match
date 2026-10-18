@@ -11,6 +11,7 @@ export type DbAvaliacao = Tables<"avaliacoes">;
 export type DbNotificacao = Tables<"notificacoes">;
 
 import { TAXA_PLATAFORMA } from "@/lib/pagamentos";
+import { useResumoTaxas } from "./useTaxas";
 export { TAXA_PLATAFORMA };
 
 export const formatBRL = (valor: number | null | undefined) =>
@@ -91,12 +92,19 @@ export const useContratacao = (id?: string) => {
   });
 };
 
-/** TRAVA: contratações em andamento da empresa logada. Se houver alguma, não pode criar vaga. */
+/**
+ * TRAVAS para criar vaga:
+ *  • contratação em andamento (precisa confirmar a finalização)
+ *  • saldo de taxas >= teto (precisa quitar) — Fase 4
+ * (as duas também são garantidas no banco)
+ */
 export const useTravaNovaVaga = () => {
   const { data: contratacoes = [], isLoading } = useMinhasContratacoes();
+  const { resumo } = useResumoTaxas();
   const { user } = useAuth();
   const pendentes = contratacoes.filter((c) => c.empresa_id === user?.id && c.status === "em_andamento");
-  return { bloqueado: pendentes.length > 0, pendentes, isLoading };
+  const motivo: "taxas" | "contratacao" | null = resumo.bloqueado ? "taxas" : pendentes.length > 0 ? "contratacao" : null;
+  return { bloqueado: motivo !== null, motivo, pendentes, taxasBloqueadas: resumo.bloqueado, isLoading };
 };
 
 const invalidateFluxo = (queryClient: ReturnType<typeof useQueryClient>) => {
@@ -179,21 +187,21 @@ export const useRecusarCandidato = () => {
 };
 
 /** Empresa confirma que o serviço foi realizado. */
+/**
+ * Passo 1 da finalização: a empresa confirma o serviço e DECLARA o valor pago.
+ * O banco calcula a taxa (5% do valor declarado), deixa status_taxa = 'pendente'
+ * e notifica o profissional para confirmar o valor (passo 2: useConfirmarValor).
+ * Trava: com saldo de taxas >= teto o banco recusa (TRAVA_TAXAS).
+ * Cobrança da taxa: ver src/lib/pagamentos.ts (acumula e é quitada depois).
+ */
 export const useFinalizarContratacao = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async (contratacao: DbContratacao) => {
-      // TODO (PAGAMENTO — TAXA 5%): a cobrança NÃO acontece aqui no app (regra das lojas).
-      //   O valor já está calculado em contratacoes.taxa_5pct (ver useAceitarCandidato).
-      //   Plugar no BACKEND, disparado por esta mudança de status para 'finalizada':
-      //     • trigger/webhook no Supabase → Edge Function `cobrar-taxa` (a criar)
-      //     • a função cobra a empresa pelo meio escolhido (boleto/Pix/cartão via gateway)
-      //     • registra em `pagamentos` { tipo: 'taxa_5pct', valor: taxa_5pct, contratacao_id }
-      //     • marca contratacoes.taxa_cobrada = true quando o gateway confirmar
-      //   Detalhes em src/lib/pagamentos.ts.
+    mutationFn: async ({ contratacao, valor }: { contratacao: DbContratacao; valor: number }) => {
+      if (!Number.isFinite(valor) || valor <= 0) throw new Error("Informe o valor pago ao profissional");
       const { error } = await supabase
         .from("contratacoes")
-        .update({ status: "finalizada", finalizada_em: new Date().toISOString() })
+        .update({ status: "finalizada", valor: Math.round(valor * 100) / 100, finalizada_em: new Date().toISOString() })
         .eq("id", contratacao.id)
         .eq("status", "em_andamento");
       if (error) throw error;
@@ -204,7 +212,10 @@ export const useFinalizarContratacao = () => {
         .eq("id", contratacao.job_id);
       if (jobError) throw jobError;
     },
-    onSuccess: () => invalidateFluxo(queryClient),
+    onSuccess: () => {
+      invalidateFluxo(queryClient);
+      queryClient.invalidateQueries({ queryKey: ["taxas"] });
+    },
   });
 };
 

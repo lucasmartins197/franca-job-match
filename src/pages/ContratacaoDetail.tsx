@@ -13,6 +13,8 @@ import UserAvatar from "@/components/frela/UserAvatar";
 import StatusBadge from "@/components/frela/StatusBadge";
 import Stars from "@/components/frela/Stars";
 import FinalizarContratacaoButton from "@/components/frela/FinalizarContratacaoButton";
+import ConfirmarValorCard from "@/components/taxas/ConfirmarValorCard";
+import TaxaStatusBadge from "@/components/taxas/TaxaStatusBadge";
 
 const ContratacaoDetail = () => {
   const { id } = useParams();
@@ -76,13 +78,23 @@ const ContratacaoDetail = () => {
             </div>
           )}
           <div className="mt-4 pt-3 border-t border-border flex items-center justify-between">
-            <span className="text-sm text-muted-foreground">Valor combinado</span>
+            <span className="text-sm text-muted-foreground">{finalizada ? "Valor declarado pela empresa" : "Valor combinado"}</span>
             <span className="text-lg font-display font-bold text-primary">{formatBRL(contratacao.valor)}</span>
           </div>
+          {finalizada && contratacao.status_taxa === "em_divergencia" && (
+            <p className="text-xs text-rose-700 mt-1">
+              Profissional informou ter recebido {formatBRL(contratacao.valor_contestado)} — em análise pela equipe FreLa.
+            </p>
+          )}
           {souEmpresa && (
-            <div className="flex items-center justify-between text-xs text-muted-foreground mt-1">
-              <button onClick={() => navigate("/planos")} className="underline decoration-dotted">Taxa FreLa (5%) · cobrada fora do app</button>
-              <span>{formatBRL(contratacao.taxa_5pct)}</span>
+            <div className="flex items-center justify-between gap-2 text-xs text-muted-foreground mt-2">
+              <button onClick={() => navigate(finalizada ? "/taxas" : "/planos")} className="underline decoration-dotted text-left">
+                Taxa FreLa (5%){finalizada ? " · ver minhas taxas" : " · entra no saldo na finalização"}
+              </button>
+              <span className="flex items-center gap-2">
+                {formatBRL(contratacao.taxa_5pct)}
+                {finalizada && <TaxaStatusBadge status={contratacao.status_taxa} />}
+              </span>
             </div>
           )}
         </div>
@@ -119,7 +131,7 @@ const ContratacaoDetail = () => {
             <div className="space-y-2">
               <FinalizarContratacaoButton contratacao={contratacao} className="w-full h-12" />
               <p className="text-xs text-muted-foreground text-center">
-                Clique depois que o serviço for realizado. Enquanto isso, não é possível criar novas vagas.
+                Clique depois que o serviço for realizado e informe o valor pago. Enquanto isso, não é possível criar novas vagas.
               </p>
             </div>
           ) : (
@@ -128,6 +140,16 @@ const ContratacaoDetail = () => {
               <p>Você está confirmado(a)! Compareça no dia e horário combinados. Depois do serviço, a empresa confirma a finalização e vocês poderão se avaliar.</p>
             </div>
           )
+        )}
+
+        {finalizada && !souEmpresa && contratacao.status_taxa === "pendente" && (
+          <ConfirmarValorCard contratacao={contratacao} empresaNome={outroNome} />
+        )}
+        {finalizada && souEmpresa && contratacao.status_taxa === "pendente" && (
+          <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 flex gap-3 text-sm text-amber-900">
+            <Info className="h-5 w-5 shrink-0" />
+            <p>Aguardando {outroNome} confirmar que recebeu {formatBRL(contratacao.valor)}.</p>
+          </div>
         )}
 
         {finalizada && (

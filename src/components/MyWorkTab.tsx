@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { ChevronRight, Briefcase, Star } from "lucide-react";
+import { ChevronRight, Briefcase, Star, BadgeDollarSign } from "lucide-react";
 import { useMyApplications } from "@/hooks/useJobs";
 import { useMinhasContratacoes, useAvaliacoesFeitas, formatBRL, formatDate } from "@/hooks/useFrela";
 import NotificationBell from "@/components/frela/NotificationBell";
@@ -17,6 +17,7 @@ const MyWorkTab = () => {
   const ativas = contratacoes.filter((c) => c.status === "em_andamento");
   const finalizadas = contratacoes.filter((c) => c.status === "finalizada");
   const aAvaliar = finalizadas.filter((c) => !avaliadas.includes(c.id));
+  const aConfirmar = finalizadas.filter((c) => c.status_taxa === "pendente");
   const pendentes = applications.filter((a) => a.status === "pendente");
   const outras = applications.filter((a) => a.status !== "pendente");
 
@@ -29,7 +30,11 @@ const MyWorkTab = () => {
       <div className="flex-1 min-w-0">
         <div className="flex items-center justify-between gap-2 mb-1">
           <h3 className="font-display font-bold text-foreground truncate">{c.jobs?.title ?? "Vaga"}</h3>
-          {aAvaliar.some((x) => x.id === c.id) ? (
+          {aConfirmar.some((x) => x.id === c.id) ? (
+            <span className="shrink-0 inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-semibold bg-amber-200 text-amber-900">
+              <BadgeDollarSign className="h-3 w-3" /> Confirmar valor
+            </span>
+          ) : aAvaliar.some((x) => x.id === c.id) ? (
             <span className="shrink-0 inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-semibold bg-amber-100 text-amber-800">
               <Star className="h-3 w-3 fill-amber-500 text-amber-500" /> Avaliar
             </span>
@@ -85,6 +90,14 @@ const MyWorkTab = () => {
           descricao="Quando você se candidatar a uma vaga, ela aparece aqui com o status." />
       ) : (
         <div className="space-y-8">
+          {aConfirmar.length > 0 && (
+            <div className="rounded-2xl border-2 border-amber-300 bg-amber-50 p-4 flex gap-3 items-center">
+              <BadgeDollarSign className="h-6 w-6 text-amber-700 shrink-0" />
+              <p className="text-sm text-amber-900">
+                Confirme o valor que você recebeu em <b>{aConfirmar.length}</b> trabalho{aConfirmar.length === 1 ? "" : "s"} finalizado{aConfirmar.length === 1 ? "" : "s"}.
+              </p>
+            </div>
+          )}
           {aAvaliar.length > 0 && (
             <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 flex gap-3 items-center">
               <Star className="h-6 w-6 fill-amber-400 text-amber-400 shrink-0" />
