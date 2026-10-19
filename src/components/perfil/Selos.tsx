@@ -1,4 +1,4 @@
-import { Award, BadgeCheck, Briefcase, Sparkles } from "lucide-react";
+import { Award, BadgeCheck, Briefcase, Medal, Sparkles, Star, ThumbsUp } from "lucide-react";
 import { Selo } from "@/hooks/usePerfil";
 import { cn } from "@/lib/utils";
 
@@ -7,6 +7,9 @@ const ESTILO: Record<Selo["tipo"], { icon: typeof Award; cls: string }> = {
   top: { icon: Award, cls: "bg-amber-100 text-amber-800" },
   trabalhos: { icon: Briefcase, cls: "bg-secondary text-secondary-foreground" },
   novo: { icon: Sparkles, cls: "bg-sky-100 text-sky-800" },
+  destaque: { icon: Star, cls: "bg-amber-400 text-amber-950" },
+  indicado: { icon: ThumbsUp, cls: "bg-violet-100 text-violet-800" },
+  experiente: { icon: Medal, cls: "bg-emerald-100 text-emerald-800" },
 };
 
 const Selos = ({ selos, size = "md", className }: { selos: Selo[]; size?: "sm" | "md"; className?: string }) => {

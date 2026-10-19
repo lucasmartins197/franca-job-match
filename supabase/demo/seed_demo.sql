@@ -87,6 +87,20 @@ from (values
 ) as x(apelido, verificado, foto)
 where p.id = pg_temp.did(x.apelido);
 
+-- Datas de cadastro espalhadas (gráfico de crescimento) e assinaturas ativas
+-- fictícias (MRR / conversão no painel de gestão). Nada é cobrado.
+update public.profiles p set
+  created_at = now() - (x.dias || ' days')::interval,
+  subscription_status = case when x.assinante then 'active' else 'inactive' end,
+  subscription_end = case when x.assinante then now() + interval '20 days' end
+from (values
+  ('e-bar', 68, true), ('e-calcados', 63, true), ('e-shoes', 49, true), ('e-cantina', 40, false),
+  ('e-mercado', 26, true), ('e-villa', 12, false),
+  ('p-ana', 70, true), ('p-carlos', 58, true), ('p-juliana', 44, false), ('p-rafael', 33, true),
+  ('p-mariana', 19, false), ('p-diego', 6, false)
+) as x(apelido, dias, assinante)
+where p.id = pg_temp.did(x.apelido);
+
 -- ─────────────────────────────────────────────
 -- 3. Dados das empresas (com coordenadas para o mapa)
 -- ─────────────────────────────────────────────

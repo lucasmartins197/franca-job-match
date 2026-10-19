@@ -262,7 +262,10 @@ export const removerFotoPortfolio = async (foto: DbPortfolioFoto) => {
 // Selos
 // ─────────────────────────────────────────────
 
-export type Selo = { id: string; texto: string; tipo: "verificado" | "top" | "trabalhos" | "novo" };
+export type Selo = { id: string; texto: string; tipo: "verificado" | "top" | "trabalhos" | "novo" | "destaque" | "indicado" | "experiente" };
+
+/** Meta para o selo "Experiente" (trabalhos finalizados + ajuste manual do ADM). Igual a frela_meta_trabalhos() no SQL. */
+export const META_TRABALHOS = 10;
 
 export const selosDe = (profile: Tables<"profiles">, trabalhos?: number | null): Selo[] => {
   const isEmpresa = profile.tipo === "empresa";
@@ -270,6 +273,11 @@ export const selosDe = (profile: Tables<"profiles">, trabalhos?: number | null):
   const total = profile.total_avaliacoes ?? 0;
   const selos: Selo[] = [];
   if (profile.verificado) selos.push({ id: "verificado", texto: isEmpresa ? "Empresa verificada" : "Verificado", tipo: "verificado" });
+  if (profile.destaque) selos.push({ id: "destaque", texto: "Destaque", tipo: "destaque" });
+  if (profile.selos_extras?.includes("indicado")) selos.push({ id: "indicado", texto: "Indicado pela FreLa", tipo: "indicado" });
+  if (!isEmpresa && (trabalhos ?? 0) + (profile.meta_ajuste_trabalhos ?? 0) >= META_TRABALHOS) {
+    selos.push({ id: "experiente", texto: "Experiente", tipo: "experiente" });
+  }
   if (total >= 3 && media >= 4.7) selos.push({ id: "top", texto: isEmpresa ? "Top avaliada" : "Top avaliado", tipo: "top" });
   if (trabalhos && trabalhos > 0) {
     selos.push({ id: "trabalhos", texto: `${trabalhos} ${isEmpresa ? (trabalhos === 1 ? "contratação" : "contratações") : trabalhos === 1 ? "trabalho" : "trabalhos"}`, tipo: "trabalhos" });

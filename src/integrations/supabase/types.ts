@@ -443,6 +443,13 @@ export type Database = {
           is_admin: boolean
           is_demo: boolean
           verificado: boolean
+          codigo_indicacao: string | null
+          destaque: boolean
+          indicacao_recompensa_em: string | null
+          indicacao_recompensa_liberada: boolean
+          indicado_por: string | null
+          meta_ajuste_trabalhos: number
+          selos_extras: string[]
         }
         Insert: {
           avaliacao_media?: number | null
@@ -462,6 +469,13 @@ export type Database = {
           is_admin?: boolean
           is_demo?: boolean
           verificado?: boolean
+          codigo_indicacao?: string | null
+          destaque?: boolean
+          indicacao_recompensa_em?: string | null
+          indicacao_recompensa_liberada?: boolean
+          indicado_por?: string | null
+          meta_ajuste_trabalhos?: number
+          selos_extras?: string[]
         }
         Update: {
           avaliacao_media?: number | null
@@ -481,6 +495,13 @@ export type Database = {
           is_admin?: boolean
           is_demo?: boolean
           verificado?: boolean
+          codigo_indicacao?: string | null
+          destaque?: boolean
+          indicacao_recompensa_em?: string | null
+          indicacao_recompensa_liberada?: boolean
+          indicado_por?: string | null
+          meta_ajuste_trabalhos?: number
+          selos_extras?: string[]
         }
         Relationships: []
       }
@@ -537,6 +558,175 @@ export type Database = {
       }
     }
     Functions: {
+      admin_ajustar_meta: {
+        Args: { p_id: string; p_ajuste: number }
+        Returns: undefined
+      }
+      admin_crescimento: {
+        Args: { p_semanas?: number; p_incluir_demo?: boolean }
+        Returns: {
+          semana: string
+          empresas: number
+          profissionais: number
+          contratacoes: number
+        }[]
+      }
+      admin_indicacoes: {
+        Args: { p_incluir_demo?: boolean }
+        Returns: {
+          indicado_id: string
+          indicado_nome: string | null
+          indicado_tipo: string
+          indicado_email: string
+          cadastrado_em: string
+          perfil_completo: boolean
+          pagou: boolean
+          recompensa_liberada: boolean
+          recompensa_em: string | null
+          indicador_id: string
+          indicador_nome: string | null
+          indicador_codigo: string | null
+        }[]
+      }
+      admin_liberar_recompensa: {
+        Args: { p_indicado: string; p_liberada?: boolean }
+        Returns: undefined
+      }
+      admin_listar_contratacoes: {
+        Args: { p_incluir_demo?: boolean }
+        Returns: {
+          id: string
+          vaga: string
+          empresa_id: string
+          empresa: string
+          profissional_id: string
+          profissional: string | null
+          valor: number
+          status: string
+          status_taxa: string | null
+          taxa: number | null
+          taxa_cobrada: boolean
+          valor_contestado: number | null
+          criada_em: string
+          finalizada_em: string | null
+          taxa_paga_em: string | null
+          is_demo: boolean
+        }[]
+      }
+      admin_listar_empresas: {
+        Args: { p_incluir_demo?: boolean }
+        Returns: {
+          id: string
+          nome_empresa: string
+          responsavel: string | null
+          email: string
+          telefone: string | null
+          ramo: string | null
+          cidade: string | null
+          endereco: string | null
+          cnpj: string | null
+          assinatura_status: string
+          assinatura_fim: string | null
+          assinante: boolean
+          vagas: number
+          vagas_abertas: number
+          contratacoes: number
+          contratacoes_finalizadas: number
+          movimentado: number
+          saldo_taxas: number
+          taxas_abertas: number
+          taxa_aberta_desde: string | null
+          em_divergencia: number
+          taxas_pagas: number
+          travada: boolean
+          perto_teto: boolean
+          inadimplente: boolean
+          avaliacao_media: number
+          total_avaliacoes: number
+          verificado: boolean
+          destaque: boolean
+          selos_extras: string[]
+          ultima_atividade: string
+          ativo: boolean
+          created_at: string
+          is_demo: boolean
+        }[]
+      }
+      admin_listar_profissionais: {
+        Args: { p_incluir_demo?: boolean }
+        Returns: {
+          id: string
+          nome: string | null
+          email: string
+          telefone: string | null
+          profissoes: string[] | null
+          cidade: string | null
+          disponibilidade: string | null
+          assinatura_status: string
+          assinatura_fim: string | null
+          assinante: boolean
+          avaliacao_media: number
+          total_avaliacoes: number
+          candidaturas: number
+          trabalhos: number
+          meta_ajuste_trabalhos: number
+          meta_trabalhos: number
+          ganhos: number
+          fotos_portfolio: number
+          verificado: boolean
+          destaque: boolean
+          selos_extras: string[]
+          indicado_por: string | null
+          codigo_indicacao: string | null
+          ultima_atividade: string
+          ativo: boolean
+          created_at: string
+          is_demo: boolean
+        }[]
+      }
+      admin_listar_vagas: {
+        Args: { p_incluir_demo?: boolean }
+        Returns: {
+          id: string
+          titulo: string
+          empresa_id: string
+          empresa: string
+          categoria: string
+          funcao: string
+          data: string
+          horario: string
+          valor: number
+          bairro: string
+          status: string
+          candidaturas: number
+          candidaturas_pendentes: number
+          profissional: string | null
+          status_contratacao: string | null
+          created_at: string
+          is_demo: boolean
+        }[]
+      }
+      admin_promover: {
+        Args: { p_id: string; p_verificado?: boolean; p_destaque?: boolean; p_selos_extras?: string[] }
+        Returns: undefined
+      }
+      admin_receita_mensal: {
+        Args: { p_meses?: number; p_incluir_demo?: boolean }
+        Returns: {
+          mes: string
+          taxas: number
+          movimentado: number
+          contratacoes: number
+        }[]
+      }
+      admin_usuario_detalhe: {
+        Args: { p_id: string }
+        Returns: Json
+      }
+      admin_visao_geral: {
+        Args: { p_incluir_demo?: boolean }
+        Returns: Json
+      }
       admin_registrar_pagamento_taxas: {
         Args: { p_empresa: string; p_referencia?: string }
         Returns: number
