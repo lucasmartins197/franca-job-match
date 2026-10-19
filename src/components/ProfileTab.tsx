@@ -27,6 +27,17 @@ const ProfileTab = () => {
 
   return (
     <div className="pb-24 pt-6 px-5 space-y-4">
+      {perfil.profile.is_admin && (
+        <button onClick={() => navigate("/gestao")}
+          className="w-full flex items-center gap-3 p-4 rounded-2xl bg-primary text-primary-foreground text-left shadow-card">
+          <span className="w-11 h-11 rounded-xl bg-white/15 flex items-center justify-center shrink-0"><LayoutDashboard className="h-5 w-5" /></span>
+          <span className="flex-1 min-w-0">
+            <span className="block font-display font-bold">Painel de Gestão</span>
+            <span className="block text-xs opacity-90">Números, usuários, financeiro e exportação</span>
+          </span>
+          <ChevronRight className="h-5 w-5" />
+        </button>
+      )}
       {perfil.profile.tipo === "freelancer" && <MetasCard profile={perfil.profile} trabalhos={historico?.length ?? 0} />}
       {perfil.profile.tipo === "empresa" && (
         <IndiqueGanhe codigo={perfil.profile.codigo_indicacao} nomeEmpresa={perfil.empresa?.nome_empresa || perfil.profile.nome || "Minha empresa"} />
@@ -41,7 +52,6 @@ const ProfileTab = () => {
           { to: "/taxas", icon: Receipt, titulo: "Minhas taxas", sub: "Saldo da taxa de 5% e histórico", badge: 0, mostrar: perfil.profile.tipo === "empresa" },
           { to: "/planos", icon: Crown, titulo: "Meu plano", sub: perfil.profile.subscription_status === "active" ? "Assinatura ativa" : "Lançamento gratuito · ver planos", badge: 0, mostrar: true },
           { to: "/suporte", icon: Headset, titulo: "Falar com a equipe", sub: "Dúvidas, problemas ou sugestões", badge: perfil.profile.is_admin ? 0 : suporteNaoLidas, mostrar: true },
-          { to: "/gestao", icon: LayoutDashboard, titulo: "Painel de gestão (ADM)", sub: "Números, usuários, financeiro e exportação", badge: 0, mostrar: !!perfil.profile.is_admin },
           { to: "/admin/taxas", icon: Scale, titulo: "Taxas e divergências (ADM)", sub: "Resolver valores contestados e registrar pagamentos", badge: 0, mostrar: !!perfil.profile.is_admin },
           { to: "/admin/suporte", icon: ShieldCheck, titulo: "Atendimento (ADM)", sub: "Responder chamados de suporte", badge: suporteNaoLidas, mostrar: !!perfil.profile.is_admin },
         ].filter((i) => i.mostrar).map((item) => (

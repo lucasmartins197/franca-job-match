@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Navigate, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { Plus, LogOut, Users, Briefcase, Lock, Star, ChevronRight, Clock, MessageCircle, Crown, Receipt, Trophy, Gift } from "lucide-react";
+import { Plus, LogOut, LayoutDashboard, Users, Briefcase, Lock, Star, ChevronRight, Clock, MessageCircle, Crown, Receipt, Trophy, Gift } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useMyJobs } from "@/hooks/useJobs";
@@ -94,6 +94,12 @@ const Dashboard = () => {
           </div>
         </button>
         <div className="flex gap-2 shrink-0">
+          {perfil?.profile.is_admin && (
+            <button onClick={() => navigate("/gestao")} aria-label="Painel de Gestão" title="Painel de Gestão"
+              className="w-10 h-10 rounded-xl bg-primary text-primary-foreground flex items-center justify-center shadow-card">
+              <LayoutDashboard className="h-5 w-5" />
+            </button>
+          )}
           <button onClick={() => navigate("/chat")} aria-label={chatNaoLidas > 0 ? `Conversas (${chatNaoLidas} não lidas)` : "Conversas"}
             className="relative w-10 h-10 rounded-xl bg-card border border-border flex items-center justify-center shadow-card">
             <MessageCircle className="h-5 w-5 text-muted-foreground" />

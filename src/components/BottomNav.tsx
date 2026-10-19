@@ -1,4 +1,4 @@
-import { Home, Search, Briefcase, MessageCircle, User } from "lucide-react";
+import { Home, Search, Briefcase, MessageCircle, User, LayoutDashboard } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface BottomNavProps {
@@ -6,6 +6,8 @@ interface BottomNavProps {
   onTabChange: (tab: string) => void;
   /** Contadores por aba (ex.: mensagens não lidas). */
   badges?: Partial<Record<string, number>>;
+  /** Mostra o atalho "Gestão" (só ADM); o clique chega como onTabChange("gestao"). */
+  mostrarGestao?: boolean;
 }
 
 const tabs = [
@@ -16,10 +18,12 @@ const tabs = [
   { id: "profile", label: "Perfil", icon: User },
 ];
 
-const BottomNav = ({ activeTab, onTabChange, badges = {} }: BottomNavProps) => (
+const gestaoTab = { id: "gestao", label: "Gestão", icon: LayoutDashboard };
+
+const BottomNav = ({ activeTab, onTabChange, badges = {}, mostrarGestao = false }: BottomNavProps) => (
   <nav className="fixed bottom-0 inset-x-0 bg-card/95 backdrop-blur-lg border-t border-border z-50 pb-safe">
-    <div className="max-w-lg mx-auto grid grid-cols-5 h-16">
-      {tabs.map((tab) => {
+    <div className={cn("max-w-lg mx-auto grid h-16", mostrarGestao ? "grid-cols-6" : "grid-cols-5")}>
+      {(mostrarGestao ? [...tabs, gestaoTab] : tabs).map((tab) => {
         const isActive = activeTab === tab.id;
         const badge = badges[tab.id] ?? 0;
         return (

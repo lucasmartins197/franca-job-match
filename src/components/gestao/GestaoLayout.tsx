@@ -55,10 +55,11 @@ const GestaoLayout = () => {
       <div className="min-h-screen bg-background">
         <header className="sticky top-0 z-40 bg-card/95 backdrop-blur border-b border-border">
           <div className="max-w-7xl mx-auto px-4 lg:px-6 h-14 flex items-center gap-3">
-            <button onClick={() => navigate("/")} aria-label="Voltar ao app" className="w-9 h-9 rounded-lg hover:bg-muted flex items-center justify-center">
-              <ArrowLeft className="h-4 w-4" />
+            <button onClick={() => navigate("/")}
+              className="shrink-0 inline-flex items-center gap-1.5 h-9 px-3 rounded-xl border border-border bg-card text-sm font-semibold text-foreground hover:bg-muted">
+              <ArrowLeft className="h-4 w-4" /> Voltar ao app
             </button>
-            <Logo size="sm" />
+            <span className="hidden sm:inline-flex"><Logo size="sm" /></span>
             <span className="text-sm font-semibold text-muted-foreground border-l border-border pl-3">Gestão</span>
             <label className="ml-auto flex items-center gap-2 text-xs text-muted-foreground cursor-pointer">
               <Switch checked={incluirDemo} onCheckedChange={setIncluirDemo} aria-label="Incluir dados demo" />
