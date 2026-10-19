@@ -262,29 +262,92 @@ export const removerFotoPortfolio = async (foto: DbPortfolioFoto) => {
 // Selos
 // ─────────────────────────────────────────────
 
-export type Selo = { id: string; texto: string; tipo: "verificado" | "top" | "trabalhos" | "novo" | "destaque" | "indicado" | "experiente" };
+export type Selo = { id: string; texto: string; tipo: "indicado" | "verificado" | "top" | "destaque" | "trabalhos" | "novo" };
 
-/** Meta para o selo "Experiente" (trabalhos finalizados + ajuste manual do ADM). Igual a frela_meta_trabalhos() no SQL. */
+/** Regras dos selos — iguais às do banco (frela_meta_trabalhos / frela_nota_minima_indicado / frela_eh_indicado). */
 export const META_TRABALHOS = 10;
+export const NOTA_MINIMA_INDICADO = 4.5;
+export const MIN_AVALIACOES_SELO = 3;
+export const NOTA_TOP_AVALIADO = 4.7;
 
+/** Selo "Indicado": 10 trabalhos finalizados (+ ajuste do ADM) e nota >= 4,5 com 3+ avaliações — ou concedido pelo ADM. */
+export const ehIndicado = (profile: Tables<"profiles">, trabalhos?: number | null) => {
+  if (profile.selos_extras?.includes("indicado")) return true;
+  const total = (trabalhos ?? 0) + (profile.meta_ajuste_trabalhos ?? 0);
+  return total >= META_TRABALHOS && (profile.total_avaliacoes ?? 0) >= MIN_AVALIACOES_SELO && Number(profile.avaliacao_media ?? 0) >= NOTA_MINIMA_INDICADO;
+};
+
+export const ehTopAvaliado = (profile: Tables<"profiles">) =>
+  (profile.total_avaliacoes ?? 0) >= MIN_AVALIACOES_SELO && Number(profile.avaliacao_media ?? 0) >= NOTA_TOP_AVALIADO;
+
+/** Selos de um perfil, do mais importante para o menos. Só o sistema/ADM controla os dados que geram selos. */
 export const selosDe = (profile: Tables<"profiles">, trabalhos?: number | null): Selo[] => {
   const isEmpresa = profile.tipo === "empresa";
-  const media = Number(profile.avaliacao_media ?? 0);
   const total = profile.total_avaliacoes ?? 0;
   const selos: Selo[] = [];
+  if (!isEmpresa && ehIndicado(profile, trabalhos)) selos.push({ id: "indicado", texto: "Indicado", tipo: "indicado" });
   if (profile.verificado) selos.push({ id: "verificado", texto: isEmpresa ? "Empresa verificada" : "Verificado", tipo: "verificado" });
+  if (ehTopAvaliado(profile)) selos.push({ id: "top", texto: isEmpresa ? "Top avaliada" : "Top avaliado", tipo: "top" });
   if (profile.destaque) selos.push({ id: "destaque", texto: "Destaque", tipo: "destaque" });
-  if (profile.selos_extras?.includes("indicado")) selos.push({ id: "indicado", texto: "Indicado pela FreLa", tipo: "indicado" });
-  if (!isEmpresa && (trabalhos ?? 0) + (profile.meta_ajuste_trabalhos ?? 0) >= META_TRABALHOS) {
-    selos.push({ id: "experiente", texto: "Experiente", tipo: "experiente" });
-  }
-  if (total >= 3 && media >= 4.7) selos.push({ id: "top", texto: isEmpresa ? "Top avaliada" : "Top avaliado", tipo: "top" });
   if (trabalhos && trabalhos > 0) {
     selos.push({ id: "trabalhos", texto: `${trabalhos} ${isEmpresa ? (trabalhos === 1 ? "contratação" : "contratações") : trabalhos === 1 ? "trabalho" : "trabalhos"}`, tipo: "trabalhos" });
   } else if (total === 0) {
     selos.push({ id: "novo", texto: "Novo no FreLa", tipo: "novo" });
   }
   return selos;
+};
+
+/** Relevância para ordenar (mesma lógica de recomendados_profissionais no banco). */
+export const relevanciaPerfil = (profile: Tables<"profiles">, trabalhos?: number | null) =>
+  (ehIndicado(profile, trabalhos) ? 4 : 0) + (profile.verificado ? 2 : 0) + (profile.destaque ? 2 : 0) + (ehTopAvaliado(profile) ? 1 : 0);
+
+export interface Meta {
+  id: "indicado" | "top" | "verificado";
+  titulo: string;
+  atingida: boolean;
+  progresso: number; // 0–100
+  detalhe: string;
+  dica: string;
+}
+
+/** Metas do profissional rumo aos selos (para a barra de progresso motivadora). */
+export const metasDoProfissional = (profile: Tables<"profiles">, trabalhos: number): Meta[] => {
+  const feitos = trabalhos + (profile.meta_ajuste_trabalhos ?? 0);
+  const media = Number(profile.avaliacao_media ?? 0);
+  const aval = profile.total_avaliacoes ?? 0;
+  const indicado = ehIndicado(profile, trabalhos);
+  const faltamTrab = Math.max(0, META_TRABALHOS - feitos);
+  const faltamAval = Math.max(0, MIN_AVALIACOES_SELO - aval);
+  const notaOk = aval >= MIN_AVALIACOES_SELO && media >= NOTA_MINIMA_INDICADO;
+
+  const dicaIndicado = indicado
+    ? "Você aparece primeiro nas recomendações e buscas das empresas!"
+    : faltamTrab > 0
+      ? `Faltam ${faltamTrab} trabalho${faltamTrab === 1 ? "" : "s"} para o selo Indicado!${notaOk || aval === 0 ? "" : ` E mantenha nota ${NOTA_MINIMA_INDICADO.toFixed(1).replace(".", ",")}+.`}`
+      : faltamAval > 0
+        ? `Você já tem os trabalhos! Falta${faltamAval === 1 ? "" : "m"} ${faltamAval} avaliaç${faltamAval === 1 ? "ão" : "ões"}.`
+        : `Quase lá: suba sua nota para ${NOTA_MINIMA_INDICADO.toFixed(1).replace(".", ",")} ou mais.`;
+
+  const top = ehTopAvaliado(profile);
+  return [
+    {
+      id: "indicado", titulo: "Selo Indicado", atingida: indicado,
+      progresso: indicado ? 100 : Math.min(99, (feitos / META_TRABALHOS) * 100),
+      detalhe: `${Math.min(feitos, META_TRABALHOS)}/${META_TRABALHOS} trabalhos · nota ${aval ? media.toFixed(1).replace(".", ",") : "—"} (mín. ${NOTA_MINIMA_INDICADO.toFixed(1).replace(".", ",")})`,
+      dica: dicaIndicado,
+    },
+    {
+      id: "top", titulo: "Top avaliado", atingida: top,
+      progresso: top ? 100 : Math.min(99, (Math.min(aval, MIN_AVALIACOES_SELO) / MIN_AVALIACOES_SELO) * (media >= NOTA_TOP_AVALIADO || aval === 0 ? 100 : 70)),
+      detalhe: `${aval} avaliaç${aval === 1 ? "ão" : "ões"} · nota ${aval ? media.toFixed(1).replace(".", ",") : "—"} (mín. ${NOTA_TOP_AVALIADO.toFixed(1).replace(".", ",")})`,
+      dica: top ? "Sua reputação está entre as melhores." : faltamAval > 0 ? `Receba mais ${faltamAval} avaliaç${faltamAval === 1 ? "ão" : "ões"} com nota alta.` : `Mantenha nota ${NOTA_TOP_AVALIADO.toFixed(1).replace(".", ",")} ou mais.`,
+    },
+    {
+      id: "verificado", titulo: "Verificado", atingida: !!profile.verificado, progresso: profile.verificado ? 100 : 0,
+      detalhe: "Concedido pela equipe FreLa",
+      dica: profile.verificado ? "Sua identidade foi conferida." : "Peça a verificação no suporte (envie um documento com foto).",
+    },
+  ];
 };
 
 // ─────────────────────────────────────────────

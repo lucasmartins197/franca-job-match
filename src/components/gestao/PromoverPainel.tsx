@@ -1,12 +1,12 @@
 import { useState } from "react";
-import { Award, BadgeCheck, Loader2, Sparkles, Target, ThumbsUp } from "lucide-react";
+import { Award, BadgeCheck, Crown, Loader2, Sparkles, Target } from "lucide-react";
 import { toast } from "sonner";
 import { Switch } from "@/components/ui/switch";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { useAjustarMeta, usePromover } from "@/hooks/useGestao";
-import { META_TRABALHOS } from "@/hooks/usePerfil";
+import { META_TRABALHOS, NOTA_MINIMA_INDICADO } from "@/hooks/usePerfil";
 import { Secao } from "./Pecas";
 
 export interface UsuarioPromover {
@@ -51,7 +51,7 @@ const PromoverPainel = ({ usuario: u }: { usuario: UsuarioPromover }) => {
       onChange: (v: boolean) => alterar({ verificado: v }, v ? "Selo Verificado concedido" : "Selo Verificado removido") },
     { id: "destaque", icon: Sparkles, titulo: "Destaque", desc: "Selo de destaque no perfil", ativo: u.destaque,
       onChange: (v: boolean) => alterar({ destaque: v }, v ? "Destaque ativado" : "Destaque removido") },
-    { id: "indicado", icon: ThumbsUp, titulo: "Indicado pela FreLa", desc: "Recomendação da equipe", ativo: indicado,
+    { id: "indicado", icon: Crown, titulo: "Indicado (manual)", desc: "Concede o selo sem esperar a meta", ativo: indicado,
       onChange: (v: boolean) => alterar({ selos: v ? [...u.selos_extras.filter((s) => s !== "indicado"), "indicado"] : u.selos_extras.filter((s) => s !== "indicado") },
         v ? "Selo Indicado concedido" : "Selo Indicado removido") },
   ];
@@ -73,7 +73,7 @@ const PromoverPainel = ({ usuario: u }: { usuario: UsuarioPromover }) => {
       {u.tipo === "freelancer" && (
         <div className="mt-4 rounded-xl border border-border p-3">
           <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
-            <Target className="h-4 w-4 text-primary" /> Meta: selo "Experiente" ({META_TRABALHOS} trabalhos)
+            <Target className="h-4 w-4 text-primary" /> Meta: selo "Indicado" ({META_TRABALHOS} trabalhos e nota ≥ {NOTA_MINIMA_INDICADO.toFixed(1).replace(".", ",")})
             {total >= META_TRABALHOS && <span className="inline-flex items-center gap-1 text-xs text-emerald-700"><Award className="h-3.5 w-3.5" /> atingida</span>}
           </div>
           <Progress value={Math.min(100, (total / META_TRABALHOS) * 100)} className="h-2 mt-2" />

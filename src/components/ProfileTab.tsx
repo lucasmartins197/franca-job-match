@@ -2,7 +2,8 @@ import { useNavigate } from "react-router-dom";
 import { ChevronRight, Crown, Edit2, Headset, Loader2, LogOut, LayoutDashboard, Receipt, Scale, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
-import { useMeuPerfil } from "@/hooks/usePerfil";
+import { useHistoricoProfissional, useMeuPerfil } from "@/hooks/usePerfil";
+import MetasCard from "@/components/perfil/MetasCard";
 import ProfileView from "@/components/perfil/ProfileView";
 import { useSuporteNaoLidas } from "@/hooks/useSuporte";
 
@@ -12,6 +13,7 @@ const ProfileTab = () => {
   const navigate = useNavigate();
   const { data: perfil, isLoading } = useMeuPerfil();
   const suporteNaoLidas = useSuporteNaoLidas();
+  const { data: historico } = useHistoricoProfissional(user?.id, perfil?.profile.tipo === "freelancer");
 
   const handleSignOut = async () => {
     await signOut();
@@ -24,6 +26,7 @@ const ProfileTab = () => {
 
   return (
     <div className="pb-24 pt-6 px-5 space-y-4">
+      {perfil.profile.tipo === "freelancer" && <MetasCard profile={perfil.profile} trabalhos={historico?.length ?? 0} />}
       <ProfileView perfil={perfil} mostrarContato />
       <Button onClick={() => navigate("/perfil/editar")} className="w-full h-12 rounded-xl font-semibold">
         <Edit2 className="h-4 w-4 mr-2" /> Editar perfil
