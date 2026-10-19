@@ -55,7 +55,7 @@ const CandidateCard = ({ application, perfil, dados, trabalhos, podeDecidir, pro
                 <Briefcase className="h-3.5 w-3.5" /> {trabalhos ?? 0} trabalho{trabalhos === 1 ? "" : "s"}
               </span>
             </div>
-            {perfil && <Selos selos={selosDe(perfil, trabalhos).filter((x) => x.tipo === "verificado" || x.tipo === "top")} size="sm" className="mt-1.5" />}
+            {perfil && <Selos selos={selosDe(perfil, trabalhos).filter((x) => ["indicado", "verificado", "top", "destaque"].includes(x.tipo))} size="sm" className="mt-1.5" />}
             {dados?.profissoes && dados.profissoes.length > 0 && (
               <div className="flex flex-wrap gap-1 mt-2">
                 {dados.profissoes.slice(0, 4).map((p) => (

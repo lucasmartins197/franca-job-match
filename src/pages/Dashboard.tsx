@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Navigate, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { Plus, LogOut, Users, Briefcase, Lock, Star, ChevronRight, Clock, MessageCircle, Crown, Receipt } from "lucide-react";
+import { Plus, LogOut, Users, Briefcase, Lock, Star, ChevronRight, Clock, MessageCircle, Crown, Receipt, Trophy, Gift } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useMyJobs } from "@/hooks/useJobs";
@@ -20,8 +20,9 @@ import EmptyState from "@/components/frela/EmptyState";
 import { JobListSkeleton } from "@/components/frela/JobCardSkeleton";
 import { useMeuPerfil } from "@/hooks/usePerfil";
 import { useChatNaoLidas } from "@/hooks/useChat";
-import { PLANOS } from "@/lib/pagamentos";
+import { PLANOS, RECOMPENSA_INDICACAO } from "@/lib/pagamentos";
 import { useResumoTaxas } from "@/hooks/useTaxas";
+import { useRecomendadosProfissionais } from "@/hooks/useRecomendacoes";
 import TaxasAviso from "@/components/taxas/TaxasAviso";
 import { Progress } from "@/components/ui/progress";
 import FinalizarContratacaoButton from "@/components/frela/FinalizarContratacaoButton";
@@ -42,6 +43,7 @@ const Dashboard = () => {
   const { data: contratacoes = [] } = useMinhasContratacoes();
   const { bloqueado, motivo, pendentes } = useTravaNovaVaga();
   const { resumo: taxas } = useResumoTaxas();
+  const { data: topPros = [] } = useRecomendadosProfissionais(3);
   const [showPostModal, setShowPostModal] = useState(false);
   const chatNaoLidas = useChatNaoLidas();
 
@@ -138,6 +140,20 @@ const Dashboard = () => {
         ))}
       </div>
 
+      <button onClick={() => navigate("/recomendados")}
+        className="mx-5 mb-3 w-[calc(100%-2.5rem)] rounded-2xl p-4 text-left bg-gradient-to-r from-amber-400 to-orange-500 text-white shadow-card flex items-center gap-3">
+        <Trophy className="h-7 w-7 shrink-0" />
+        <span className="flex-1 min-w-0">
+          <span className="block font-display font-bold">Melhores profissionais</span>
+          <span className="block text-xs opacity-90">Indicados, verificados e mais bem avaliados de Franca</span>
+        </span>
+        <span className="flex -space-x-2 shrink-0">
+          {topPros.slice(0, 3).map((p) => (
+            <UserAvatar key={p.id} nome={p.nome} fotoUrl={p.foto_url} size="sm" className="ring-2 ring-orange-400" />
+          ))}
+        </span>
+      </button>
+
       <button onClick={() => navigate("/taxas")}
         className="mx-5 mb-3 w-[calc(100%-2.5rem)] rounded-2xl border border-border bg-card p-4 text-left shadow-card">
         <div className="flex items-center gap-3">
@@ -155,6 +171,18 @@ const Dashboard = () => {
         </div>
         <Progress value={Math.min(100, (taxas.saldo / taxas.teto) * 100)}
           className={`h-1.5 mt-3 ${taxas.bloqueado ? "[&>div]:bg-destructive" : taxas.perto ? "[&>div]:bg-amber-500" : ""}`} />
+      </button>
+
+      <button onClick={() => navigate("/profile")}
+        className="mx-5 mb-3 w-[calc(100%-2.5rem)] flex items-center gap-3 rounded-2xl border border-emerald-200 bg-emerald-50 p-3.5 text-left">
+        <span className="w-10 h-10 rounded-xl bg-emerald-600 text-white flex items-center justify-center shrink-0"><Gift className="h-5 w-5" /></span>
+        <span className="flex-1 min-w-0">
+          <span className="block text-sm font-semibold text-emerald-950">Indique e Ganhe {formatBRL(RECOMPENSA_INDICACAO)}</span>
+          <span className="block text-xs text-emerald-800">
+            {taxas.creditos > 0 ? `Você tem ${formatBRL(taxas.creditos)} de crédito nas taxas` : "Desconto nas taxas por empresa indicada que assinar"}
+          </span>
+        </span>
+        <ChevronRight className="h-4 w-4 text-emerald-700" />
       </button>
 
       <button onClick={() => navigate("/planos")}

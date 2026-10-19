@@ -3,7 +3,7 @@
 --
 -- ⚠️ SÓ PARA DEMONSTRAÇÃO. Para remover tudo depois: seed_demo_LIMPAR.sql
 --
--- Pré-requisito: SQLs das Fases 1, 2, 3 e 4 já rodados.
+-- Pré-requisito: SQLs das Fases 1 a 6 já rodados.
 -- Rode no SQL Editor do Supabase. Pode rodar de novo sem duplicar.
 --
 -- Marcadores dos dados fake (usados pela limpeza):
@@ -301,6 +301,17 @@ select pg_temp.did(j || '-' || p), pg_temp.did(j), pg_temp.did(p), 'pendente', n
 from (values ('v01','p-ana',2),('v01','p-rafael',1),('v02','p-carlos',4),('v03','p-juliana',6),('v03','p-diego',3),
              ('v04','p-rafael',8),('v06','p-ana',1),('v06','p-mariana',1),('v08','p-diego',2),('v05','p-juliana',10)) v(j, p, h)
 on conflict do nothing;
+
+-- Fase 6: Indique e Ganhe — Bar do Zé indicou a Cantina, que assinou → R$ 50 de crédito
+update public.profiles set indicado_por = pg_temp.did('e-bar') where id = pg_temp.did('e-cantina');
+insert into public.indicacoes (id, indicador_id, indicado_id, codigo, status, created_at)
+select pg_temp.did('ind-cantina'), pg_temp.did('e-bar'), pg_temp.did('e-cantina'),
+       (select codigo_indicacao from public.profiles where id = pg_temp.did('e-bar')), 'pagou', now() - interval '40 days'
+on conflict (indicado_id) do nothing;
+select public.frela_conceder_recompensa(pg_temp.did('ind-cantina'));
+
+-- Fase 6: metas — Ana tem trabalhos comprovados fora do app (ajuste do ADM) e atinge o selo "Indicado"
+update public.profiles set meta_ajuste_trabalhos = 6 where id = pg_temp.did('p-ana');
 
 -- Notificações geradas pelo seed para os próprios usuários demo ficam como lidas
 update public.notificacoes set lida = true

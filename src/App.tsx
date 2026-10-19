@@ -34,6 +34,8 @@ import GestaoUsuario from "./pages/gestao/UsuarioDetalhe";
 import GestaoFinanceiro from "./pages/gestao/Financeiro";
 import GestaoCrescimento from "./pages/gestao/Crescimento";
 import GestaoOperacao from "./pages/gestao/Operacao";
+import Recomendados from "./pages/Recomendados";
+import MelhoresLugares from "./pages/MelhoresLugares";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient({
@@ -90,6 +92,8 @@ const App = () => (
             <Route path="/contratacao/:id" element={<ProtectedRoute><ContratacaoDetail /></ProtectedRoute>} />
             <Route path="/chat" element={<ProtectedRoute><Conversas /></ProtectedRoute>} />
             <Route path="/chat/:id" element={<ProtectedRoute><Conversa /></ProtectedRoute>} />
+            <Route path="/recomendados" element={<ProtectedRoute><Recomendados /></ProtectedRoute>} />
+            <Route path="/melhores-lugares" element={<ProtectedRoute><MelhoresLugares /></ProtectedRoute>} />
             <Route path="/taxas" element={<ProtectedRoute><MinhasTaxas /></ProtectedRoute>} />
             <Route path="/planos" element={<ProtectedRoute><Planos /></ProtectedRoute>} />
             <Route path="/suporte" element={<ProtectedRoute><Suporte /></ProtectedRoute>} />

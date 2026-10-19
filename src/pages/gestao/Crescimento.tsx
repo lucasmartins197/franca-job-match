@@ -58,7 +58,7 @@ const Crescimento = () => {
       render: (l) => <Toggle label="Verificado" checked={l.verificado} onChange={(v) => alterar(l, { verificado: v }, v ? "Verificado" : "Selo removido")} /> },
     { id: "destaque", titulo: "Destaque", valor: (l) => l.destaque, alinhar: "center",
       render: (l) => <Toggle label="Destaque" checked={l.destaque} onChange={(v) => alterar(l, { destaque: v }, v ? "Em destaque" : "Destaque removido")} /> },
-    { id: "indicado", titulo: "Indicado pela FreLa", valor: (l) => l.selos.includes("indicado"), alinhar: "center",
+    { id: "indicado", titulo: "Indicado (manual)", valor: (l) => l.selos.includes("indicado"), alinhar: "center",
       render: (l) => <Toggle label="Indicado" checked={l.selos.includes("indicado")}
         onChange={(v) => alterar(l, { selos: v ? [...l.selos.filter((s) => s !== "indicado"), "indicado"] : l.selos.filter((s) => s !== "indicado") }, v ? "Selo Indicado" : "Selo removido")} /> },
   ];
@@ -84,7 +84,7 @@ const Crescimento = () => {
   });
   const colMetas: Coluna<ProfissionalGestao>[] = [
     { id: "nome", titulo: "Profissional", valor: (p) => p.nome, render: (p) => <span className="font-semibold">{p.nome}</span> },
-    { id: "progresso", titulo: "Meta “Experiente”", valor: (p) => (p.trabalhos + p.meta_ajuste_trabalhos) / p.meta_trabalhos,
+    { id: "progresso", titulo: "Meta “Indicado”", valor: (p) => (p.trabalhos + p.meta_ajuste_trabalhos) / p.meta_trabalhos,
       render: (p) => {
         const total = p.trabalhos + p.meta_ajuste_trabalhos;
         return (

@@ -1,5 +1,6 @@
 import { useNavigate } from "react-router-dom";
-import { ChevronRight, Briefcase, Star, BadgeDollarSign } from "lucide-react";
+import { ChevronRight, Briefcase, Star, BadgeDollarSign, Crown } from "lucide-react";
+import { ehIndicado, metasDoProfissional, useMeuPerfil } from "@/hooks/usePerfil";
 import { useMyApplications } from "@/hooks/useJobs";
 import { useMinhasContratacoes, useAvaliacoesFeitas, formatBRL, formatDate } from "@/hooks/useFrela";
 import NotificationBell from "@/components/frela/NotificationBell";
@@ -13,6 +14,7 @@ const MyWorkTab = () => {
   const { data: applications = [], isLoading: loadingApps } = useMyApplications();
   const { data: contratacoes = [], isLoading: loadingContratacoes } = useMinhasContratacoes();
   const { data: avaliadas = [] } = useAvaliacoesFeitas();
+  const { data: perfil } = useMeuPerfil();
 
   const ativas = contratacoes.filter((c) => c.status === "em_andamento");
   const finalizadas = contratacoes.filter((c) => c.status === "finalizada");
@@ -90,6 +92,16 @@ const MyWorkTab = () => {
           descricao="Quando você se candidatar a uma vaga, ela aparece aqui com o status." />
       ) : (
         <div className="space-y-8">
+          {perfil && !ehIndicado(perfil.profile, finalizadas.length) && (
+            <button onClick={() => navigate("/?tab=profile")} className="w-full text-left rounded-2xl bg-gradient-to-r from-primary to-brand-light text-primary-foreground p-4 flex gap-3 items-center">
+              <Crown className="h-6 w-6 shrink-0" />
+              <span className="flex-1">
+                <span className="block text-sm font-bold">{metasDoProfissional(perfil.profile, finalizadas.length)[0].dica}</span>
+                <span className="block text-xs opacity-90">Com o selo Indicado você aparece primeiro para as empresas.</span>
+              </span>
+              <ChevronRight className="h-4 w-4" />
+            </button>
+          )}
           {aConfirmar.length > 0 && (
             <div className="rounded-2xl border-2 border-amber-300 bg-amber-50 p-4 flex gap-3 items-center">
               <BadgeDollarSign className="h-6 w-6 text-amber-700 shrink-0" />

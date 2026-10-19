@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { Bell, Loader2, UserPlus, CheckCircle2, Star, MessageSquare, Flag, Headset, BadgeDollarSign, Receipt, AlertTriangle, XCircle } from "lucide-react";
+import { Bell, Loader2, UserPlus, CheckCircle2, Star, MessageSquare, Flag, Headset, BadgeDollarSign, Receipt, AlertTriangle, XCircle, Gift } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { DbNotificacao, useMarcarNotificacaoLida, useNotificacoes } from "@/hooks/useFrela";
@@ -17,6 +17,7 @@ const ICONES: Record<string, typeof Bell> = {
   taxa: Receipt,
   divergencia: AlertTriangle,
   cancelamento: XCircle,
+  indicacao: Gift,
 };
 
 const Notificacoes = () => {

@@ -152,6 +152,39 @@ export type Database = {
           },
         ]
       }
+      creditos_taxas: {
+        Row: {
+          created_at: string
+          descricao: string | null
+          empresa_id: string
+          id: string
+          indicacao_id: string | null
+          origem: string
+          saldo: number
+          valor: number
+        }
+        Insert: {
+          created_at?: string
+          descricao?: string | null
+          empresa_id: string
+          id?: string
+          indicacao_id?: string | null
+          origem?: string
+          saldo: number
+          valor: number
+        }
+        Update: {
+          created_at?: string
+          descricao?: string | null
+          empresa_id?: string
+          id?: string
+          indicacao_id?: string | null
+          origem?: string
+          saldo?: number
+          valor?: number
+        }
+        Relationships: []
+      }
       empresa_dados: {
         Row: {
           cnpj: string | null
@@ -192,6 +225,42 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      indicacoes: {
+        Row: {
+          codigo: string
+          created_at: string
+          id: string
+          indicado_id: string
+          indicador_id: string
+          recompensa_valor: number | null
+          recompensado_em: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          codigo: string
+          created_at?: string
+          id?: string
+          indicado_id: string
+          indicador_id: string
+          recompensa_valor?: number | null
+          recompensado_em?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          codigo?: string
+          created_at?: string
+          id?: string
+          indicado_id?: string
+          indicador_id?: string
+          recompensa_valor?: number | null
+          recompensado_em?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
       }
       jobs: {
         Row: {
@@ -549,6 +618,7 @@ export type Database = {
         Row: {
           a_confirmar: number
           confirmado: number
+          creditos: number
           em_divergencia: number
           empresa_id: string
           pago: number
@@ -558,6 +628,60 @@ export type Database = {
       }
     }
     Functions: {
+      minhas_indicacoes: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          created_at: string
+          id: string
+          indicado_nome: string | null
+          indicado_tipo: string
+          recompensa_valor: number | null
+          recompensado_em: string | null
+          status: string
+        }[]
+      }
+      recomendadas_empresas: {
+        Args: { p_limite?: number }
+        Returns: {
+          avaliacao_media: number
+          cidade: string | null
+          contratacoes: number
+          destaque: boolean
+          endereco: string | null
+          foto_url: string | null
+          id: string
+          nome_empresa: string
+          ramo: string | null
+          relevancia: number
+          top_avaliada: boolean
+          total_avaliacoes: number
+          vagas_abertas: number
+          verificado: boolean
+        }[]
+      }
+      recomendados_profissionais: {
+        Args: { p_limite?: number }
+        Returns: {
+          avaliacao_media: number
+          cidade: string | null
+          destaque: boolean
+          disponibilidade: string | null
+          foto_url: string | null
+          id: string
+          indicado: boolean
+          nome: string | null
+          profissoes: string[] | null
+          relevancia: number
+          top_avaliado: boolean
+          total_avaliacoes: number
+          trabalhos: number
+          verificado: boolean
+        }[]
+      }
+      validar_codigo_indicacao: {
+        Args: { p_codigo: string }
+        Returns: string | null
+      }
       admin_ajustar_meta: {
         Args: { p_id: string; p_ajuste: number }
         Returns: undefined
@@ -650,6 +774,8 @@ export type Database = {
           ativo: boolean
           created_at: string
           is_demo: boolean
+          creditos: number
+          indicacoes: number
         }[]
       }
       admin_listar_profissionais: {
@@ -762,6 +888,8 @@ export type Database = {
           pode_renovar: boolean
           saldo: number
           teto: number
+          creditos: number
+          bruto: number
         }[]
       }
       pode_renovar_assinatura: {

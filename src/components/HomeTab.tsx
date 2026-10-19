@@ -1,5 +1,7 @@
 import { useState } from "react";
-import { Search, SearchX, MapPin } from "lucide-react";
+import { Search, SearchX, MapPin, ChevronRight, Star, BadgeCheck } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { useRecomendadasEmpresas } from "@/hooks/useRecomendacoes";
 import { Input } from "@/components/ui/input";
 import JobCard from "@/components/JobCard";
 import CategoryGrid from "@/components/CategoryGrid";
@@ -23,6 +25,8 @@ const HomeTab = () => {
   const { data: perfil } = useMeuPerfil();
   const { data: jobs = [], isLoading } = useJobs();
   const { data: empresas = {} } = useProfilesByIds(jobs.map((j) => j.user_id));
+  const { data: lugares = [] } = useRecomendadasEmpresas(8);
+  const navigate = useNavigate();
 
   const contagem: Record<string, number> = {};
   for (const j of jobs) {
@@ -67,6 +71,30 @@ const HomeTab = () => {
           <h2 className="font-display font-bold text-lg text-foreground mb-3">O que você procura?</h2>
           <CategoryGrid onSelect={setSelectedCategory} selected={selectedCategory} contagem={contagem} />
         </section>
+
+        {!selectedCategory && !searchQuery && lugares.length > 0 && (
+          <section>
+            <div className="flex items-center justify-between mb-3">
+              <h2 className="font-display font-bold text-base text-foreground">Melhores lugares para trabalhar</h2>
+              <button onClick={() => navigate("/melhores-lugares")} className="text-sm font-semibold text-primary flex items-center shrink-0">Ver todos <ChevronRight className="h-4 w-4" /></button>
+            </div>
+            <div className="flex gap-3 overflow-x-auto no-scrollbar -mx-5 px-5 pb-1">
+              {lugares.slice(0, 8).map((e) => (
+                <button key={e.id} onClick={() => navigate(`/perfil/${e.id}`)}
+                  className="shrink-0 w-36 text-left bg-card border border-border rounded-2xl p-3 shadow-card hover:border-primary/40">
+                  <UserAvatar nome={e.nome_empresa} fotoUrl={e.foto_url} size="md" />
+                  <p className="font-semibold text-sm text-foreground mt-2 truncate">{e.nome_empresa}</p>
+                  <p className="text-xs text-muted-foreground flex items-center gap-1">
+                    <Star className="h-3 w-3 fill-amber-400 text-amber-400" />
+                    {e.total_avaliacoes ? Number(e.avaliacao_media).toFixed(1) : "—"} · {e.contratacoes} contrat.
+                  </p>
+                  {e.vagas_abertas > 0 && <p className="text-[11px] font-semibold text-primary mt-0.5">{e.vagas_abertas} vaga{e.vagas_abertas === 1 ? "" : "s"} aberta{e.vagas_abertas === 1 ? "" : "s"}</p>}
+                  {e.verificado && <p className="text-[11px] text-muted-foreground mt-0.5 inline-flex items-center gap-0.5"><BadgeCheck className="h-3 w-3 text-primary" /> Verificada</p>}
+                </button>
+              ))}
+            </div>
+          </section>
+        )}
 
         <section>
           <div className="flex items-end justify-between mb-3">

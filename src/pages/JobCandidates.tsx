@@ -18,7 +18,7 @@ import PageHeader from "@/components/frela/PageHeader";
 import StatusBadge from "@/components/frela/StatusBadge";
 import CandidateCard from "@/components/perfil/CandidateCard";
 import EmptyState from "@/components/frela/EmptyState";
-import { useTrabalhosFinalizados } from "@/hooks/usePerfil";
+import { relevanciaPerfil, useTrabalhosFinalizados } from "@/hooks/usePerfil";
 
 const JobCandidates = () => {
   const { id } = useParams();
@@ -105,9 +105,14 @@ const JobCandidates = () => {
     }
   };
 
+  // Mesmo status: quem tem selo (Indicado > Verificado/Destaque > Top) primeiro, depois nota e trabalhos
+  const relev = (userId: string) => (perfis[userId] ? relevanciaPerfil(perfis[userId], trabalhos[userId]) : 0);
   const ordenadas = [...applications].sort((a, b) => {
     const ordem = { aceita: 0, pendente: 1, recusada: 2 } as Record<string, number>;
-    return (ordem[a.status] ?? 3) - (ordem[b.status] ?? 3);
+    return (ordem[a.status] ?? 3) - (ordem[b.status] ?? 3)
+      || relev(b.user_id) - relev(a.user_id)
+      || Number(perfis[b.user_id]?.avaliacao_media ?? 0) - Number(perfis[a.user_id]?.avaliacao_media ?? 0)
+      || (trabalhos[b.user_id] ?? 0) - (trabalhos[a.user_id] ?? 0);
   });
 
   return (

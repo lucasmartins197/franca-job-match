@@ -13,6 +13,9 @@ export interface ResumoTaxas {
   teto: number;
   bloqueado: boolean;
   pode_renovar: boolean;
+  /** Créditos disponíveis (Indique e Ganhe) e total de taxas antes do crédito */
+  creditos: number;
+  bruto: number;
   /** saldo >= AVISO_TAXAS_PCT do teto (e ainda não travado) */
   perto: boolean;
   /** SQL da Fase 4 ainda não rodado */
@@ -21,7 +24,7 @@ export interface ResumoTaxas {
 
 const VAZIO: ResumoTaxas = {
   saldo: 0, a_confirmar: 0, confirmado: 0, em_divergencia: 0, pago: 0,
-  teto: TETO_TAXAS, bloqueado: false, pode_renovar: true, perto: false,
+  teto: TETO_TAXAS, bloqueado: false, pode_renovar: true, perto: false, creditos: 0, bruto: 0,
 };
 
 /** Mensagem amigável para os erros de trava vindos do banco. */
@@ -51,6 +54,7 @@ export const useResumoTaxas = () => {
         saldo, teto,
         a_confirmar: n(r.a_confirmar), confirmado: n(r.confirmado), em_divergencia: n(r.em_divergencia), pago: n(r.pago),
         bloqueado: !!r.bloqueado, pode_renovar: !!r.pode_renovar,
+        creditos: n(r.creditos), bruto: n(r.bruto ?? r.saldo),
         perto: !r.bloqueado && saldo >= teto * AVISO_TAXAS_PCT,
       };
     },
