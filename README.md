@@ -18,8 +18,9 @@
    update public.profiles set is_admin = true where email in ('email-do-lucas@...', 'email-do-socio@...');
    ```
 5. **Fase 4 — rode:** `supabase/migrations/20261020120000_fase4_taxas.sql` (sistema de taxas de 5%: confirmação de valor pelo profissional, saldo, trava no teto de R$ 50, divergências, quitação pelo ADM, cancelamento de vaga). Para mudar o teto ou a porcentagem: `frela_teto_taxas()` / `frela_taxa_percentual()` no SQL e `TETO_TAXAS` / `TAXA_PLATAFORMA` em `src/lib/pagamentos.ts`.
-6. **Auth → URL Configuration:** coloque a URL do app em *Site URL* e adicione em *Redirect URLs* `<url-do-app>/auth` (confirmação de email) e `<url-do-app>/redefinir-senha` (esqueci minha senha).
-7. As migrations antigas (`20260324…`, `20260404…`, `20260618…`) são do projeto Supabase anterior — **não rode** no FreLa.
+6. **Fase 5 — rode:** `supabase/migrations/20261021120000_fase5_gestao.sql` (funções do painel de gestão, colunas de destaque/selos/metas/indicação). Depois disso, o painel fica em **`/gestao`** (só para `is_admin = true`).
+7. **Auth → URL Configuration:** coloque a URL do app em *Site URL* e adicione em *Redirect URLs* `<url-do-app>/auth` (confirmação de email) e `<url-do-app>/redefinir-senha` (esqueci minha senha).
+8. As migrations antigas (`20260324…`, `20260404…`, `20260618…`) são do projeto Supabase anterior — **não rode** no FreLa.
 
 ## Dados de demonstração (apresentação)
 
@@ -57,6 +58,8 @@ Ver `src/lib/pagamentos.ts`: mensalidade via IAP (App Store/Google Play) e quita
 | `/chat/:id` | as duas partes | conversa em tempo real |
 | `/taxas` | empresa | saldo da taxa de 5%, teto, histórico, "Quitar" (em breve) |
 | `/admin/taxas` | ADM | divergências de valor e saldos por empresa (registrar pagamento) |
+| `/gestao` | ADM | painel de gestão: visão geral, financeiro, empresas, profissionais, crescimento, operação (tudo exporta para Excel) |
+| `/gestao/usuario/:id` | ADM | tudo sobre um usuário + promover/selos/meta |
 | `/redefinir-senha` | todos | destino do link "esqueci minha senha" |
 | `/planos` | todos | planos e modelo de receita ("assinar" → em breve) |
 | `/suporte` | todos | chat com a equipe FreLa |
