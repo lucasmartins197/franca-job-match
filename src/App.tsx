@@ -32,6 +32,8 @@ import GestaoEmpresas from "./pages/gestao/Empresas";
 import GestaoProfissionais from "./pages/gestao/Profissionais";
 import GestaoUsuario from "./pages/gestao/UsuarioDetalhe";
 import GestaoFinanceiro from "./pages/gestao/Financeiro";
+import GestaoCrescimento from "./pages/gestao/Crescimento";
+import GestaoOperacao from "./pages/gestao/Operacao";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient({
@@ -102,6 +104,8 @@ const App = () => (
               <Route path="empresas" element={<GestaoEmpresas />} />
               <Route path="profissionais" element={<GestaoProfissionais />} />
               <Route path="usuario/:id" element={<GestaoUsuario />} />
+              <Route path="crescimento" element={<GestaoCrescimento />} />
+              <Route path="operacao" element={<GestaoOperacao />} />
             </Route>
             <Route path="*" element={<NotFound />} />
           </Routes>

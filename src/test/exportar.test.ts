@@ -3,15 +3,16 @@ import { gerarCSV } from "@/lib/exportar";
 
 describe("gerarCSV (Excel pt-BR)", () => {
   it("usa ; como separador, vírgula decimal, datas pt-BR e escapa aspas", () => {
-    const csv = gerarCSV(
+    type Linha = { nome: string; valor: number };
+    const csv = gerarCSV<Linha>(
       [
-        { titulo: "Nome", valor: (l: { nome: string }) => l.nome },
-        { titulo: "Valor", valor: (l: { valor: number }) => l.valor },
+        { titulo: "Nome", valor: (l) => l.nome },
+        { titulo: "Valor", valor: (l) => l.valor },
         { titulo: "Data", valor: () => "2026-10-19" },
         { titulo: "Ativo", valor: () => true },
         { titulo: "Lista", valor: () => ["Garçom", "Bartender"] },
       ],
-      [{ nome: 'Bar "do Zé"; Centro', valor: 7.5 }] as never[]
+      [{ nome: 'Bar "do Zé"; Centro', valor: 7.5 }]
     );
     const [cab, linha] = csv.split("\r\n");
     expect(cab).toBe("Nome;Valor;Data;Ativo;Lista");
