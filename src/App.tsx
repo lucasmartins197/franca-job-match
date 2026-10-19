@@ -31,6 +31,7 @@ import GestaoVisaoGeral from "./pages/gestao/VisaoGeral";
 import GestaoEmpresas from "./pages/gestao/Empresas";
 import GestaoProfissionais from "./pages/gestao/Profissionais";
 import GestaoUsuario from "./pages/gestao/UsuarioDetalhe";
+import GestaoFinanceiro from "./pages/gestao/Financeiro";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient({
@@ -97,6 +98,7 @@ const App = () => (
             {/* Painel de gestão (só ADM — o layout bloqueia quem não é is_admin) */}
             <Route path="/gestao" element={<ProtectedRoute><GestaoLayout /></ProtectedRoute>}>
               <Route index element={<GestaoVisaoGeral />} />
+              <Route path="financeiro" element={<GestaoFinanceiro />} />
               <Route path="empresas" element={<GestaoEmpresas />} />
               <Route path="profissionais" element={<GestaoProfissionais />} />
               <Route path="usuario/:id" element={<GestaoUsuario />} />
