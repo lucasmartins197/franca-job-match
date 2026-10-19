@@ -26,6 +26,11 @@ import Planos from "./pages/Planos";
 import MinhasTaxas from "./pages/MinhasTaxas";
 import AdminTaxas from "./pages/AdminTaxas";
 import RedefinirSenha from "./pages/RedefinirSenha";
+import GestaoLayout from "./components/gestao/GestaoLayout";
+import GestaoVisaoGeral from "./pages/gestao/VisaoGeral";
+import GestaoEmpresas from "./pages/gestao/Empresas";
+import GestaoProfissionais from "./pages/gestao/Profissionais";
+import GestaoUsuario from "./pages/gestao/UsuarioDetalhe";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient({
@@ -89,6 +94,13 @@ const App = () => (
             <Route path="/admin/suporte" element={<ProtectedRoute><AdminSuporte /></ProtectedRoute>} />
             <Route path="/admin/suporte/:userId" element={<ProtectedRoute><Suporte /></ProtectedRoute>} />
             <Route path="/notificacoes" element={<ProtectedRoute><Notificacoes /></ProtectedRoute>} />
+            {/* Painel de gestão (só ADM — o layout bloqueia quem não é is_admin) */}
+            <Route path="/gestao" element={<ProtectedRoute><GestaoLayout /></ProtectedRoute>}>
+              <Route index element={<GestaoVisaoGeral />} />
+              <Route path="empresas" element={<GestaoEmpresas />} />
+              <Route path="profissionais" element={<GestaoProfissionais />} />
+              <Route path="usuario/:id" element={<GestaoUsuario />} />
+            </Route>
             <Route path="*" element={<NotFound />} />
           </Routes>
         </AuthProvider>
