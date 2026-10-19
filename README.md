@@ -19,8 +19,9 @@
    ```
 5. **Fase 4 — rode:** `supabase/migrations/20261020120000_fase4_taxas.sql` (sistema de taxas de 5%: confirmação de valor pelo profissional, saldo, trava no teto de R$ 50, divergências, quitação pelo ADM, cancelamento de vaga). Para mudar o teto ou a porcentagem: `frela_teto_taxas()` / `frela_taxa_percentual()` no SQL e `TETO_TAXAS` / `TAXA_PLATAFORMA` em `src/lib/pagamentos.ts`.
 6. **Fase 5 — rode:** `supabase/migrations/20261021120000_fase5_gestao.sql` (funções do painel de gestão, colunas de destaque/selos/metas/indicação). Depois disso, o painel fica em **`/gestao`** (só para `is_admin = true`).
-7. **Auth → URL Configuration:** coloque a URL do app em *Site URL* e adicione em *Redirect URLs* `<url-do-app>/auth` (confirmação de email) e `<url-do-app>/redefinir-senha` (esqueci minha senha).
-8. As migrations antigas (`20260324…`, `20260404…`, `20260618…`) são do projeto Supabase anterior — **não rode** no FreLa.
+7. **Fase 6 — rode:** `supabase/migrations/20261022120000_fase6_crescimento.sql` (selo Indicado automático, recomendações, Indique e Ganhe com crédito nas taxas). O `seed_demo.sql` agora requer as Fases 1–6.
+8. **Auth → URL Configuration:** coloque a URL do app em *Site URL* e adicione em *Redirect URLs* `<url-do-app>/auth` (confirmação de email) e `<url-do-app>/redefinir-senha` (esqueci minha senha).
+9. As migrations antigas (`20260324…`, `20260404…`, `20260618…`) são do projeto Supabase anterior — **não rode** no FreLa.
 
 ## Dados de demonstração (apresentação)
 
@@ -31,6 +32,12 @@
 ## Pagamentos (preparado, desativado)
 
 Ver `src/lib/pagamentos.ts`: mensalidade via IAP (App Store/Google Play) e quitação das taxas via Stripe (Pix/cartão) com baixa pelo webhook chamando `frela_quitar_taxas` — pontos de integração marcados com `TODO`. Nada é cobrado hoje; o ADM pode registrar pagamentos recebidos manualmente em `/admin/taxas`.
+
+### Indique e Ganhe
+Empresa compartilha o código/link (perfil da empresa). Quando a empresa indicada se cadastra com o código e **ativa a assinatura**, quem indicou ganha **R$ 50 de crédito** que abate o saldo de taxas (e, portanto, o teto/trava). O crédito é consumido na quitação. Status: `pendente` → `cadastrou` (perfil completo) → `pagou` (assinatura ativa) → `recompensado`.
+
+### Selos
+`Indicado` (automático: 10 trabalhos + nota ≥ 4,5 com 3+ avaliações, ou concedido pelo ADM), `Verificado` (ADM), `Top avaliado` (3+ avaliações e nota ≥ 4,7), `Destaque` (ADM), `Novo`. Quem tem selo aparece primeiro nas recomendações e na lista de candidatos.
 
 ### Ciclo da taxa de 5%
 1. Empresa confirma a finalização **declarando o valor pago** → taxa = 5% (status `pendente`).
@@ -60,6 +67,9 @@ Ver `src/lib/pagamentos.ts`: mensalidade via IAP (App Store/Google Play) e quita
 | `/admin/taxas` | ADM | divergências de valor e saldos por empresa (registrar pagamento) |
 | `/gestao` | ADM | painel de gestão: visão geral, financeiro, empresas, profissionais, crescimento, operação (tudo exporta para Excel) |
 | `/gestao/usuario/:id` | ADM | tudo sobre um usuário + promover/selos/meta |
+| `/recomendados` | empresa | vitrine "Melhores profissionais" (selo > avaliação > trabalhos) |
+| `/melhores-lugares` | profissional | empresas mais bem avaliadas e que mais contratam |
+| `/auth?indicacao=CODIGO` | todos | link de indicação (preenche o código no cadastro) |
 | `/redefinir-senha` | todos | destino do link "esqueci minha senha" |
 | `/planos` | todos | planos e modelo de receita ("assinar" → em breve) |
 | `/suporte` | todos | chat com a equipe FreLa |

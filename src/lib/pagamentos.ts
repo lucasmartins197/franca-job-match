@@ -39,6 +39,15 @@
 
 export const TAXA_PLATAFORMA = 0.05;
 
+/**
+ * Indique e Ganhe (Fase 6): empresa que indica outra empresa ganha este valor de
+ * CRÉDITO nas taxas quando a indicada ativa a assinatura (frela_recompensa_indicacao
+ * no SQL). O crédito abate o saldo (e portanto o teto/trava) e é consumido na quitação.
+ * TODO (IAP): a recompensa dispara quando profiles.subscription_status vira 'active' —
+ *   ou seja, assim que a Edge Function `validar-assinatura` gravar isso, nada mais muda.
+ */
+export const RECOMPENSA_INDICACAO = 50;
+
 /** Saldo de taxas a partir do qual a empresa fica travada (R$). */
 export const TETO_TAXAS = 50;
 

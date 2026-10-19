@@ -1,10 +1,10 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { CheckCircle2, Info, Loader2, Lock, QrCode, Receipt, Rocket } from "lucide-react";
+import { CheckCircle2, Gift, Info, Loader2, Lock, QrCode, Receipt, Rocket } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { formatBRL, formatDate } from "@/hooks/useFrela";
 import { useHistoricoTaxas, useResumoTaxas } from "@/hooks/useTaxas";
-import { STATUS_TAXA, TAXA_PLATAFORMA, quitarTaxas } from "@/lib/pagamentos";
+import { RECOMPENSA_INDICACAO, STATUS_TAXA, TAXA_PLATAFORMA, quitarTaxas } from "@/lib/pagamentos";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -105,6 +105,15 @@ const MinhasTaxas = () => {
           {resumo.em_divergencia > 0 && (
             <p className="text-[11px] text-muted-foreground mt-2">* Valores em análise não entram no saldo até a equipe resolver.</p>
           )}
+          {resumo.creditos > 0 && (
+            <button onClick={() => navigate("/profile")} className="w-full mt-3 rounded-xl border border-emerald-200 bg-emerald-50 p-3 text-left text-sm flex items-center gap-2">
+              <Gift className="h-4 w-4 text-emerald-700 shrink-0" />
+              <span className="flex-1 text-emerald-900">
+                Crédito de indicação: <b>−{formatBRL(resumo.creditos)}</b>
+                <span className="block text-xs">Taxas {formatBRL(resumo.bruto)} − crédito = saldo {formatBRL(resumo.saldo)}</span>
+              </span>
+            </button>
+          )}
 
           <Button onClick={handleQuitar} disabled={resumo.saldo <= 0 || quitando} className="w-full h-12 rounded-xl font-semibold text-base mt-5">
             {quitando ? <Loader2 className="h-5 w-5 animate-spin" /> : resumo.saldo > 0 ? `Quitar ${formatBRL(resumo.saldo)}` : "Nada a pagar"}
@@ -121,6 +130,7 @@ const MinhasTaxas = () => {
           <p>2. O profissional confirma que recebeu. Se ele contestar, a equipe FreLa analisa e ajusta.</p>
           <p>3. As taxas acumulam no saldo. Com {formatBRL(resumo.teto)} em aberto, a conta trava até a quitação.</p>
           <p>4. Para renovar a assinatura é preciso estar sem taxas em aberto.</p>
+          <p>5. Indique outras empresas: cada uma que assinar vale {formatBRL(RECOMPENSA_INDICACAO)} de desconto aqui.</p>
         </section>
 
         {/* Histórico */}

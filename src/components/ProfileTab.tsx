@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import { useHistoricoProfissional, useMeuPerfil } from "@/hooks/usePerfil";
 import MetasCard from "@/components/perfil/MetasCard";
+import IndiqueGanhe from "@/components/perfil/IndiqueGanhe";
 import ProfileView from "@/components/perfil/ProfileView";
 import { useSuporteNaoLidas } from "@/hooks/useSuporte";
 
@@ -27,6 +28,9 @@ const ProfileTab = () => {
   return (
     <div className="pb-24 pt-6 px-5 space-y-4">
       {perfil.profile.tipo === "freelancer" && <MetasCard profile={perfil.profile} trabalhos={historico?.length ?? 0} />}
+      {perfil.profile.tipo === "empresa" && (
+        <IndiqueGanhe codigo={perfil.profile.codigo_indicacao} nomeEmpresa={perfil.empresa?.nome_empresa || perfil.profile.nome || "Minha empresa"} />
+      )}
       <ProfileView perfil={perfil} mostrarContato />
       <Button onClick={() => navigate("/perfil/editar")} className="w-full h-12 rounded-xl font-semibold">
         <Edit2 className="h-4 w-4 mr-2" /> Editar perfil

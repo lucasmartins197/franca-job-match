@@ -1,12 +1,12 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
-import { Briefcase, Building2, ArrowLeft, Loader2, MailCheck, ChevronRight, KeyRound } from "lucide-react";
+import { Briefcase, Building2, ArrowLeft, Loader2, MailCheck, ChevronRight, KeyRound, CheckCircle2 } from "lucide-react";
 import OnboardingScreen from "@/components/OnboardingScreen";
 import Logo from "@/components/frela/Logo";
 import { useAuth } from "@/hooks/useAuth";
@@ -31,7 +31,12 @@ const traduzErro = (message: string) => {
 const Auth = () => {
   const navigate = useNavigate();
   const { session, userTipo, loading: authLoading, refreshAuthState } = useAuth();
-  const [step, setStep] = useState<Step>("onboarding");
+  const [searchParams] = useSearchParams();
+  const codigoDoLink = (searchParams.get("indicacao") ?? searchParams.get("ref") ?? "").trim().toUpperCase();
+  // Quem chega por link de indicação pula a apresentação
+  const [step, setStep] = useState<Step>(codigoDoLink ? "choose" : "onboarding");
+  const [codigoIndicacao, setCodigoIndicacao] = useState(codigoDoLink);
+  const [indicadoPor, setIndicadoPor] = useState<string | null>(null);
   const [tipo, setTipo] = useState<UserTipo>("freelancer");
   const [nome, setNome] = useState("");
   const [telefone, setTelefone] = useState("");
@@ -40,6 +45,24 @@ const Auth = () => {
   const [loading, setLoading] = useState(false);
   const [reenviando, setReenviando] = useState(false);
   const [linkEnviado, setLinkEnviado] = useState(false);
+
+  // Valida o código de indicação enquanto digita (mostra quem indicou)
+  useEffect(() => {
+    const codigo = codigoIndicacao.trim();
+    if (codigo.length < 4) {
+      setIndicadoPor(null);
+      return;
+    }
+    let cancelado = false;
+    const t = setTimeout(async () => {
+      const { data } = await supabase.rpc("validar_codigo_indicacao", { p_codigo: codigo });
+      if (!cancelado) setIndicadoPor(data ?? null);
+    }, 350);
+    return () => {
+      cancelado = true;
+      clearTimeout(t);
+    };
+  }, [codigoIndicacao]);
 
   useEffect(() => {
     if (!authLoading && session && userTipo) {
@@ -82,7 +105,13 @@ const Auth = () => {
       password: senha,
       options: {
         emailRedirectTo: `${window.location.origin}/auth`,
-        data: { nome: nome.trim(), tipo, telefone: telefone.trim() || null },
+        data: {
+          nome: nome.trim(),
+          tipo,
+          telefone: telefone.trim() || null,
+          // Indique e Ganhe: o banco liga o cadastro a quem indicou (handle_new_user)
+          indicacao: codigoIndicacao.trim().toUpperCase() || null,
+        },
       },
     });
 
@@ -210,6 +239,11 @@ const Auth = () => {
       <AnimatePresence mode="wait">
         {step === "choose" && (
           <motion.div key="choose" {...anim} className="flex-1">
+            {codigoDoLink && (
+              <div className="rounded-2xl border border-primary/30 bg-primary/5 p-3 mb-5 text-sm text-center text-foreground">
+                🎁 {indicadoPor ? <>Você foi indicado por <b>{indicadoPor}</b>.</> : "Você recebeu um convite."} Crie sua conta para começar.
+              </div>
+            )}
             <h2 className="text-xl font-display font-bold text-foreground text-center mb-6">Como você quer usar o FreLa?</h2>
             <div className="space-y-3">
               {[
@@ -260,6 +294,16 @@ const Auth = () => {
               <div className="space-y-1.5">
                 <Label htmlFor="senha">Senha</Label>
                 <Input id="senha" type="password" autoComplete="new-password" placeholder="Mínimo 6 caracteres" value={senha} onChange={(e) => setSenha(e.target.value)} className="h-12 rounded-xl" />
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="indicacao">Código de indicação <span className="text-muted-foreground font-normal">(opcional)</span></Label>
+                <Input id="indicacao" value={codigoIndicacao} maxLength={12} autoCapitalize="characters" placeholder="Ex: A1B2C3"
+                  onChange={(e) => setCodigoIndicacao(e.target.value.toUpperCase())} className="h-12 rounded-xl uppercase tracking-widest" />
+                {codigoIndicacao.length >= 4 && (
+                  indicadoPor
+                    ? <p className="text-xs text-emerald-700 flex items-center gap-1"><CheckCircle2 className="h-3.5 w-3.5" /> Indicado por {indicadoPor}</p>
+                    : <p className="text-xs text-muted-foreground">Código não encontrado — confira com quem te indicou.</p>
+                )}
               </div>
             </div>
             <Button type="submit" disabled={loading} className="w-full h-12 mt-6 rounded-xl font-semibold text-base">
