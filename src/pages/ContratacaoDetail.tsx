@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { Loader2, Calendar, Clock, MapPin, Phone, Info, ChevronRight, MessageCircle, Star } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -32,6 +32,14 @@ const ContratacaoDetail = () => {
   const { data: meuPerfil } = useMeuPerfil();
   const [nota, setNota] = useState(0);
   const [comentario, setComentario] = useState("");
+  const { hash } = useLocation();
+
+  // vindo de "Avaliar agora": rola até o cartão de avaliação
+  useEffect(() => {
+    if (hash === "#avaliacao" && contratacao?.status === "finalizada") {
+      setTimeout(() => document.getElementById("avaliacao")?.scrollIntoView({ behavior: "smooth", block: "center" }), 100);
+    }
+  }, [hash, contratacao?.status]);
 
   if (isLoading) {
     return <div className="min-h-screen bg-background flex items-center justify-center"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>;

@@ -106,13 +106,14 @@ export const useApply = () => {
       const { error } = await supabase.from("applications").insert({ job_id: jobId, user_id: userId });
       if (error) {
         if (error.code === "23505") throw new Error("Você já se candidatou a esta vaga.");
-        throw error;
+        throw new Error(mensagemTrava(error) ?? error.message);
       }
       // A notificação para a empresa é criada pelo trigger frela_on_application_insert.
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["my-applications"] });
     },
+    onError: () => queryClient.invalidateQueries({ queryKey: ["pendencias"] }),
   });
 };
 

@@ -13,6 +13,7 @@ import { CATEGORIAS, categoriaDe } from "@/lib/categorias";
 import { useJobs } from "@/hooks/useJobs";
 import { useProfilesByIds } from "@/hooks/useFrela";
 import { useMeuPerfil } from "@/hooks/usePerfil";
+import PendenciasAviso from "@/components/confirmacao/PendenciasAviso";
 
 const saudacao = () => {
   const h = new Date().getHours();
@@ -55,6 +56,7 @@ const HomeTab = () => {
           </div>
           <NotificationBell />
         </div>
+        <PendenciasAviso className="mb-4" />
         <div className="relative">
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input

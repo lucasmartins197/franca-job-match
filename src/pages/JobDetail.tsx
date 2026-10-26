@@ -1,11 +1,12 @@
 import { useParams, useNavigate } from "react-router-dom";
-import { MapPin, Clock, Calendar, Building2, CheckCircle2, Loader2, Users, ChevronRight } from "lucide-react";
+import { MapPin, Clock, Calendar, Building2, CheckCircle2, Loader2, Users, ChevronRight, Lock } from "lucide-react";
 import { motion } from "framer-motion";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { useJob, useApply, useMyApplications } from "@/hooks/useJobs";
 import { useAuth } from "@/hooks/useAuth";
 import { formatBRL } from "@/hooks/useFrela";
+import { textoPendencia, usePendencias } from "@/hooks/useConfirmacao";
 import { selosDe, usePerfilPublico } from "@/hooks/usePerfil";
 import UserAvatar from "@/components/frela/UserAvatar";
 import MapaEndereco from "@/components/frela/MapaEndereco";
@@ -23,6 +24,7 @@ const JobDetail = () => {
   const applyMutation = useApply();
   const { data: myApplications = [] } = useMyApplications();
   const { data: perfilEmpresa } = usePerfilPublico(job?.user_id);
+  const pendencias = usePendencias();
 
   if (isLoading) {
     return <div className="min-h-screen bg-background flex items-center justify-center"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>;
@@ -78,6 +80,21 @@ const JobDetail = () => {
     if (job.status !== "aberta") {
       return <p className="text-center text-muted-foreground h-14 flex items-center justify-center">Esta vaga não está mais aberta</p>;
     }
+    if (pendencias.bloqueiaCandidatura && pendencias.principal) {
+      const t = textoPendencia(pendencias.principal);
+      return (
+        <div className="space-y-2">
+          <p className="text-xs text-amber-900 bg-amber-50 border border-amber-200 rounded-lg p-2 flex gap-1.5">
+            <Lock className="h-3.5 w-3.5 shrink-0 mt-0.5" />
+            <span><b>Candidatura bloqueada.</b> {t.descricao}</span>
+          </p>
+          <Button onClick={() => navigate(`/contratacao/${pendencias.principal!.contratacao_id}`)}
+            className="w-full h-12 rounded-xl font-semibold text-base">
+            {t.acao}
+          </Button>
+        </div>
+      );
+    }
     return (
       <Button onClick={handleApply} disabled={applyMutation.isPending}
         className="w-full h-12 rounded-xl text-primary-foreground font-semibold text-base">
@@ -89,7 +106,7 @@ const JobDetail = () => {
   const acao = renderAcao();
 
   return (
-    <div className="min-h-screen bg-background pb-28 max-w-lg mx-auto">
+    <div className="min-h-screen bg-background pb-40 max-w-lg mx-auto">
       <PageHeader title="Detalhes da vaga" />
 
       <div className="px-5">

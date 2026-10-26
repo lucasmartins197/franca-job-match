@@ -1,4 +1,5 @@
 import { useNavigate } from "react-router-dom";
+import PendenciasAviso from "@/components/confirmacao/PendenciasAviso";
 import { ChevronRight, Briefcase, Star, BadgeDollarSign, Crown, KeyRound } from "lucide-react";
 import { ehIndicado, metasDoProfissional, useMeuPerfil } from "@/hooks/usePerfil";
 import { useMyApplications } from "@/hooks/useJobs";
@@ -106,6 +107,7 @@ const MyWorkTab = () => {
               <ChevronRight className="h-4 w-4" />
             </button>
           )}
+          <PendenciasAviso tipos={["digitar_codigo"]} />
           {aConfirmar.length > 0 && (
             <div className="rounded-2xl border-2 border-amber-300 bg-amber-50 p-4 flex gap-3 items-center">
               <BadgeDollarSign className="h-6 w-6 text-amber-700 shrink-0" />

@@ -7,6 +7,7 @@ import { AuthProvider, useAuth } from "@/hooks/useAuth";
 import { useMeuPerfil } from "@/hooks/usePerfil";
 import { useChatRealtime } from "@/hooks/useChat";
 import Logo from "@/components/frela/Logo";
+import AvaliacaoObrigatoriaModal from "@/components/confirmacao/AvaliacaoObrigatoriaModal";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
@@ -78,6 +79,7 @@ const App = () => (
       <BrowserRouter>
         <AuthProvider>
           <ChatRealtime />
+          <AvaliacaoObrigatoriaModal />
           <Routes>
             <Route path="/auth" element={<Auth />} />
             <Route path="/redefinir-senha" element={<RedefinirSenha />} />
