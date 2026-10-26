@@ -6,6 +6,7 @@ import { useHistoricoProfissional, useMeuPerfil } from "@/hooks/usePerfil";
 import MetasCard from "@/components/perfil/MetasCard";
 import ForcaCurriculo from "@/components/perfil/ForcaCurriculo";
 import IndiqueGanhe from "@/components/perfil/IndiqueGanhe";
+import ExcluirConta from "@/components/perfil/ExcluirConta";
 import ProfileView from "@/components/perfil/ProfileView";
 import { useSuporteNaoLidas } from "@/hooks/useSuporte";
 
@@ -74,6 +75,11 @@ const ProfileTab = () => {
         className="w-full h-12 rounded-xl border-destructive/30 text-destructive hover:bg-destructive/10">
         <LogOut className="h-4 w-4 mr-2" /> Sair da conta
       </Button>
+      <p className="text-xs text-center text-muted-foreground space-x-3">
+        <button onClick={() => navigate("/termos")} className="underline decoration-dotted">Termos de Uso</button>
+        <button onClick={() => navigate("/privacidade")} className="underline decoration-dotted">Privacidade</button>
+      </p>
+      <ExcluirConta />
     </div>
   );
 };

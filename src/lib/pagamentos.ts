@@ -112,7 +112,16 @@ export const calcularTaxa = (valor: number) => Math.round(valor * TAXA_PLATAFORM
 export type ResultadoAssinatura = { status: "em_breve" } | { status: "ok" } | { status: "taxas_pendentes" };
 
 /**
- * Ponto ÚNICO de início/renovação da assinatura.
+ * Ponto ÚNICO de início/renovação da assinatura (só EMPRESA).
+ * No app das lojas ela PRECISA ser In-App Purchase (Apple IAP / Google Play Billing):
+ *   TODO (IAP) — com o app Capacitor (capacitor.config.ts):
+ *     1. Criar o produto de assinatura FRELA_EMPRESA_MENSAL (R$ 89,90) no App Store
+ *        Connect e no Google Play Console.
+ *     2. `npm i @revenuecat/purchases-capacitor && npx cap sync` (ou cordova-plugin-purchase).
+ *     3. Aqui: se `ehAppNativo()` (src/lib/push.ts) → Purchases.purchasePackage(...);
+ *        no navegador → manter "em breve" (não vender assinatura fora da loja).
+ *     4. Recibo → Edge Function `validar-assinatura` → profiles.subscription_status.
+ *   A TAXA de 5% NÃO passa pela loja: é cobrança do backend (quitarTaxas abaixo).
  * Regra: empresa com taxas em aberto não assina/renova — precisa quitar antes.
  * TODO (IAP): depois da checagem, abrir o fluxo de compra da loja (ver topo do arquivo).
  *   A Edge Function `validar-assinatura` também deve chamar pode_renovar_assinatura()

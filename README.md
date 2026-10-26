@@ -20,8 +20,9 @@
 5. **Fase 4 — rode:** `supabase/migrations/20261020120000_fase4_taxas.sql` (sistema de taxas de 5%: confirmação de valor pelo profissional, saldo, trava no teto de R$ 50, divergências, quitação pelo ADM, cancelamento de vaga). Para mudar o teto ou a porcentagem: `frela_teto_taxas()` / `frela_taxa_percentual()` no SQL e `TETO_TAXAS` / `TAXA_PLATAFORMA` em `src/lib/pagamentos.ts`.
 6. **Fase 5 — rode:** `supabase/migrations/20261021120000_fase5_gestao.sql` (funções do painel de gestão, colunas de destaque/selos/metas/indicação). Depois disso, o painel fica em **`/gestao`** (só para `is_admin = true`).
 7. **Fase 6 — rode:** `supabase/migrations/20261022120000_fase6_crescimento.sql` (selo Indicado automático, recomendações, Indique e Ganhe com crédito nas taxas). O `seed_demo.sql` agora requer as Fases 1–6.
-8. **Auth → URL Configuration:** coloque a URL do app em *Site URL* e adicione em *Redirect URLs* `<url-do-app>/auth` (confirmação de email) e `<url-do-app>/redefinir-senha` (esqueci minha senha).
-9. As migrations antigas (`20260324…`, `20260404…`, `20260618…`) são do projeto Supabase anterior — **não rode** no FreLa.
+8. **Fase 7 — rode:** `supabase/migrations/20261023120000_fase7_ajustes_finais.sql` (profissional grátis nas métricas, código de confirmação cruzado, avaliação obrigatória, travas, aviso de vagas nos dias disponíveis, Verificado exige currículo completo).
+9. **Auth → URL Configuration:** coloque a URL do app em *Site URL* e adicione em *Redirect URLs* `<url-do-app>/auth` (confirmação de email) e `<url-do-app>/redefinir-senha` (esqueci minha senha).
+10. As migrations antigas (`20260324…`, `20260404…`, `20260618…`) são do projeto Supabase anterior — **não rode** no FreLa.
 
 ## Dados de demonstração (apresentação)
 
@@ -31,7 +32,8 @@
 
 ## Pagamentos (preparado, desativado)
 
-Ver `src/lib/pagamentos.ts`: mensalidade via IAP (App Store/Google Play) e quitação das taxas via Stripe (Pix/cartão) com baixa pelo webhook chamando `frela_quitar_taxas` — pontos de integração marcados com `TODO`. Nada é cobrado hoje; o ADM pode registrar pagamentos recebidos manualmente em `/admin/taxas`.
+**Profissional é grátis.** Só a empresa paga: assinatura de R$ 89,90/mês + 5% por contratação.
+Ver `src/lib/pagamentos.ts`: mensalidade da empresa via IAP (App Store/Google Play) e quitação das taxas via Stripe (Pix/cartão) com baixa pelo webhook chamando `frela_quitar_taxas` — pontos de integração marcados com `TODO`. Nada é cobrado hoje; o ADM pode registrar pagamentos recebidos manualmente em `/admin/taxas`.
 
 ### Indique e Ganhe
 Empresa compartilha o código/link (perfil da empresa). Quando a empresa indicada se cadastra com o código e **ativa a assinatura**, quem indicou ganha **R$ 50 de crédito** que abate o saldo de taxas (e, portanto, o teto/trava). O crédito é consumido na quitação. Status: `pendente` → `cadastrou` (perfil completo) → `pagou` (assinatura ativa) → `recompensado`.
@@ -39,12 +41,30 @@ Empresa compartilha o código/link (perfil da empresa). Quando a empresa indicad
 ### Selos
 `Indicado` (automático: 10 trabalhos + nota ≥ 4,5 com 3+ avaliações, ou concedido pelo ADM), `Verificado` (ADM), `Top avaliado` (3+ avaliações e nota ≥ 4,7), `Destaque` (ADM), `Novo`. Quem tem selo aparece primeiro nas recomendações e na lista de candidatos.
 
-### Ciclo da taxa de 5%
-1. Empresa confirma a finalização **declarando o valor pago** → taxa = 5% (status `pendente`).
-2. Profissional **confirma** (`confirmada`) ou **contesta** (`em_divergencia`, fora do saldo até um ADM resolver).
-3. Saldo = `pendente` + `confirmada` não pagas. **Saldo ≥ R$ 50 → trava**: sem novas vagas e sem confirmar finalizações (garantido no banco).
-4. Renovação da assinatura só com zero taxas em aberto.
-5. Quitação → `paga` (hoje manual pelo ADM; depois automática pelo Stripe).
+### Ciclo da taxa de 5% (com código de confirmação — Fase 7)
+1. Depois do serviço, a empresa toca em **Serviço realizado** e **declara o valor pago** → o app gera um **código de 4 dígitos** que só ela vê.
+2. A empresa passa o código ao profissional **pessoalmente**. Ele digita no app (5 erros bloqueiam; a empresa gera outro) e confirma o valor — ou contesta (`em_divergencia`, fora do saldo até um ADM resolver).
+3. Código certo → contratação finalizada, taxa de 5% no saldo (`confirmada`) e **avaliação obrigatória** (estrelas + comentário) para os dois.
+4. Travas: empresa sem nova vaga com serviço em andamento, avaliação pendente ou saldo ≥ R$ 50; profissional sem se candidatar com serviço não confirmado pelo código (código gerado ou dia já passou) ou avaliação pendente.
+5. Travou (profissional sem celular, não compareceu)? O ADM abre a contratação e usa **Encerrar** (valor 0 = sem taxa).
+
+Contratações finalizadas antes da Fase 7 continuam no fluxo antigo (profissional confirma o valor pelo cartão "Confirme o valor recebido").
+- Renovação da assinatura só com zero taxas em aberto.
+- Quitação → `paga` (hoje manual pelo ADM; depois automática pelo Stripe).
+
+## Publicar nas lojas (Capacitor)
+
+O app nativo usa **Capacitor 8** (`capacitor.config.ts`, pastas `android/` e `ios/`). `appId`: `br.com.frela.app` (troque antes da 1ª publicação se quiser outro — depois não muda).
+
+1. `npm run cap:sync` (build + copia para Android/iOS) → `npm run cap:android` (Android Studio) / `npm run cap:ios` (Xcode, no Mac).
+2. Ícone e splash: edite `assets/icon-only.png`, `assets/icon-foreground.png`, `assets/icon-background.png`, `assets/splash.png` e rode `npm run cap:icones`.
+3. Antes de enviar:
+   - preencher `src/lib/legal.ts` (razão social/CNPJ e e-mail) e informar a URL pública de `/privacidade` nas lojas;
+   - **Supabase Auth → Redirect URLs**: os links de e-mail (confirmação e "esqueci a senha") abrem no navegador; para abrirem no app, configurar deep link (App Links/Universal Links) — TODO;
+   - versão em `android/app/build.gradle` (`versionCode`/`versionName`) e no Xcode.
+4. **Assinatura da empresa = In-App Purchase** (Apple/Google), nunca Stripe — ponto marcado em `iniciarAssinatura()` (`src/lib/pagamentos.ts`). A taxa de 5% é cobrada fora do app (backend).
+5. Push nativo: passo a passo em `src/lib/push.ts` (hoje as notificações são internas, no sino).
+6. Exclusão de conta: Perfil → "Excluir minha conta" (vira pedido no suporte; concluir em até 7 dias).
 
 ## Rotas
 
@@ -55,7 +75,7 @@ Empresa compartilha o código/link (perfil da empresa). Quando a empresa indicad
 | `/dashboard` | empresa | painel, trava, contratações em andamento, minhas vagas por status |
 | `/job/:id` | todos | detalhe da vaga / candidatar-se |
 | `/job/:id/candidates` | empresa | candidatos → aceitar/recusar |
-| `/contratacao/:id` | as duas partes | confirmar finalização, avaliações |
+| `/contratacao/:id` | as duas partes | código de confirmação (empresa gera, profissional digita), avaliações obrigatórias |
 | `/notificacoes` | todos | lista, marcar como lida |
 | `/profile` | empresa | meu perfil (o profissional usa a aba Perfil) |
 | `/completar-perfil` | todos | obrigatório após o cadastro (foto + campos essenciais) |
@@ -71,7 +91,8 @@ Empresa compartilha o código/link (perfil da empresa). Quando a empresa indicad
 | `/melhores-lugares` | profissional | empresas mais bem avaliadas e que mais contratam |
 | `/auth?indicacao=CODIGO` | todos | link de indicação (preenche o código no cadastro) |
 | `/redefinir-senha` | todos | destino do link "esqueci minha senha" |
-| `/planos` | todos | planos e modelo de receita ("assinar" → em breve) |
+| `/planos` | todos | empresa: plano e taxa ("assinar" → em breve); profissional: "grátis" |
+| `/privacidade`, `/termos` | público | política de privacidade e termos (exigidos pelas lojas) |
 | `/suporte` | todos | chat com a equipe FreLa |
 | `/admin/suporte` | ADM | chamados de suporte; `/admin/suporte/:userId` responde |
 
