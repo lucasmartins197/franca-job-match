@@ -38,6 +38,8 @@ import GestaoOperacao from "./pages/gestao/Operacao";
 import Recomendados from "./pages/Recomendados";
 import MelhoresLugares from "./pages/MelhoresLugares";
 import NotFound from "./pages/NotFound";
+import { Privacidade, Termos } from "./pages/Legal";
+import AppNativo from "./components/frela/AppNativo";
 
 const queryClient = new QueryClient({
   defaultOptions: { queries: { staleTime: 15_000, refetchOnWindowFocus: true } },
@@ -80,8 +82,11 @@ const App = () => (
         <AuthProvider>
           <ChatRealtime />
           <AvaliacaoObrigatoriaModal />
+          <AppNativo />
           <Routes>
             <Route path="/auth" element={<Auth />} />
+            <Route path="/privacidade" element={<Privacidade />} />
+            <Route path="/termos" element={<Termos />} />
             <Route path="/redefinir-senha" element={<RedefinirSenha />} />
             <Route path="/completar-perfil" element={<ProtectedRoute perfilIncompletoOk><CompletarPerfil /></ProtectedRoute>} />
             <Route path="/" element={<ProtectedRoute><Index /></ProtectedRoute>} />
