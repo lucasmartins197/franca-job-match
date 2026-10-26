@@ -1,0 +1,13 @@
+{
+  "name": "FreLa — Freelas em Franca",
+  "short_name": "FreLa",
+  "lang": "pt-BR",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f6faf9",
+  "theme_color": "#126f66",
+  "icons": [
+    { "src": "/icon-192.png", "type": "image/png", "sizes": "192x192" },
+    { "src": "/icon-512.png", "type": "image/png", "sizes": "512x512", "purpose": "any maskable" }
+  ]
+}

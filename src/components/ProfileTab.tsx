@@ -4,7 +4,9 @@ import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import { useHistoricoProfissional, useMeuPerfil } from "@/hooks/usePerfil";
 import MetasCard from "@/components/perfil/MetasCard";
+import ForcaCurriculo from "@/components/perfil/ForcaCurriculo";
 import IndiqueGanhe from "@/components/perfil/IndiqueGanhe";
+import ExcluirConta from "@/components/perfil/ExcluirConta";
 import ProfileView from "@/components/perfil/ProfileView";
 import { useSuporteNaoLidas } from "@/hooks/useSuporte";
 
@@ -39,6 +41,7 @@ const ProfileTab = () => {
         </button>
       )}
       {perfil.profile.tipo === "freelancer" && <MetasCard profile={perfil.profile} trabalhos={historico?.length ?? 0} />}
+      {perfil.profile.tipo === "freelancer" && <ForcaCurriculo perfil={perfil} />}
       {perfil.profile.tipo === "empresa" && (
         <IndiqueGanhe codigo={perfil.profile.codigo_indicacao} nomeEmpresa={perfil.empresa?.nome_empresa || perfil.profile.nome || "Minha empresa"} />
       )}
@@ -50,7 +53,7 @@ const ProfileTab = () => {
       <nav className="bg-card border border-border rounded-2xl divide-y divide-border overflow-hidden shadow-card">
         {[
           { to: "/taxas", icon: Receipt, titulo: "Minhas taxas", sub: "Saldo da taxa de 5% e histórico", badge: 0, mostrar: perfil.profile.tipo === "empresa" },
-          { to: "/planos", icon: Crown, titulo: "Meu plano", sub: perfil.profile.subscription_status === "active" ? "Assinatura ativa" : "Lançamento gratuito · ver planos", badge: 0, mostrar: true },
+          { to: "/planos", icon: Crown, titulo: "Meu plano", sub: perfil.profile.subscription_status === "active" ? "Assinatura ativa" : "Lançamento gratuito · ver planos", badge: 0, mostrar: perfil.profile.tipo === "empresa" },
           { to: "/suporte", icon: Headset, titulo: "Falar com a equipe", sub: "Dúvidas, problemas ou sugestões", badge: perfil.profile.is_admin ? 0 : suporteNaoLidas, mostrar: true },
           { to: "/admin/taxas", icon: Scale, titulo: "Taxas e divergências (ADM)", sub: "Resolver valores contestados e registrar pagamentos", badge: 0, mostrar: !!perfil.profile.is_admin },
           { to: "/admin/suporte", icon: ShieldCheck, titulo: "Atendimento (ADM)", sub: "Responder chamados de suporte", badge: suporteNaoLidas, mostrar: !!perfil.profile.is_admin },
@@ -72,6 +75,11 @@ const ProfileTab = () => {
         className="w-full h-12 rounded-xl border-destructive/30 text-destructive hover:bg-destructive/10">
         <LogOut className="h-4 w-4 mr-2" /> Sair da conta
       </Button>
+      <p className="text-xs text-center text-muted-foreground space-x-3">
+        <button onClick={() => navigate("/termos")} className="underline decoration-dotted">Termos de Uso</button>
+        <button onClick={() => navigate("/privacidade")} className="underline decoration-dotted">Privacidade</button>
+      </p>
+      <ExcluirConta />
     </div>
   );
 };

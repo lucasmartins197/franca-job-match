@@ -20,7 +20,6 @@ const VisaoGeral = () => {
   }
 
   const mes = new Date().toLocaleDateString("pt-BR", { month: "long" });
-  const assinantes = (v?.assinantes_empresa ?? 0) + (v?.assinantes_profissional ?? 0);
 
   return (
     <div className="space-y-5">
@@ -39,10 +38,10 @@ const VisaoGeral = () => {
           sub="ativas nos últimos 30 dias / cadastradas" />
         <Stat titulo="Profissionais ativos" valor={`${v?.profissionais_ativos ?? 0} / ${v?.profissionais ?? 0}`} icon={Users} carregando={isLoading}
           sub="ativos nos últimos 30 dias / cadastrados" />
-        <Stat titulo="Conversão (cadastro → assinante)" valor={pct(v?.conversao)} icon={BadgePercent} carregando={isLoading}
-          sub={`${assinantes} assinantes de ${v?.cadastros ?? 0} cadastros`} />
+        <Stat titulo="Conversão (empresa → assinante)" valor={pct(v?.conversao)} icon={BadgePercent} carregando={isLoading}
+          sub={`${v?.assinantes_empresa ?? 0} assinantes de ${v?.empresas ?? 0} empresas`} />
         <Stat titulo="MRR (assinaturas ativas)" valor={brl(v?.mrr)} icon={Wallet} carregando={isLoading}
-          sub={`${v?.assinantes_empresa ?? 0} empresas · ${v?.assinantes_profissional ?? 0} profissionais`} />
+          sub={`${v?.assinantes_empresa ?? 0} empresas × ${brl(v?.precos?.empresa)} · profissional é grátis`} />
       </div>
 
       {v && (v.empresas_travadas > 0 || v.divergencias > 0 || v.suporte_abertos > 0) && (
@@ -113,7 +112,7 @@ const VisaoGeral = () => {
         <Secao titulo="Como os números são calculados">
           <ul className="text-xs text-muted-foreground space-y-1.5">
             <li><b className="text-foreground">Ativo:</b> teve atividade (cadastro, vaga, candidatura ou contratação) nos últimos 30 dias.</li>
-            <li><b className="text-foreground">MRR:</b> assinantes ativos × preço do plano ({brl(v?.precos?.freelancer)} / {brl(v?.precos?.empresa)}).</li>
+            <li><b className="text-foreground">MRR:</b> empresas assinantes × {brl(v?.precos?.empresa)}. Profissionais usam o FreLa de graça e não entram na receita.</li>
             <li><b className="text-foreground">Receita do mês:</b> MRR + taxas de 5% das contratações finalizadas no mês (exceto em divergência).</li>
             <li><b className="text-foreground">Acumulada:</b> todas as taxas geradas + assinaturas registradas em pagamentos.</li>
             <li>ADMs não entram nas contagens. Use o seletor "Incluir dados demo" no topo.</li>

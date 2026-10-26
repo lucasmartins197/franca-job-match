@@ -48,7 +48,7 @@ const UsuarioDetalhe = () => {
           <div className="flex flex-wrap items-center gap-2">
             <h1 className="text-xl font-display font-bold text-foreground">{nome}</h1>
             <Chip tipo="inativo">{isEmpresa ? "Empresa" : "Profissional"}</Chip>
-            {assinante ? <Chip tipo="assinante">Assinante</Chip> : <Chip tipo="inativo">Sem assinatura</Chip>}
+            {isEmpresa && (assinante ? <Chip tipo="assinante">Assinante</Chip> : <Chip tipo="inativo">Sem assinatura</Chip>)}
             {p.is_demo && <Chip tipo="demo">demo</Chip>}
           </div>
           {isEmpresa && p.nome && <p className="text-sm text-muted-foreground">Responsável: {p.nome}</p>}

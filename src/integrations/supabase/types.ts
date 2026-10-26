@@ -101,6 +101,10 @@ export type Database = {
           motivo_divergencia: string | null
           status_taxa: string | null
           taxa_paga_em: string | null
+          codigo_gerado_em: string | null
+          confirmado_por_codigo: boolean
+          codigo_confirmado_em: string | null
+          codigo_tentativas: number
           valor_confirmado_profissional: boolean
           valor_contestado: number | null
         }
@@ -120,6 +124,10 @@ export type Database = {
           motivo_divergencia?: string | null
           status_taxa?: string | null
           taxa_paga_em?: string | null
+          codigo_gerado_em?: string | null
+          confirmado_por_codigo?: boolean
+          codigo_confirmado_em?: string | null
+          codigo_tentativas?: number
           valor_confirmado_profissional?: boolean
           valor_contestado?: number | null
         }
@@ -139,6 +147,10 @@ export type Database = {
           motivo_divergencia?: string | null
           status_taxa?: string | null
           taxa_paga_em?: string | null
+          codigo_gerado_em?: string | null
+          confirmado_por_codigo?: boolean
+          codigo_confirmado_em?: string | null
+          codigo_tentativas?: number
           valor_confirmado_profissional?: boolean
           valor_contestado?: number | null
         }
@@ -872,6 +884,30 @@ export type Database = {
           pago: number
           saldo: number
         }[]
+      }
+      gerar_codigo_confirmacao: {
+        Args: { p_id: string; p_valor: number }
+        Returns: string
+      }
+      meu_codigo_confirmacao: {
+        Args: { p_id: string }
+        Returns: string | null
+      }
+      confirmar_codigo_contratacao: {
+        Args: { p_id: string; p_codigo: string; p_valor_confere?: boolean; p_valor_recebido?: number; p_motivo?: string }
+        Returns: string
+      }
+      admin_encerrar_contratacao: {
+        Args: { p_id: string; p_valor: number }
+        Returns: undefined
+      }
+      minhas_pendencias: {
+        Args: Record<PropertyKey, never>
+        Returns: { tipo: string; contratacao_id: string; titulo: string; data: string; bloqueia: boolean }[]
+      }
+      frela_curriculo_completo: {
+        Args: { p_id: string }
+        Returns: boolean
       }
       confirmar_valor_contratacao: {
         Args: { p_id: string; p_confirma: boolean; p_valor_recebido?: number; p_motivo?: string }

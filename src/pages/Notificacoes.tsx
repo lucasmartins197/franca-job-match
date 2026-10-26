@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { Bell, Loader2, UserPlus, CheckCircle2, Star, MessageSquare, Flag, Headset, BadgeDollarSign, Receipt, AlertTriangle, XCircle, Gift } from "lucide-react";
+import { Bell, Loader2, UserPlus, CheckCircle2, Star, MessageSquare, Flag, Headset, BadgeDollarSign, Receipt, AlertTriangle, XCircle, Gift, KeyRound, CalendarCheck } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { DbNotificacao, useMarcarNotificacaoLida, useNotificacoes } from "@/hooks/useFrela";
@@ -18,6 +18,11 @@ const ICONES: Record<string, typeof Bell> = {
   divergencia: AlertTriangle,
   cancelamento: XCircle,
   indicacao: Gift,
+  // Fase 7
+  codigo_gerado: KeyRound,
+  digitar_codigo: KeyRound,
+  avaliar: Star,
+  vaga_disponivel: CalendarCheck,
 };
 
 const Notificacoes = () => {
@@ -46,7 +51,7 @@ const Notificacoes = () => {
         {isLoading && <div className="flex justify-center py-12"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>}
         {!isLoading && notificacoes.length === 0 && (
           <EmptyState icon={Bell} titulo="Tudo em dia por aqui"
-            descricao="Avisos sobre candidaturas, confirmações, mensagens e avaliações aparecem aqui." />
+            descricao="Vagas nos seus dias disponíveis, candidaturas, códigos de confirmação, mensagens e avaliações aparecem aqui." />
         )}
         {notificacoes.map((n) => {
           const Icone = ICONES[n.tipo] ?? Bell;

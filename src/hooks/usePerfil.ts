@@ -35,7 +35,8 @@ export const camposFaltando = (p: PerfilCompleto | null | undefined): string[] =
     if (!d?.profissoes || d.profissoes.length === 0) faltando.push("profissões");
     if (!preenchido(d?.experiencia)) faltando.push("experiência");
     if (!preenchido(d?.bio)) faltando.push("sobre você");
-    if (!preenchido(d?.disponibilidade)) faltando.push("disponibilidade");
+    // dias disponíveis: usados nos avisos de vagas (mesma regra de frela_curriculo_completo no SQL)
+    if (parseDisponibilidade(d?.disponibilidade).dias.length === 0) faltando.push("dias disponíveis");
   }
   return faltando;
 };
@@ -345,7 +346,7 @@ export const metasDoProfissional = (profile: Tables<"profiles">, trabalhos: numb
     {
       id: "verificado", titulo: "Verificado", atingida: !!profile.verificado, progresso: profile.verificado ? 100 : 0,
       detalhe: "Concedido pela equipe FreLa",
-      dica: profile.verificado ? "Sua identidade foi conferida." : "Peça a verificação no suporte (envie um documento com foto).",
+      dica: profile.verificado ? "Sua identidade foi conferida." : "Com o currículo completo, peça a verificação no suporte (envie um documento com foto).",
     },
   ];
 };

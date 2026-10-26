@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Loader2 } from "lucide-react";
+import { ArrowLeft, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -15,6 +15,7 @@ import { TODAS_FUNCOES } from "@/lib/categorias";
 import PortfolioEditor from "@/components/perfil/PortfolioEditor";
 import PhotoUpload from "@/components/frela/PhotoUpload";
 import ChipSelect from "@/components/frela/ChipSelect";
+import { Progress } from "@/components/ui/progress";
 
 const RAMOS = ["Bar / Restaurante", "Comércio / Loja", "Eventos", "Beleza e Estética", "Indústria", "Logística", "Construção", "Serviços", "Outro"];
 
@@ -22,7 +23,31 @@ interface Props {
   perfil: PerfilCompleto;
   submitLabel?: string;
   onSaved?: () => void;
+  /** Onboarding: mostra uma etapa por vez (Continuar / Voltar) e salva no fim. */
+  passoAPasso?: boolean;
 }
+
+type SecaoId = "foto" | "empresa" | "pessoal" | "oquefaz" | "disp" | "portfolio" | "redes";
+
+interface Passo {
+  titulo: string;
+  descricao: string;
+  secoes: SecaoId[];
+  /** nomes de camposFaltando() validados ao avançar */
+  campos: string[];
+}
+
+const PASSOS_PROFISSIONAL: Passo[] = [
+  { titulo: "Foto e contato", descricao: "Uma foto de rosto, nítida, passa confiança para a empresa.", secoes: ["foto", "pessoal"], campos: ["foto", "nome", "telefone", "cidade"] },
+  { titulo: "O que você faz", descricao: "Escolha suas profissões e conte sua experiência — é o seu currículo.", secoes: ["oquefaz"], campos: ["profissões", "experiência", "sobre você"] },
+  { titulo: "Quando você pode trabalhar", descricao: "Avisamos você quando abrir vaga da sua profissão nesses dias.", secoes: ["disp"], campos: ["dias disponíveis"] },
+  { titulo: "Portfólio e redes", descricao: "Opcional, mas perfis com fotos de trabalhos recebem mais convites.", secoes: ["portfolio", "redes"], campos: [] },
+];
+
+const PASSOS_EMPRESA: Passo[] = [
+  { titulo: "Sua empresa", descricao: "Os profissionais veem isso antes de se candidatar.", secoes: ["foto", "empresa"], campos: ["foto", "nome da empresa", "ramo", "endereço"] },
+  { titulo: "Responsável e contato", descricao: "Quem fala com o profissional no dia do serviço.", secoes: ["pessoal"], campos: ["nome", "telefone", "cidade"] },
+];
 
 const Campo = ({ id, label, obrigatorio, children, dica }: { id?: string; label: string; obrigatorio?: boolean; children: React.ReactNode; dica?: string }) => (
   <div className="space-y-1.5">
@@ -42,11 +67,15 @@ const Secao = ({ titulo, children }: { titulo: string; children: React.ReactNode
 );
 
 /** Formulário de perfil (profissional ou empresa). Usado em "completar perfil" e "editar perfil". */
-const ProfileForm = ({ perfil, submitLabel = "Salvar perfil", onSaved }: Props) => {
+const ProfileForm = ({ perfil, submitLabel = "Salvar perfil", onSaved, passoAPasso = false }: Props) => {
   const { user } = useAuth();
   const invalidate = useInvalidatePerfil();
   const isEmpresa = perfil.profile.tipo === "empresa";
   const [saving, setSaving] = useState(false);
+  const [passo, setPasso] = useState(0);
+  const passos = isEmpresa ? PASSOS_EMPRESA : PASSOS_PROFISSIONAL;
+  const ultimoPasso = !passoAPasso || passo === passos.length - 1;
+  const mostra = (id: SecaoId) => !passoAPasso || passos[passo].secoes.includes(id);
 
   const [foto, setFoto] = useState<string | null>(null);
   const [nome, setNome] = useState("");
@@ -90,10 +119,8 @@ const ProfileForm = ({ perfil, submitLabel = "Salvar perfil", onSaved }: Props) 
     setBioEmpresa(e?.bio ?? "");
   }, [perfil]);
 
-  const handleSubmit = async (ev: React.FormEvent) => {
-    ev.preventDefault();
-    if (!user) return;
-
+  const montarRascunho = (): PerfilCompleto | null => {
+    if (!user) return null;
     const disponibilidade = formatDisponibilidade(dias, periodos, obsDisp);
     const rascunho: PerfilCompleto = {
       profile: { ...perfil.profile, foto_url: foto, nome: nome.trim(), telefone: telefone.trim(), cidade: cidade.trim() },
@@ -121,6 +148,27 @@ const ProfileForm = ({ perfil, submitLabel = "Salvar perfil", onSaved }: Props) 
             linkedin: linkedin.trim() ? normalizarLinkedin(linkedin) : null,
           },
     };
+    return rascunho;
+  };
+
+  const avancar = () => {
+    const rascunho = montarRascunho();
+    if (!rascunho) return;
+    const faltando = camposFaltando(rascunho).filter((c) => passos[passo].campos.includes(c));
+    if (faltando.length > 0) {
+      toast.error(`Falta preencher: ${faltando.join(", ")}`);
+      return;
+    }
+    setPasso((p) => p + 1);
+    window.scrollTo(0, 0);
+  };
+
+  const handleSubmit = async (ev: React.FormEvent) => {
+    ev.preventDefault();
+    if (!user) return;
+    if (!ultimoPasso) return avancar();
+    const rascunho = montarRascunho();
+    if (!rascunho) return;
 
     const faltando = camposFaltando(rascunho);
     if (faltando.length > 0) {
@@ -171,9 +219,21 @@ const ProfileForm = ({ perfil, submitLabel = "Salvar perfil", onSaved }: Props) 
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      {user && <PhotoUpload userId={user.id} nome={isEmpresa ? nomeEmpresa || nome : nome} value={foto} onChange={setFoto} obrigatoria />}
+      {passoAPasso && (
+        <div>
+          <div className="flex justify-between text-xs text-muted-foreground mb-1.5">
+            <span>Passo {passo + 1} de {passos.length}</span>
+            <span>{Math.round(((passo + 1) / passos.length) * 100)}%</span>
+          </div>
+          <Progress value={((passo + 1) / passos.length) * 100} className="h-2" />
+          <h2 className="text-lg font-display font-bold text-foreground mt-4">{passos[passo].titulo}</h2>
+          <p className="text-sm text-muted-foreground">{passos[passo].descricao}</p>
+        </div>
+      )}
 
-      {isEmpresa ? (
+      {mostra("foto") && user && <PhotoUpload userId={user.id} nome={isEmpresa ? nomeEmpresa || nome : nome} value={foto} onChange={setFoto} obrigatoria />}
+
+      {isEmpresa && mostra("empresa") ? (
         <Secao titulo="Sua empresa">
           <Campo id="nome-empresa" label="Nome da empresa" obrigatorio>
             <Input id="nome-empresa" value={nomeEmpresa} onChange={(e) => setNomeEmpresa(e.target.value)} className="h-11 rounded-xl" />
@@ -194,7 +254,7 @@ const ProfileForm = ({ perfil, submitLabel = "Salvar perfil", onSaved }: Props) 
         </Secao>
       ) : null}
 
-      <Secao titulo={isEmpresa ? "Responsável e contato" : "Dados pessoais"}>
+      {mostra("pessoal") && <Secao titulo={isEmpresa ? "Responsável e contato" : "Dados pessoais"}>
         <Campo id="nome" label={isEmpresa ? "Nome do responsável" : "Nome completo"} obrigatorio>
           <Input id="nome" value={nome} onChange={(e) => setNome(e.target.value)} className="h-11 rounded-xl" />
         </Campo>
@@ -209,11 +269,11 @@ const ProfileForm = ({ perfil, submitLabel = "Salvar perfil", onSaved }: Props) 
         {!isEmpresa && (
           <p className="text-xs text-muted-foreground">Seu telefone só aparece para a empresa depois que ela confirmar você numa vaga.</p>
         )}
-      </Secao>
+      </Secao>}
 
       {!isEmpresa && (
         <>
-          <Secao titulo="O que você faz">
+          {mostra("oquefaz") && <Secao titulo="O que você faz">
             <Campo label="Profissões" obrigatorio dica="Escolha todas que você faz.">
               <ChipSelect options={TODAS_FUNCOES} value={profissoes} onChange={setProfissoes} allowCustom limite={14} />
             </Campo>
@@ -225,41 +285,48 @@ const ProfileForm = ({ perfil, submitLabel = "Salvar perfil", onSaved }: Props) 
               <Textarea id="bio" placeholder="Conte um pouco sobre você, seu jeito de trabalhar..." value={bio}
                 onChange={(e) => setBio(e.target.value)} className="rounded-xl min-h-[80px]" maxLength={600} />
             </Campo>
-          </Secao>
+          </Secao>}
 
-          <Secao titulo="Disponibilidade">
-            <Campo label="Dias" obrigatorio>
+          {mostra("disp") && <Secao titulo="Disponibilidade">
+            <Campo label="Dias em que você pode trabalhar" obrigatorio dica="Você recebe aviso das vagas da sua profissão nesses dias.">
               <ChipSelect options={DIAS} value={dias} onChange={(v) => setDias(DIAS.filter((d) => v.includes(d)))} />
             </Campo>
-            <Campo label="Períodos">
+            <Campo label="Períodos" dica="Se marcar, só avisamos de vagas que começam nesses períodos.">
               <ChipSelect options={PERIODOS} value={periodos} onChange={(v) => setPeriodos(PERIODOS.filter((p) => v.includes(p)))} />
             </Campo>
             <Campo id="obs-disp" label="Observação">
               <Input id="obs-disp" placeholder="Ex: só depois das 18h durante a semana" value={obsDisp} onChange={(e) => setObsDisp(e.target.value)} className="h-11 rounded-xl" />
             </Campo>
-          </Secao>
+          </Secao>}
 
-          {user && (
+          {mostra("portfolio") && user && (
             <Secao titulo="Portfólio (opcional)">
               <p className="text-xs text-muted-foreground -mt-2">Fotos de trabalhos que você já fez: eventos, pratos, unhas, obras... Perfis com fotos recebem mais convites.</p>
               <PortfolioEditor userId={user.id} />
             </Secao>
           )}
 
-          <Secao titulo="Redes sociais (opcional)">
+          {mostra("redes") && <Secao titulo="Redes sociais (opcional)">
             <Campo id="instagram" label="Instagram">
               <Input id="instagram" placeholder="@seuperfil" value={instagram} onChange={(e) => setInstagram(e.target.value)} className="h-11 rounded-xl" autoCapitalize="none" />
             </Campo>
             <Campo id="linkedin" label="LinkedIn">
               <Input id="linkedin" placeholder="linkedin.com/in/seuperfil" value={linkedin} onChange={(e) => setLinkedin(e.target.value)} className="h-11 rounded-xl" autoCapitalize="none" />
             </Campo>
-          </Secao>
+          </Secao>}
         </>
       )}
 
-      <Button type="submit" disabled={saving} className="w-full h-12 rounded-xl font-semibold text-base">
-        {saving ? <Loader2 className="h-5 w-5 animate-spin" /> : submitLabel}
-      </Button>
+      <div className="flex gap-2">
+        {passoAPasso && passo > 0 && (
+          <Button type="button" variant="outline" onClick={() => { setPasso((p) => p - 1); window.scrollTo(0, 0); }} className="h-12 rounded-xl" aria-label="Voltar">
+            <ArrowLeft className="h-5 w-5" />
+          </Button>
+        )}
+        <Button type="submit" disabled={saving} className="flex-1 h-12 rounded-xl font-semibold text-base">
+          {saving ? <Loader2 className="h-5 w-5 animate-spin" /> : ultimoPasso ? submitLabel : "Continuar"}
+        </Button>
+      </div>
     </form>
   );
 };

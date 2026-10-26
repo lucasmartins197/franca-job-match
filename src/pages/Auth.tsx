@@ -310,6 +310,10 @@ const Auth = () => {
               {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : "Criar conta"}
             </Button>
             <p className="text-xs text-muted-foreground text-center mt-3">
+              Ao criar a conta você aceita os <a href="/termos" className="underline">Termos de Uso</a> e a{" "}
+              <a href="/privacidade" className="underline">Política de Privacidade</a>.
+            </p>
+            <p className="text-xs text-muted-foreground text-center mt-2">
               Cada email tem uma única conta — de profissional <b>ou</b> de empresa.
             </p>
             <button type="button" onClick={goToLogin} className="w-full mt-4 text-center text-sm text-muted-foreground">
