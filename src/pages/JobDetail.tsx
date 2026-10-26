@@ -132,7 +132,7 @@ const JobDetail = () => {
               <span className="px-2.5 py-1 rounded-lg text-xs font-medium bg-muted text-foreground/80">{job.skill}</span>
             )}
           </div>
-          <div className="mt-4 rounded-xl bg-primary/5 border border-primary/15 px-4 py-3 flex items-center justify-between">
+          <div className="mt-4 rounded-xl bg-primary/5 border border-primary/15 px-4 py-3 flex flex-wrap items-center justify-between gap-x-3">
             <span className="text-sm text-muted-foreground">Você recebe</span>
             <span className="text-2xl font-display font-extrabold text-primary">{formatBRL(job.payment)}</span>
           </div>
@@ -201,7 +201,7 @@ const JobDetail = () => {
               </blockquote>
             )}
             <Button variant="outline" onClick={() => navigate(`/perfil/${job.user_id}`)} className="w-full h-11 rounded-xl font-semibold">
-              <Building2 className="h-4 w-4 mr-2" /> Ver perfil completo da empresa
+              <Building2 className="h-4 w-4 mr-2" /> Ver perfil da empresa
             </Button>
           </div>
         </section>

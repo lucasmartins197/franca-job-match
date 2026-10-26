@@ -93,7 +93,7 @@ const DigitarCodigoCard = ({ contratacao, empresaNome }: { contratacao: DbContra
             <div className="grid grid-cols-2 gap-2">
               {[false, true].map((dif) => (
                 <button key={String(dif)} type="button" onClick={() => setValorDiferente(dif)}
-                  className={cn("h-10 rounded-xl border text-sm font-semibold", valorDiferente === dif ? "border-primary bg-primary/10 text-primary" : "border-border text-muted-foreground")}>
+                  className={cn("min-h-10 py-1.5 px-2 rounded-xl border text-sm font-semibold leading-tight", valorDiferente === dif ? "border-primary bg-primary/10 text-primary" : "border-border text-muted-foreground")}>
                   {dif ? "Recebi outro valor" : "Recebi esse valor"}
                 </button>
               ))}
