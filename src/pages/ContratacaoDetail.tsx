@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { Loader2, Calendar, Clock, MapPin, Phone, Info, ChevronRight, MessageCircle } from "lucide-react";
+import { Loader2, Calendar, Clock, MapPin, Phone, Info, ChevronRight, MessageCircle, Star } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -12,7 +12,10 @@ import PageHeader from "@/components/frela/PageHeader";
 import UserAvatar from "@/components/frela/UserAvatar";
 import StatusBadge from "@/components/frela/StatusBadge";
 import Stars from "@/components/frela/Stars";
-import FinalizarContratacaoButton from "@/components/frela/FinalizarContratacaoButton";
+import CodigoEmpresaCard from "@/components/confirmacao/CodigoEmpresaCard";
+import DigitarCodigoCard from "@/components/confirmacao/DigitarCodigoCard";
+import AdminEncerrarCard from "@/components/confirmacao/AdminEncerrarCard";
+import { useMeuPerfil } from "@/hooks/usePerfil";
 import ConfirmarValorCard from "@/components/taxas/ConfirmarValorCard";
 import TaxaStatusBadge from "@/components/taxas/TaxaStatusBadge";
 
@@ -26,6 +29,7 @@ const ContratacaoDetail = () => {
     contratacao ? [contratacao.empresa_id, contratacao.profissional_id] : []
   );
   const avaliar = useAvaliar();
+  const { data: meuPerfil } = useMeuPerfil();
   const [nota, setNota] = useState(0);
   const [comentario, setComentario] = useState("");
 
@@ -43,6 +47,9 @@ const ContratacaoDetail = () => {
 
   const job = contratacao.jobs;
   const souEmpresa = user.id === contratacao.empresa_id;
+  const souParte = souEmpresa || user.id === contratacao.profissional_id;
+  // Fase 7: no fluxo com código, a avaliação (com comentário) é obrigatória
+  const avaliacaoObrigatoria = !!contratacao.codigo_gerado_em;
   const outroId = souEmpresa ? contratacao.profissional_id : contratacao.empresa_id;
   const outro = perfis[outroId];
   const outroNome = souEmpresa ? outro?.nome || "Profissional" : job?.company_name || outro?.nome || "Empresa";
@@ -52,6 +59,7 @@ const ContratacaoDetail = () => {
 
   const handleAvaliar = async () => {
     if (nota < 1) { toast.error("Escolha de 1 a 5 estrelas"); return; }
+    if (avaliacaoObrigatoria && comentario.trim().length < 3) { toast.error("Escreva um comentário sobre o serviço"); return; }
     try {
       await avaliar.mutateAsync({ contratacao, nota, comentario });
       toast.success("Avaliação enviada. Obrigado!");
@@ -88,8 +96,8 @@ const ContratacaoDetail = () => {
           )}
           {souEmpresa && (
             <div className="flex items-center justify-between gap-2 text-xs text-muted-foreground mt-2">
-              <button onClick={() => navigate(finalizada ? "/taxas" : "/planos")} className="underline decoration-dotted text-left">
-                Taxa FreLa (5%){finalizada ? " · ver minhas taxas" : " · entra no saldo na finalização"}
+              <button onClick={() => navigate("/taxas")} className="underline decoration-dotted text-left">
+                Taxa FreLa (5%){finalizada ? " · ver minhas taxas" : " · entra no saldo quando o código for confirmado"}
               </button>
               <span className="flex items-center gap-2">
                 {formatBRL(contratacao.taxa_5pct)}
@@ -126,21 +134,9 @@ const ContratacaoDetail = () => {
           </div>
         </div>
 
-        {!finalizada && (
-          souEmpresa ? (
-            <div className="space-y-2">
-              <FinalizarContratacaoButton contratacao={contratacao} className="w-full h-12" />
-              <p className="text-xs text-muted-foreground text-center">
-                Clique depois que o serviço for realizado e informe o valor pago. Enquanto isso, não é possível criar novas vagas.
-              </p>
-            </div>
-          ) : (
-            <div className="rounded-xl border border-blue-200 bg-blue-50 p-4 flex gap-3 text-sm text-blue-900">
-              <Info className="h-5 w-5 shrink-0" />
-              <p>Você está confirmado(a)! Compareça no dia e horário combinados. Depois do serviço, a empresa confirma a finalização e vocês poderão se avaliar.</p>
-            </div>
-          )
-        )}
+        {!finalizada && souEmpresa && <CodigoEmpresaCard contratacao={contratacao} profissionalNome={outroNome} />}
+        {!finalizada && !souEmpresa && souParte && <DigitarCodigoCard contratacao={contratacao} empresaNome={outroNome} />}
+        {!finalizada && !souParte && meuPerfil?.profile.is_admin && <AdminEncerrarCard contratacao={contratacao} />}
 
         {finalizada && !souEmpresa && contratacao.status_taxa === "pendente" && (
           <ConfirmarValorCard contratacao={contratacao} empresaNome={outroNome} />
@@ -152,12 +148,18 @@ const ContratacaoDetail = () => {
           </div>
         )}
 
-        {finalizada && (
-          <div className="bg-card rounded-2xl p-4 border border-border shadow-card">
-            <h3 className="font-display font-bold text-foreground mb-1">Avaliação</h3>
+        {finalizada && souParte && (
+          <div id="avaliacao" className={`bg-card rounded-2xl p-4 border shadow-card ${!minhaAvaliacao && avaliacaoObrigatoria ? "border-2 border-amber-400" : "border-border"}`}>
+            <h3 className="font-display font-bold text-foreground mb-1 flex items-center gap-2">
+              Avaliação
+              {!minhaAvaliacao && avaliacaoObrigatoria && (
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-100 text-amber-900 text-[11px] font-bold"><Star className="h-3 w-3" /> Obrigatória</span>
+              )}
+            </h3>
             {contratacao.finalizada_em && (
               <p className="text-xs text-muted-foreground mb-3">
-                Finalizada em {new Date(contratacao.finalizada_em).toLocaleDateString("pt-BR")}
+                {contratacao.confirmado_por_codigo ? "Confirmada com código em " : "Finalizada em "}
+                {new Date(contratacao.finalizada_em).toLocaleDateString("pt-BR")}
               </p>
             )}
             {minhaAvaliacao ? (
@@ -169,10 +171,15 @@ const ContratacaoDetail = () => {
             ) : (
               <div className="space-y-3">
                 <p className="text-sm text-muted-foreground">Como foi trabalhar com {outroNome}?</p>
+                {avaliacaoObrigatoria && (
+                  <p className="text-xs text-amber-800 bg-amber-50 border border-amber-200 rounded-lg p-2">
+                    {souEmpresa ? "Enquanto não avaliar, você não pode criar vagas nem contratar." : "Enquanto não avaliar, você não pode se candidatar a outras vagas."}
+                  </p>
+                )}
                 <Stars value={nota} size="lg" onChange={setNota} />
-                <Textarea placeholder="Deixe um comentário (opcional)" value={comentario} onChange={(e) => setComentario(e.target.value)}
+                <Textarea placeholder={avaliacaoObrigatoria ? "Conte como foi o serviço (obrigatório)" : "Deixe um comentário (opcional)"} value={comentario} onChange={(e) => setComentario(e.target.value)}
                   className="rounded-xl bg-background border-border min-h-[80px]" maxLength={500} />
-                <Button onClick={handleAvaliar} disabled={avaliar.isPending || nota < 1}
+                <Button onClick={handleAvaliar} disabled={avaliar.isPending || nota < 1 || (avaliacaoObrigatoria && comentario.trim().length < 3)}
                   className="w-full h-12 rounded-xl text-primary-foreground font-semibold">
                   {avaliar.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : "Enviar avaliação"}
                 </Button>

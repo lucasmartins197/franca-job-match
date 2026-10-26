@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { ChevronRight, Briefcase, Star, BadgeDollarSign, Crown } from "lucide-react";
+import { ChevronRight, Briefcase, Star, BadgeDollarSign, Crown, KeyRound } from "lucide-react";
 import { ehIndicado, metasDoProfissional, useMeuPerfil } from "@/hooks/usePerfil";
 import { useMyApplications } from "@/hooks/useJobs";
 import { useMinhasContratacoes, useAvaliacoesFeitas, formatBRL, formatDate } from "@/hooks/useFrela";
@@ -32,7 +32,11 @@ const MyWorkTab = () => {
       <div className="flex-1 min-w-0">
         <div className="flex items-center justify-between gap-2 mb-1">
           <h3 className="font-display font-bold text-foreground truncate">{c.jobs?.title ?? "Vaga"}</h3>
-          {aConfirmar.some((x) => x.id === c.id) ? (
+          {c.status === "em_andamento" && c.codigo_gerado_em ? (
+            <span className="shrink-0 inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-semibold bg-primary text-primary-foreground">
+              <KeyRound className="h-3 w-3" /> Digitar código
+            </span>
+          ) : aConfirmar.some((x) => x.id === c.id) ? (
             <span className="shrink-0 inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-semibold bg-amber-200 text-amber-900">
               <BadgeDollarSign className="h-3 w-3" /> Confirmar valor
             </span>
@@ -114,7 +118,10 @@ const MyWorkTab = () => {
             <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 flex gap-3 items-center">
               <Star className="h-6 w-6 fill-amber-400 text-amber-400 shrink-0" />
               <p className="text-sm text-amber-900">
-                Você tem <b>{aAvaliar.length}</b> trabalho{aAvaliar.length === 1 ? "" : "s"} para avaliar. Sua avaliação ajuda outros profissionais a escolher bons lugares.
+                Você tem <b>{aAvaliar.length}</b> trabalho{aAvaliar.length === 1 ? "" : "s"} para avaliar.
+                {aAvaliar.some((c) => c.codigo_gerado_em)
+                  ? " A avaliação é obrigatória: enquanto não avaliar, você não pode se candidatar a novas vagas."
+                  : " Sua avaliação ajuda outros profissionais a escolher bons lugares."}
               </p>
             </div>
           )}

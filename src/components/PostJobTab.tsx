@@ -10,7 +10,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useCreateJob } from "@/hooks/useJobs";
-import { useMyProfile, useTravaNovaVaga } from "@/hooks/useFrela";
+import { TEXTO_TRAVA_VAGA, useMyProfile, useTravaNovaVaga } from "@/hooks/useFrela";
 import { CATEGORIAS } from "@/lib/categorias";
 
 
@@ -47,7 +47,7 @@ const PostJobTab = ({ onClose }: { onClose?: () => void }) => {
     e.preventDefault();
     if (!user) { toast.error("Faça login primeiro"); return; }
     if (bloqueado) {
-      toast.error(motivo === "taxas" ? "Quite as taxas em aberto para criar novas vagas." : "Confirme a finalização da contratação em andamento antes de criar uma nova vaga.");
+      toast.error(motivo ? TEXTO_TRAVA_VAGA[motivo] : "Criação de vaga bloqueada");
       return;
     }
     if (!title.trim() || !category || !description.trim() || !date || !timeStart || !timeEnd || !address.trim()) {
@@ -109,9 +109,7 @@ const PostJobTab = ({ onClose }: { onClose?: () => void }) => {
         <Lock className="h-12 w-12 text-amber-500 mb-4" />
         <h2 className="font-display font-bold text-foreground mb-2">Criação de vaga bloqueada</h2>
         <p className="text-sm text-muted-foreground">
-          {motivo === "taxas"
-            ? "Seu saldo de taxas atingiu o limite. Quite as taxas em “Minhas taxas” para voltar a publicar vagas."
-            : "Você tem uma contratação em andamento. Confirme a finalização dela no painel antes de criar uma nova vaga."}
+          {motivo && TEXTO_TRAVA_VAGA[motivo]}
         </p>
       </div>
     );

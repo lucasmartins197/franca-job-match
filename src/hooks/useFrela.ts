@@ -12,6 +12,7 @@ export type DbNotificacao = Tables<"notificacoes">;
 
 import { TAXA_PLATAFORMA } from "@/lib/pagamentos";
 import { useResumoTaxas } from "./useTaxas";
+import { usePendencias } from "./useConfirmacao";
 export { TAXA_PLATAFORMA };
 
 export const formatBRL = (valor: number | null | undefined) =>
@@ -94,17 +95,27 @@ export const useContratacao = (id?: string) => {
 
 /**
  * TRAVAS para criar vaga:
- *  • contratação em andamento (precisa confirmar a finalização)
+ *  • contratação em andamento (precisa confirmar o serviço com o código)
  *  • saldo de taxas >= teto (precisa quitar) — Fase 4
  * (as duas também são garantidas no banco)
  */
 export const useTravaNovaVaga = () => {
   const { data: contratacoes = [], isLoading } = useMinhasContratacoes();
   const { resumo } = useResumoTaxas();
+  const { avaliar } = usePendencias();
   const { user } = useAuth();
   const pendentes = contratacoes.filter((c) => c.empresa_id === user?.id && c.status === "em_andamento");
-  const motivo: "taxas" | "contratacao" | null = resumo.bloqueado ? "taxas" : pendentes.length > 0 ? "contratacao" : null;
+  const motivo: MotivoTravaVaga | null =
+    resumo.bloqueado ? "taxas" : pendentes.length > 0 ? "contratacao" : avaliar.length > 0 ? "avaliacao" : null;
   return { bloqueado: motivo !== null, motivo, pendentes, taxasBloqueadas: resumo.bloqueado, isLoading };
+};
+
+export type MotivoTravaVaga = "taxas" | "contratacao" | "avaliacao";
+
+export const TEXTO_TRAVA_VAGA: Record<MotivoTravaVaga, string> = {
+  taxas: "Seu saldo de taxas atingiu o limite. Quite as taxas em “Minhas taxas” para voltar a publicar vagas.",
+  contratacao: "Você tem um serviço em andamento. Depois que ele acontecer, gere o código e peça para o profissional confirmar.",
+  avaliacao: "Você tem uma avaliação pendente. Avalie o último profissional para publicar novas vagas.",
 };
 
 const invalidateFluxo = (queryClient: ReturnType<typeof useQueryClient>) => {
@@ -183,39 +194,6 @@ export const useRecusarCandidato = () => {
       if (error) throw error;
     },
     onSuccess: () => invalidateFluxo(queryClient),
-  });
-};
-
-/** Empresa confirma que o serviço foi realizado. */
-/**
- * Passo 1 da finalização: a empresa confirma o serviço e DECLARA o valor pago.
- * O banco calcula a taxa (5% do valor declarado), deixa status_taxa = 'pendente'
- * e notifica o profissional para confirmar o valor (passo 2: useConfirmarValor).
- * Trava: com saldo de taxas >= teto o banco recusa (TRAVA_TAXAS).
- * Cobrança da taxa: ver src/lib/pagamentos.ts (acumula e é quitada depois).
- */
-export const useFinalizarContratacao = () => {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: async ({ contratacao, valor }: { contratacao: DbContratacao; valor: number }) => {
-      if (!Number.isFinite(valor) || valor <= 0) throw new Error("Informe o valor pago ao profissional");
-      const { error } = await supabase
-        .from("contratacoes")
-        .update({ status: "finalizada", valor: Math.round(valor * 100) / 100, finalizada_em: new Date().toISOString() })
-        .eq("id", contratacao.id)
-        .eq("status", "em_andamento");
-      if (error) throw error;
-
-      const { error: jobError } = await supabase
-        .from("jobs")
-        .update({ status: "finalizada" })
-        .eq("id", contratacao.job_id);
-      if (jobError) throw jobError;
-    },
-    onSuccess: () => {
-      invalidateFluxo(queryClient);
-      queryClient.invalidateQueries({ queryKey: ["taxas"] });
-    },
   });
 };
 

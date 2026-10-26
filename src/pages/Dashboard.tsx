@@ -2,12 +2,12 @@ import { useState } from "react";
 import { Navigate, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { Plus, LogOut, LayoutDashboard, Users, Briefcase, Lock, Star, ChevronRight, Clock, MessageCircle, Crown, Receipt, Trophy, Gift } from "lucide-react";
+import { Plus, LogOut, LayoutDashboard, KeyRound, Users, Briefcase, Lock, Star, ChevronRight, Clock, MessageCircle, Crown, Receipt, Trophy, Gift } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useMyJobs } from "@/hooks/useJobs";
 import {
-  useMinhasContratacoes, useProfilesByIds, useAvaliacoesFeitas, useTravaNovaVaga, formatBRL, formatDate,
+  useMinhasContratacoes, useProfilesByIds, useAvaliacoesFeitas, useTravaNovaVaga, formatBRL, formatDate, TEXTO_TRAVA_VAGA,
 } from "@/hooks/useFrela";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -25,7 +25,7 @@ import { useResumoTaxas } from "@/hooks/useTaxas";
 import { useRecomendadosProfissionais } from "@/hooks/useRecomendacoes";
 import TaxasAviso from "@/components/taxas/TaxasAviso";
 import { Progress } from "@/components/ui/progress";
-import FinalizarContratacaoButton from "@/components/frela/FinalizarContratacaoButton";
+import GerarCodigoButton from "@/components/confirmacao/GerarCodigoButton";
 
 const STATUS_TABS = [
   { value: "aberta", label: "Abertas" },
@@ -72,7 +72,7 @@ const Dashboard = () => {
 
   const abrirNovaVaga = () => {
     if (bloqueado) {
-      toast.error(motivo === "taxas" ? "Quite as taxas em aberto para criar novas vagas." : "Confirme a finalização da contratação em andamento antes de criar uma nova vaga.");
+      toast.error(motivo ? TEXTO_TRAVA_VAGA[motivo] : "Criação de vaga bloqueada");
       return;
     }
     setShowPostModal(true);
@@ -119,15 +119,12 @@ const Dashboard = () => {
 
       <TaxasAviso className="mx-5 mb-4 w-[calc(100%-2.5rem)]" />
 
-      {motivo === "contratacao" && (
+      {(motivo === "contratacao" || motivo === "avaliacao") && (
         <div className="mx-5 mb-6 rounded-xl border border-amber-300 bg-amber-50 p-4 flex gap-3">
           <Lock className="h-5 w-5 text-amber-600 shrink-0 mt-0.5" />
           <div className="text-sm text-amber-900">
             <p className="font-bold mb-0.5">Criação de vagas bloqueada</p>
-            <p>
-              Você tem {pendentes.length === 1 ? "uma contratação" : `${pendentes.length} contratações`} em andamento.
-              Depois que o serviço acontecer, clique em <b>Confirmar finalização</b> para liberar novas vagas.
-            </p>
+            <p>{TEXTO_TRAVA_VAGA[motivo]}</p>
           </div>
         </div>
       )}
@@ -224,7 +221,13 @@ const Dashboard = () => {
                   <Button variant="outline" onClick={() => navigate(`/chat/${c.id}`)} className="h-11 rounded-xl" aria-label="Abrir chat">
                     <MessageCircle className="h-4 w-4" />
                   </Button>
-                  <FinalizarContratacaoButton contratacao={c} className="flex-1 h-11" />
+                  {c.codigo_gerado_em ? (
+                    <Button onClick={() => navigate(`/contratacao/${c.id}`)} className="flex-1 h-11 rounded-xl font-semibold">
+                      <KeyRound className="h-4 w-4 mr-2" /> Ver código
+                    </Button>
+                  ) : (
+                    <GerarCodigoButton contratacao={c} className="flex-1 h-11" />
+                  )}
                 </div>
               </div>
             ))}
@@ -235,6 +238,9 @@ const Dashboard = () => {
       {aAvaliar.length > 0 && (
         <section className="px-5 mb-8">
           <h2 className="font-display font-bold text-foreground mb-3">Avalie quem trabalhou com você</h2>
+          {aAvaliar.some((c) => c.codigo_gerado_em) && (
+            <p className="text-xs text-amber-800 -mt-2 mb-3">Avaliação obrigatória: enquanto não avaliar, não dá para criar vagas nem contratar.</p>
+          )}
           <div className="space-y-3">
             {aAvaliar.map((c) => (
               <button key={c.id} onClick={() => navigate(`/contratacao/${c.id}`)}

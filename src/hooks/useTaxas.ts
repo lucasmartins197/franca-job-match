@@ -31,7 +31,9 @@ const VAZIO: ResumoTaxas = {
 export const mensagemTrava = (err: unknown): string | null => {
   const msg = err instanceof Error ? err.message : typeof err === "object" && err && "message" in err ? String((err as { message: unknown }).message) : "";
   if (msg.includes("TRAVA_TAXAS")) return "Seu saldo de taxas atingiu o limite. Quite as taxas em “Minhas taxas” para continuar.";
-  if (msg.includes("TRAVA_CONTRATACAO_EM_ANDAMENTO")) return "Confirme a finalização da contratação em andamento antes de criar uma nova vaga.";
+  if (msg.includes("TRAVA_CONTRATACAO_EM_ANDAMENTO")) return "Confirme o serviço em andamento com o código antes de criar uma nova vaga.";
+  if (msg.includes("TRAVA_AVALIACAO")) return "Você tem uma avaliação pendente. Avalie o último serviço para continuar.";
+  if (msg.includes("TRAVA_CODIGO")) return "Confirme o serviço anterior com o código da empresa antes de se candidatar.";
   return null;
 };
 
