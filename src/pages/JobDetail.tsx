@@ -5,9 +5,9 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { useJob, useApply, useMyApplications } from "@/hooks/useJobs";
 import { useAuth } from "@/hooks/useAuth";
-import { formatBRL } from "@/hooks/useFrela";
+import { formatBRL, useAvaliacoesRecebidas } from "@/hooks/useFrela";
 import { textoPendencia, usePendencias } from "@/hooks/useConfirmacao";
-import { selosDe, usePerfilPublico } from "@/hooks/usePerfil";
+import { selosDe, useContratacoesEmpresa, usePerfilPublico } from "@/hooks/usePerfil";
 import UserAvatar from "@/components/frela/UserAvatar";
 import MapaEndereco from "@/components/frela/MapaEndereco";
 import Selos from "@/components/perfil/Selos";
@@ -25,6 +25,9 @@ const JobDetail = () => {
   const { data: myApplications = [] } = useMyApplications();
   const { data: perfilEmpresa } = usePerfilPublico(job?.user_id);
   const pendencias = usePendencias();
+  const { data: contratacoesEmpresa } = useContratacoesEmpresa(job?.user_id);
+  const { data: avaliacoesEmpresa = [] } = useAvaliacoesRecebidas(job?.user_id);
+  const ultimaAvaliacao = avaliacoesEmpresa.find((a) => a.comentario);
 
   if (isLoading) {
     return <div className="min-h-screen bg-background flex items-center justify-center"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>;
@@ -160,24 +163,48 @@ const JobDetail = () => {
         )}
 
         <h3 className="font-display font-bold text-foreground mb-2">Quem está contratando</h3>
-        <button onClick={() => navigate(`/perfil/${job.user_id}`)}
-          className="w-full text-left bg-card rounded-2xl p-4 border border-border mb-6 shadow-card flex items-center gap-3 hover:border-primary/40 transition-colors">
-          <UserAvatar nome={empresaDados?.nome_empresa || job.company_name} fotoUrl={empresa?.foto_url} size="lg" />
-          <div className="flex-1 min-w-0">
-            <p className="font-display font-bold text-foreground truncate">{empresaDados?.nome_empresa || job.company_name}</p>
-            <p className="text-xs text-muted-foreground truncate">
-              {[empresaDados?.ramo, empresaDados?.endereco || `${empresa?.cidade || "Franca"}, SP`].filter(Boolean).join(" · ")}
-            </p>
-            <div className="flex items-center gap-1.5 mt-1">
-              <Stars value={Number(empresa?.avaliacao_media ?? 0)} size="sm" />
-              <span className="text-xs text-muted-foreground">
-                {empresa?.total_avaliacoes ? `${Number(empresa.avaliacao_media).toFixed(1)} (${empresa.total_avaliacoes})` : "Sem avaliações ainda"}
-              </span>
+        <section className="bg-card rounded-2xl border border-border mb-6 shadow-card overflow-hidden">
+          <button onClick={() => navigate(`/perfil/${job.user_id}`)}
+            className="w-full text-left p-4 flex items-center gap-3 hover:bg-muted/40 transition-colors">
+            <UserAvatar nome={empresaDados?.nome_empresa || job.company_name} fotoUrl={empresa?.foto_url} size="lg" />
+            <div className="flex-1 min-w-0">
+              <p className="font-display font-bold text-foreground truncate">{empresaDados?.nome_empresa || job.company_name}</p>
+              <p className="text-xs text-muted-foreground truncate">
+                {[empresaDados?.ramo, empresaDados?.endereco || `${empresa?.cidade || "Franca"}, SP`].filter(Boolean).join(" · ")}
+              </p>
+              <div className="flex items-center gap-1.5 mt-1">
+                <Stars value={Number(empresa?.avaliacao_media ?? 0)} size="sm" />
+                <span className="text-xs text-muted-foreground">
+                  {empresa?.total_avaliacoes ? `${Number(empresa.avaliacao_media).toFixed(1)} (${empresa.total_avaliacoes})` : "Sem avaliações ainda"}
+                </span>
+              </div>
+              {empresa && <Selos selos={selosDe(empresa).filter((x) => x.tipo !== "novo")} size="sm" className="mt-1.5" />}
             </div>
-            {empresa && <Selos selos={selosDe(empresa).filter((x) => x.tipo !== "novo")} size="sm" className="mt-1.5" />}
+            <ChevronRight className="h-5 w-5 text-muted-foreground shrink-0" />
+          </button>
+          <div className="px-4 pb-4 space-y-3">
+            {empresaDados?.bio && <p className="text-sm text-muted-foreground leading-relaxed line-clamp-3">{empresaDados.bio}</p>}
+            <div className="grid grid-cols-2 gap-2 text-center">
+              <div className="rounded-xl bg-muted/60 py-2">
+                <p className="text-base font-display font-bold text-foreground">{contratacoesEmpresa ?? 0}</p>
+                <p className="text-[11px] text-muted-foreground">contratações pelo FreLa</p>
+              </div>
+              <div className="rounded-xl bg-muted/60 py-2">
+                <p className="text-base font-display font-bold text-foreground">{empresa?.total_avaliacoes ? Number(empresa.avaliacao_media).toFixed(1) : "—"}</p>
+                <p className="text-[11px] text-muted-foreground">nota dos profissionais</p>
+              </div>
+            </div>
+            {ultimaAvaliacao && (
+              <blockquote className="text-sm text-foreground bg-muted/40 rounded-xl p-3">
+                <Stars value={ultimaAvaliacao.nota} size="sm" />
+                <p className="mt-1">“{ultimaAvaliacao.comentario}”</p>
+              </blockquote>
+            )}
+            <Button variant="outline" onClick={() => navigate(`/perfil/${job.user_id}`)} className="w-full h-11 rounded-xl font-semibold">
+              <Building2 className="h-4 w-4 mr-2" /> Ver perfil completo da empresa
+            </Button>
           </div>
-          <ChevronRight className="h-5 w-5 text-muted-foreground shrink-0" />
-        </button>
+        </section>
       </div>
 
       {acao && (

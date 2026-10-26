@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import { useHistoricoProfissional, useMeuPerfil } from "@/hooks/usePerfil";
 import MetasCard from "@/components/perfil/MetasCard";
+import ForcaCurriculo from "@/components/perfil/ForcaCurriculo";
 import IndiqueGanhe from "@/components/perfil/IndiqueGanhe";
 import ProfileView from "@/components/perfil/ProfileView";
 import { useSuporteNaoLidas } from "@/hooks/useSuporte";
@@ -39,6 +40,7 @@ const ProfileTab = () => {
         </button>
       )}
       {perfil.profile.tipo === "freelancer" && <MetasCard profile={perfil.profile} trabalhos={historico?.length ?? 0} />}
+      {perfil.profile.tipo === "freelancer" && <ForcaCurriculo perfil={perfil} />}
       {perfil.profile.tipo === "empresa" && (
         <IndiqueGanhe codigo={perfil.profile.codigo_indicacao} nomeEmpresa={perfil.empresa?.nome_empresa || perfil.profile.nome || "Minha empresa"} />
       )}
