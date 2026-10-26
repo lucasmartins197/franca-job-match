@@ -9,7 +9,6 @@ const Profissionais = () => {
   const navigate = useNavigate();
   const { data: pros = [], isLoading, error } = useProfissionaisGestao();
   const [status, setStatus] = useState("todos");
-  const [assinatura, setAssinatura] = useState("todas");
   const [cidade, setCidade] = useState("todas");
   const [profissao, setProfissao] = useState("todas");
 
@@ -19,7 +18,6 @@ const Profissionais = () => {
   const filtrados = pros.filter((p) =>
     (status === "todos" || (status === "ativos" && p.ativo) || (status === "inativos" && !p.ativo) ||
       (status === "verificados" && p.verificado) || (status === "sem_trabalho" && p.trabalhos === 0)) &&
-    (assinatura === "todas" || (assinatura === "assinantes") === p.assinante) &&
     (cidade === "todas" || p.cidade === cidade) &&
     (profissao === "todas" || (p.profissoes ?? []).includes(profissao))
   );
@@ -44,10 +42,6 @@ const Profissionais = () => {
       render: (p) => <span className="block max-w-[220px] truncate" title={(p.profissoes ?? []).join(", ")}>{(p.profissoes ?? []).join(", ") || "—"}</span>,
     },
     { id: "cidade", titulo: "Cidade", valor: (p) => p.cidade },
-    {
-      id: "assinatura", titulo: "Assinatura", valor: (p) => (p.assinante ? "Ativa" : "Inativa"),
-      render: (p) => <Chip tipo={p.assinante ? "assinante" : "inativo"}>{p.assinante ? "Ativa" : "Inativa"}</Chip>,
-    },
     {
       id: "avaliacao", titulo: "Avaliação", valor: (p) => p.avaliacao_media, alinhar: "right",
       render: (p) => p.total_avaliacoes ? <span className="inline-flex items-center gap-1"><Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />{Number(p.avaliacao_media).toFixed(1)} <span className="text-muted-foreground">({p.total_avaliacoes})</span></span> : "—",
@@ -93,9 +87,6 @@ const Profissionais = () => {
             <SelectFiltro rotulo="Situação" valor={status} onChange={setStatus} opcoes={[
               { valor: "todos", label: "Todos" }, { valor: "ativos", label: "Ativos" }, { valor: "inativos", label: "Inativos" },
               { valor: "verificados", label: "Verificados" }, { valor: "sem_trabalho", label: "Sem trabalhos ainda" },
-            ]} />
-            <SelectFiltro rotulo="Assinatura" valor={assinatura} onChange={setAssinatura} opcoes={[
-              { valor: "todas", label: "Assinatura: todas" }, { valor: "assinantes", label: "Assinantes" }, { valor: "nao", label: "Não assinantes" },
             ]} />
             <SelectFiltro rotulo="Cidade" valor={cidade} onChange={setCidade} opcoes={[{ valor: "todas", label: "Todas as cidades" }, ...cidades.map((c) => ({ valor: c, label: c }))]} />
             <SelectFiltro rotulo="Profissão" valor={profissao} onChange={setProfissao} opcoes={[{ valor: "todas", label: "Todas as profissões" }, ...profissoes.map((c) => ({ valor: c, label: c }))]} />

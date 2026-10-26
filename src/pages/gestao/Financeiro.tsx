@@ -26,7 +26,6 @@ const Financeiro = () => {
   const [filtroEmp, setFiltroEmp] = useState("com_saldo");
   const [filtroTaxa, setFiltroTaxa] = useState("todas");
 
-  const pf = (v?.assinantes_profissional ?? 0) * (v?.precos?.freelancer ?? 39.9);
   const pj = (v?.assinantes_empresa ?? 0) * (v?.precos?.empresa ?? 89.9);
   const travadas = empresas.filter((e) => e.travada);
 
@@ -60,13 +59,12 @@ const Financeiro = () => {
 
   return (
     <div className="space-y-5">
-      <TituloPagina titulo="Financeiro" sub="Valores projetados a partir das assinaturas ativas e das taxas registradas — sem pagamento real ligado." />
+      <TituloPagina titulo="Financeiro" sub="Receita = assinatura das empresas + taxa de 5% por contratação. Profissional é grátis. Valores projetados — sem pagamento real ligado." />
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         <Stat titulo="MRR (assinaturas ativas)" valor={brl(v?.mrr)} icon={Wallet} tom="destaque" carregando={isLoading}
-          sub={`${(v?.assinantes_empresa ?? 0) + (v?.assinantes_profissional ?? 0)} assinantes`} />
-        <Stat titulo="Assinatura PF (profissionais)" valor={brl(pf)} carregando={isLoading} sub={`${v?.assinantes_profissional ?? 0} × ${brl(v?.precos?.freelancer)}`} />
-        <Stat titulo="Assinatura PJ (empresas)" valor={brl(pj)} carregando={isLoading} sub={`${v?.assinantes_empresa ?? 0} × ${brl(v?.precos?.empresa)}`} />
+          sub={`${v?.assinantes_empresa ?? 0} empresas assinantes`} />
+        <Stat titulo="Assinaturas (empresas)" valor={brl(pj)} carregando={isLoading} sub={`${v?.assinantes_empresa ?? 0} × ${brl(v?.precos?.empresa)}`} />
         <Stat titulo="Taxas 5% no mês" valor={brl(v?.taxas_mes)} icon={Receipt} carregando={isLoading} sub={`${brl(v?.taxas_total)} geradas no total`} />
         <Stat titulo="Taxas pagas" valor={brl(v?.taxas_pagas)} carregando={isLoading} />
         <Stat titulo="Taxas a receber" valor={brl(v?.taxas_a_receber)} tom={(v?.taxas_a_receber ?? 0) > 0 ? "alerta" : "padrao"} carregando={isLoading} />

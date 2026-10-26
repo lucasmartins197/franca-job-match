@@ -50,7 +50,7 @@ const ProfileTab = () => {
       <nav className="bg-card border border-border rounded-2xl divide-y divide-border overflow-hidden shadow-card">
         {[
           { to: "/taxas", icon: Receipt, titulo: "Minhas taxas", sub: "Saldo da taxa de 5% e histórico", badge: 0, mostrar: perfil.profile.tipo === "empresa" },
-          { to: "/planos", icon: Crown, titulo: "Meu plano", sub: perfil.profile.subscription_status === "active" ? "Assinatura ativa" : "Lançamento gratuito · ver planos", badge: 0, mostrar: true },
+          { to: "/planos", icon: Crown, titulo: "Meu plano", sub: perfil.profile.subscription_status === "active" ? "Assinatura ativa" : "Lançamento gratuito · ver planos", badge: 0, mostrar: perfil.profile.tipo === "empresa" },
           { to: "/suporte", icon: Headset, titulo: "Falar com a equipe", sub: "Dúvidas, problemas ou sugestões", badge: perfil.profile.is_admin ? 0 : suporteNaoLidas, mostrar: true },
           { to: "/admin/taxas", icon: Scale, titulo: "Taxas e divergências (ADM)", sub: "Resolver valores contestados e registrar pagamentos", badge: 0, mostrar: !!perfil.profile.is_admin },
           { to: "/admin/suporte", icon: ShieldCheck, titulo: "Atendimento (ADM)", sub: "Responder chamados de suporte", badge: suporteNaoLidas, mostrar: !!perfil.profile.is_admin },

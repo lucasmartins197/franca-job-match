@@ -2,23 +2,26 @@
  * MODELO DE RECEITA DO FRELA — preparado, mas DESATIVADO.
  * Nenhuma cobrança real acontece no app hoje.
  *
- * 1) MENSALIDADE (profissional R$ 39,90 · empresa R$ 89,90)
+ * O PROFISSIONAL NÃO PAGA NADA (Fase 7): sem assinatura e sem taxa.
+ *
+ * 1) MENSALIDADE DA EMPRESA (R$ 89,90)
  *    Será vendida por IN-APP PURCHASE — Apple IAP (StoreKit) / Google Play Billing —
  *    porque é assinatura de acesso ao app (regra das lojas). NÃO usar Stripe para isso.
  *    TODO (IAP):
- *      • app nativo (Capacitor/React Native) + plugin de compras (ex.: RevenueCat
- *        ou cordova-plugin-purchase) com os produtos FRELA_PRO_MENSAL / FRELA_EMPRESA_MENSAL
+ *      • app nativo (Capacitor — ver capacitor.config.ts) + plugin de compras (ex.: RevenueCat
+ *        @revenuecat/purchases-capacitor ou cordova-plugin-purchase) com o produto FRELA_EMPRESA_MENSAL
  *      • após a compra, enviar o recibo para uma Edge Function `validar-assinatura`
  *        que valida com Apple/Google e grava profiles.subscription_status / subscription_end
  *        (esses campos são protegidos: só o backend altera — ver SQL da Fase 3)
  *      • webhooks das lojas (renovação/cancelamento) na mesma Edge Function
  *    Ponto de entrada no app: `iniciarAssinatura()` abaixo.
  *
- * 2) TAXA DE 5% (empresa, por contratação finalizada) — Fase 4
- *    • Na finalização a empresa DECLARA o valor pago → taxa_5pct = 5% desse valor
- *      (calculado no banco). status_taxa = 'pendente'.
- *    • O profissional confirma o valor (→ 'confirmada') ou contesta (→ 'em_divergencia',
- *      fora do saldo até um ADM resolver).
+ * 2) TAXA DE 5% (empresa, por contratação finalizada) — Fases 4 e 7
+ *    • A empresa marca o serviço como realizado e DECLARA o valor pago → o banco gera um
+ *      CÓDIGO de 4 dígitos que só ela vê (gerar_codigo_confirmacao).
+ *    • O profissional digita o código no local (confirmar_codigo_contratacao): isso prova a
+ *      presença, finaliza a contratação e registra a taxa (5% do valor declarado) no saldo.
+ *      Se ele disser que recebeu outro valor → 'em_divergencia' (fora do saldo até um ADM resolver).
  *    • As taxas ACUMULAM numa conta da empresa (saldo = pendente + confirmada não pagas).
  *    • TRAVA: saldo >= TETO_TAXAS (R$ 50) → não cria vagas nem confirma finalizações
  *      (garantido no banco por triggers, além da interface).
@@ -30,7 +33,8 @@
  *      `select public.frela_quitar_taxas(<empresa_id>, <payment_intent_id>)`, que marca
  *      as taxas como pagas, registra em `pagamentos` e libera a conta.
  *      Hoje o ADM pode registrar um pagamento recebido manualmente (painel /admin/taxas).
- *    Como é cobrança de serviço entre empresas (não acesso ao app), roda fora das lojas.
+ *    Como é cobrança de serviço entre empresas (não acesso ao app), roda FORA das lojas:
+ *    no app só existem o saldo e o botão de quitação; a cobrança é do backend.
  *
  *    Teto e porcentagem: o banco é a fonte da verdade (frela_teto_taxas /
  *    frela_taxa_percentual no SQL da Fase 4). As constantes abaixo são só o valor de
@@ -63,7 +67,8 @@ export const STATUS_TAXA: Record<StatusTaxa, { label: string; descricao: string;
   paga: { label: "Paga", descricao: "Taxa quitada", cls: "bg-emerald-100 text-emerald-800" },
 };
 
-export type TipoPlano = "freelancer" | "empresa";
+/** Só a EMPRESA tem plano. O profissional usa o FreLa de graça (Fase 7). */
+export type TipoPlano = "empresa";
 
 export interface Plano {
   id: TipoPlano;
@@ -76,21 +81,6 @@ export interface Plano {
 }
 
 export const PLANOS: Record<TipoPlano, Plano> = {
-  freelancer: {
-    id: "freelancer",
-    produtoLoja: "FRELA_PRO_MENSAL",
-    nome: "FreLa Pro",
-    publico: "Para profissionais",
-    preco: 39.9,
-    beneficios: [
-      "Candidaturas ilimitadas em todas as vagas de Franca",
-      "Perfil em destaque para as empresas",
-      "Portfólio com até 12 fotos",
-      "Selo de verificação após análise da equipe",
-      "Chat direto com as empresas que te contratarem",
-      "Sem taxa sobre o que você recebe",
-    ],
-  },
   empresa: {
     id: "empresa",
     produtoLoja: "FRELA_EMPRESA_MENSAL",
@@ -106,6 +96,16 @@ export const PLANOS: Record<TipoPlano, Plano> = {
     ],
   },
 };
+
+/** O que o profissional ganha — tudo grátis, sem assinatura e sem taxa. */
+export const BENEFICIOS_PROFISSIONAL = [
+  "Candidaturas ilimitadas em todas as vagas de Franca",
+  "Aviso das vagas nos dias em que você está disponível",
+  "Currículo com portfólio de fotos e avaliações",
+  "Selos Verificado e Indicado para aparecer primeiro",
+  "Chat direto com as empresas que te contratarem",
+  "Você recebe o valor cheio combinado — sem taxa",
+];
 
 export const calcularTaxa = (valor: number) => Math.round(valor * TAXA_PLATAFORMA * 100) / 100;
 
