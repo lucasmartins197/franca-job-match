@@ -82,84 +82,128 @@ export type Database = {
             referencedRelation: "contratacoes"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "avaliacoes_de_id_fkey"
+            columns: ["de_id"]
+            isOneToOne: false
+            referencedRelation: "frela_ultima_atividade"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "avaliacoes_de_id_fkey"
+            columns: ["de_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "avaliacoes_para_id_fkey"
+            columns: ["para_id"]
+            isOneToOne: false
+            referencedRelation: "frela_ultima_atividade"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "avaliacoes_para_id_fkey"
+            columns: ["para_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
         ]
       }
       contratacoes: {
         Row: {
+          confirmado_profissional_em: string | null
           created_at: string
+          divergencia_resolvida_em: string | null
           empresa_id: string
           finalizada_em: string | null
           id: string
           job_id: string
+          motivo_divergencia: string | null
           profissional_id: string
           status: string
-          taxa_5pct: number | null
-          taxa_cobrada: boolean | null
-          valor: number
-          confirmado_profissional_em: string | null
-          divergencia_resolvida_em: string | null
-          motivo_divergencia: string | null
           status_taxa: string | null
+          taxa_5pct: number
+          taxa_cobrada: boolean
           taxa_paga_em: string | null
-          codigo_gerado_em: string | null
-          confirmado_por_codigo: boolean
-          codigo_confirmado_em: string | null
-          codigo_tentativas: number
+          valor: number
           valor_confirmado_profissional: boolean
           valor_contestado: number | null
         }
         Insert: {
+          confirmado_profissional_em?: string | null
           created_at?: string
+          divergencia_resolvida_em?: string | null
           empresa_id: string
           finalizada_em?: string | null
           id?: string
           job_id: string
+          motivo_divergencia?: string | null
           profissional_id: string
           status?: string
-          taxa_5pct?: number | null
-          taxa_cobrada?: boolean | null
-          valor: number
-          confirmado_profissional_em?: string | null
-          divergencia_resolvida_em?: string | null
-          motivo_divergencia?: string | null
           status_taxa?: string | null
+          taxa_5pct?: number
+          taxa_cobrada?: boolean
           taxa_paga_em?: string | null
-          codigo_gerado_em?: string | null
-          confirmado_por_codigo?: boolean
-          codigo_confirmado_em?: string | null
-          codigo_tentativas?: number
+          valor?: number
           valor_confirmado_profissional?: boolean
           valor_contestado?: number | null
         }
         Update: {
+          confirmado_profissional_em?: string | null
           created_at?: string
+          divergencia_resolvida_em?: string | null
           empresa_id?: string
           finalizada_em?: string | null
           id?: string
           job_id?: string
+          motivo_divergencia?: string | null
           profissional_id?: string
           status?: string
-          taxa_5pct?: number | null
-          taxa_cobrada?: boolean | null
-          valor?: number
-          confirmado_profissional_em?: string | null
-          divergencia_resolvida_em?: string | null
-          motivo_divergencia?: string | null
           status_taxa?: string | null
+          taxa_5pct?: number
+          taxa_cobrada?: boolean
           taxa_paga_em?: string | null
-          codigo_gerado_em?: string | null
-          confirmado_por_codigo?: boolean
-          codigo_confirmado_em?: string | null
-          codigo_tentativas?: number
+          valor?: number
           valor_confirmado_profissional?: boolean
           valor_contestado?: number | null
         }
         Relationships: [
           {
+            foreignKeyName: "contratacoes_empresa_id_fkey"
+            columns: ["empresa_id"]
+            isOneToOne: false
+            referencedRelation: "frela_ultima_atividade"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contratacoes_empresa_id_fkey"
+            columns: ["empresa_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "contratacoes_job_id_fkey"
             columns: ["job_id"]
             isOneToOne: false
             referencedRelation: "jobs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contratacoes_profissional_id_fkey"
+            columns: ["profissional_id"]
+            isOneToOne: false
+            referencedRelation: "frela_ultima_atividade"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contratacoes_profissional_id_fkey"
+            columns: ["profissional_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -195,40 +239,78 @@ export type Database = {
           saldo?: number
           valor?: number
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "creditos_taxas_empresa_id_fkey"
+            columns: ["empresa_id"]
+            isOneToOne: false
+            referencedRelation: "frela_ultima_atividade"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "creditos_taxas_empresa_id_fkey"
+            columns: ["empresa_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "creditos_taxas_indicacao_id_fkey"
+            columns: ["indicacao_id"]
+            isOneToOne: false
+            referencedRelation: "indicacoes"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       empresa_dados: {
         Row: {
-          cnpj: string | null
-          endereco: string | null
-          nome_empresa: string | null
-          profile_id: string
-          ramo: string | null
           bio: string | null
+          cnpj: string | null
+          created_at: string
+          endereco: string
+          id: string
+          is_demo: boolean
           latitude: number | null
           longitude: number | null
+          nome_empresa: string
+          profile_id: string
+          ramo: string | null
         }
         Insert: {
+          bio?: string | null
           cnpj?: string | null
-          endereco?: string | null
-          nome_empresa?: string | null
+          created_at?: string
+          endereco?: string
+          id?: string
+          is_demo?: boolean
+          latitude?: number | null
+          longitude?: number | null
+          nome_empresa?: string
           profile_id: string
           ramo?: string | null
-          bio?: string | null
-          latitude?: number | null
-          longitude?: number | null
         }
         Update: {
-          cnpj?: string | null
-          endereco?: string | null
-          nome_empresa?: string | null
-          profile_id?: string
-          ramo?: string | null
           bio?: string | null
+          cnpj?: string | null
+          created_at?: string
+          endereco?: string
+          id?: string
+          is_demo?: boolean
           latitude?: number | null
           longitude?: number | null
+          nome_empresa?: string
+          profile_id?: string
+          ramo?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "empresa_dados_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: true
+            referencedRelation: "frela_ultima_atividade"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "empresa_dados_profile_id_fkey"
             columns: ["profile_id"]
@@ -272,45 +354,39 @@ export type Database = {
           status?: string
           updated_at?: string
         }
-        Relationships: []
-      }
-      lista_espera: {
-        Row: {
-          id: string
-          email: string
-          cidade: string | null
-          tipo: string | null
-          latitude: number | null
-          longitude: number | null
-          user_id: string | null
-          created_at: string
-        }
-        Insert: {
-          id?: string
-          email: string
-          cidade?: string | null
-          tipo?: string | null
-          latitude?: number | null
-          longitude?: number | null
-          user_id?: string | null
-          created_at?: string
-        }
-        Update: {
-          id?: string
-          email?: string
-          cidade?: string | null
-          tipo?: string | null
-          latitude?: number | null
-          longitude?: number | null
-          user_id?: string | null
-          created_at?: string
-        }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "indicacoes_indicado_id_fkey"
+            columns: ["indicado_id"]
+            isOneToOne: true
+            referencedRelation: "frela_ultima_atividade"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "indicacoes_indicado_id_fkey"
+            columns: ["indicado_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "indicacoes_indicador_id_fkey"
+            columns: ["indicador_id"]
+            isOneToOne: false
+            referencedRelation: "frela_ultima_atividade"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "indicacoes_indicador_id_fkey"
+            columns: ["indicador_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       jobs: {
         Row: {
-          latitude: number | null
-          longitude: number | null
           address: string
           category: string
           company_name: string
@@ -330,8 +406,6 @@ export type Database = {
           user_id: string
         }
         Insert: {
-          latitude?: number | null
-          longitude?: number | null
           address?: string
           category: string
           company_name: string
@@ -351,8 +425,6 @@ export type Database = {
           user_id: string
         }
         Update: {
-          latitude?: number | null
-          longitude?: number | null
           address?: string
           category?: string
           company_name?: string
@@ -375,29 +447,29 @@ export type Database = {
       }
       mensagens: {
         Row: {
-          contratacao_id: string | null
+          contratacao_id: string
           created_at: string
           de_id: string
           id: string
-          lida: boolean | null
+          lida: boolean
           para_id: string
           texto: string
         }
         Insert: {
-          contratacao_id?: string | null
+          contratacao_id: string
           created_at?: string
           de_id: string
           id?: string
-          lida?: boolean | null
+          lida?: boolean
           para_id: string
           texto: string
         }
         Update: {
-          contratacao_id?: string | null
+          contratacao_id?: string
           created_at?: string
           de_id?: string
           id?: string
-          lida?: boolean | null
+          lida?: boolean
           para_id?: string
           texto?: string
         }
@@ -409,13 +481,41 @@ export type Database = {
             referencedRelation: "contratacoes"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "mensagens_de_id_fkey"
+            columns: ["de_id"]
+            isOneToOne: false
+            referencedRelation: "frela_ultima_atividade"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mensagens_de_id_fkey"
+            columns: ["de_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mensagens_para_id_fkey"
+            columns: ["para_id"]
+            isOneToOne: false
+            referencedRelation: "frela_ultima_atividade"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mensagens_para_id_fkey"
+            columns: ["para_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
         ]
       }
       notificacoes: {
         Row: {
           created_at: string
           id: string
-          lida: boolean | null
+          lida: boolean
           link: string | null
           texto: string
           tipo: string
@@ -424,7 +524,7 @@ export type Database = {
         Insert: {
           created_at?: string
           id?: string
-          lida?: boolean | null
+          lida?: boolean
           link?: string | null
           texto: string
           tipo: string
@@ -433,13 +533,28 @@ export type Database = {
         Update: {
           created_at?: string
           id?: string
-          lida?: boolean | null
+          lida?: boolean
           link?: string | null
           texto?: string
           tipo?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "notificacoes_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "frela_ultima_atividade"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notificacoes_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       pagamentos: {
         Row: {
@@ -460,7 +575,7 @@ export type Database = {
           stripe_id?: string | null
           tipo: string
           user_id: string
-          valor: number
+          valor?: number
         }
         Update: {
           contratacao_id?: string | null
@@ -478,6 +593,20 @@ export type Database = {
             columns: ["contratacao_id"]
             isOneToOne: false
             referencedRelation: "contratacoes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pagamentos_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "frela_ultima_atividade"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pagamentos_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -509,6 +638,181 @@ export type Database = {
             foreignKeyName: "portfolio_fotos_profile_id_fkey"
             columns: ["profile_id"]
             isOneToOne: false
+            referencedRelation: "frela_ultima_atividade"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "portfolio_fotos_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          avaliacao_media: number
+          bio: string | null
+          cartao_cadastrado: boolean
+          cidade: string
+          codigo_indicacao: string | null
+          created_at: string
+          destaque: boolean
+          email: string
+          foto_url: string | null
+          id: string
+          indicacao_recompensa_em: string | null
+          indicacao_recompensa_liberada: boolean
+          indicado_por: string | null
+          is_admin: boolean
+          is_demo: boolean
+          jobs_completed: number | null
+          meta_ajuste_trabalhos: number
+          neighborhood: string | null
+          nome: string | null
+          phone: string | null
+          rating: number | null
+          selos_extras: string[]
+          skills: string[] | null
+          stripe_customer_id: string | null
+          subscription_end: string | null
+          subscription_status: string
+          telefone: string
+          tipo: string
+          total_avaliacoes: number
+          verificado: boolean
+        }
+        Insert: {
+          avaliacao_media?: number
+          bio?: string | null
+          cartao_cadastrado?: boolean
+          cidade?: string
+          codigo_indicacao?: string | null
+          created_at?: string
+          destaque?: boolean
+          email: string
+          foto_url?: string | null
+          id: string
+          indicacao_recompensa_em?: string | null
+          indicacao_recompensa_liberada?: boolean
+          indicado_por?: string | null
+          is_admin?: boolean
+          is_demo?: boolean
+          jobs_completed?: number | null
+          meta_ajuste_trabalhos?: number
+          neighborhood?: string | null
+          nome?: string | null
+          phone?: string | null
+          rating?: number | null
+          selos_extras?: string[]
+          skills?: string[] | null
+          stripe_customer_id?: string | null
+          subscription_end?: string | null
+          subscription_status?: string
+          telefone?: string
+          tipo: string
+          total_avaliacoes?: number
+          verificado?: boolean
+        }
+        Update: {
+          avaliacao_media?: number
+          bio?: string | null
+          cartao_cadastrado?: boolean
+          cidade?: string
+          codigo_indicacao?: string | null
+          created_at?: string
+          destaque?: boolean
+          email?: string
+          foto_url?: string | null
+          id?: string
+          indicacao_recompensa_em?: string | null
+          indicacao_recompensa_liberada?: boolean
+          indicado_por?: string | null
+          is_admin?: boolean
+          is_demo?: boolean
+          jobs_completed?: number | null
+          meta_ajuste_trabalhos?: number
+          neighborhood?: string | null
+          nome?: string | null
+          phone?: string | null
+          rating?: number | null
+          selos_extras?: string[]
+          skills?: string[] | null
+          stripe_customer_id?: string | null
+          subscription_end?: string | null
+          subscription_status?: string
+          telefone?: string
+          tipo?: string
+          total_avaliacoes?: number
+          verificado?: boolean
+        }
+        Relationships: [
+          {
+            foreignKeyName: "profiles_indicado_por_fkey"
+            columns: ["indicado_por"]
+            isOneToOne: false
+            referencedRelation: "frela_ultima_atividade"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "profiles_indicado_por_fkey"
+            columns: ["indicado_por"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profissional_dados: {
+        Row: {
+          bio: string
+          created_at: string
+          disponibilidade: string
+          experiencia: string
+          id: string
+          instagram: string | null
+          is_demo: boolean
+          linkedin: string | null
+          profile_id: string
+          profissoes: string[]
+        }
+        Insert: {
+          bio?: string
+          created_at?: string
+          disponibilidade?: string
+          experiencia?: string
+          id?: string
+          instagram?: string | null
+          is_demo?: boolean
+          linkedin?: string | null
+          profile_id: string
+          profissoes?: string[]
+        }
+        Update: {
+          bio?: string
+          created_at?: string
+          disponibilidade?: string
+          experiencia?: string
+          id?: string
+          instagram?: string | null
+          is_demo?: boolean
+          linkedin?: string | null
+          profile_id?: string
+          profissoes?: string[]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "profissional_dados_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: true
+            referencedRelation: "frela_ultima_atividade"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "profissional_dados_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: true
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
@@ -544,174 +848,368 @@ export type Database = {
         }
         Relationships: []
       }
-      profiles: {
+      user_roles: {
         Row: {
-          latitude: number | null
-          longitude: number | null
-          localizacao_em: string | null
-          avaliacao_media: number | null
-          cartao_cadastrado: boolean | null
-          cidade: string | null
-          created_at: string
-          email: string
-          foto_url: string | null
           id: string
-          nome: string | null
-          stripe_customer_id: string | null
-          subscription_end: string | null
-          subscription_status: string | null
-          telefone: string | null
-          tipo: string
-          total_avaliacoes: number | null
-          is_admin: boolean
-          is_demo: boolean
-          verificado: boolean
-          codigo_indicacao: string | null
-          destaque: boolean
-          indicacao_recompensa_em: string | null
-          indicacao_recompensa_liberada: boolean
-          indicado_por: string | null
-          meta_ajuste_trabalhos: number
-          selos_extras: string[]
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
         }
         Insert: {
-          latitude?: number | null
-          longitude?: number | null
-          localizacao_em?: string | null
-          avaliacao_media?: number | null
-          cartao_cadastrado?: boolean | null
-          cidade?: string | null
-          created_at?: string
-          email: string
-          foto_url?: string | null
-          id: string
-          nome?: string | null
-          stripe_customer_id?: string | null
-          subscription_end?: string | null
-          subscription_status?: string | null
-          telefone?: string | null
-          tipo: string
-          total_avaliacoes?: number | null
-          is_admin?: boolean
-          is_demo?: boolean
-          verificado?: boolean
-          codigo_indicacao?: string | null
-          destaque?: boolean
-          indicacao_recompensa_em?: string | null
-          indicacao_recompensa_liberada?: boolean
-          indicado_por?: string | null
-          meta_ajuste_trabalhos?: number
-          selos_extras?: string[]
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
         }
         Update: {
-          latitude?: number | null
-          longitude?: number | null
-          localizacao_em?: string | null
-          avaliacao_media?: number | null
-          cartao_cadastrado?: boolean | null
-          cidade?: string | null
-          created_at?: string
-          email?: string
-          foto_url?: string | null
           id?: string
-          nome?: string | null
-          stripe_customer_id?: string | null
-          subscription_end?: string | null
-          subscription_status?: string | null
-          telefone?: string | null
-          tipo?: string
-          total_avaliacoes?: number | null
-          is_admin?: boolean
-          is_demo?: boolean
-          verificado?: boolean
-          codigo_indicacao?: string | null
-          destaque?: boolean
-          indicacao_recompensa_em?: string | null
-          indicacao_recompensa_liberada?: boolean
-          indicado_por?: string | null
-          meta_ajuste_trabalhos?: number
-          selos_extras?: string[]
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
         }
         Relationships: []
       }
-      profissional_dados: {
+    }
+    Views: {
+      frela_ultima_atividade: {
         Row: {
-          bio: string | null
-          disponibilidade: string | null
-          experiencia: string | null
-          instagram: string | null
-          linkedin: string | null
-          profile_id: string
-          profissoes: string[] | null
+          id: string | null
+          ultima_atividade: string | null
         }
         Insert: {
-          bio?: string | null
-          disponibilidade?: string | null
-          experiencia?: string | null
-          instagram?: string | null
-          linkedin?: string | null
-          profile_id: string
-          profissoes?: string[] | null
+          id?: string | null
+          ultima_atividade?: never
         }
         Update: {
-          bio?: string | null
-          disponibilidade?: string | null
-          experiencia?: string | null
-          instagram?: string | null
-          linkedin?: string | null
-          profile_id?: string
-          profissoes?: string[] | null
+          id?: string | null
+          ultima_atividade?: never
+        }
+        Relationships: []
+      }
+      taxas_saldo_empresas: {
+        Row: {
+          a_confirmar: number | null
+          confirmado: number | null
+          creditos: number | null
+          em_divergencia: number | null
+          empresa_id: string | null
+          pago: number | null
+          saldo: number | null
         }
         Relationships: [
           {
-            foreignKeyName: "profissional_dados_profile_id_fkey"
-            columns: ["profile_id"]
-            isOneToOne: true
+            foreignKeyName: "contratacoes_empresa_id_fkey"
+            columns: ["empresa_id"]
+            isOneToOne: false
+            referencedRelation: "frela_ultima_atividade"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contratacoes_empresa_id_fkey"
+            columns: ["empresa_id"]
+            isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
       }
     }
-    Views: {
-      taxas_saldo_empresas: {
-        Row: {
-          a_confirmar: number
-          confirmado: number
+    Functions: {
+      admin_ajustar_meta: {
+        Args: { p_ajuste: number; p_id: string }
+        Returns: undefined
+      }
+      admin_crescimento: {
+        Args: { p_incluir_demo?: boolean; p_semanas?: number }
+        Returns: {
+          contratacoes: number
+          empresas: number
+          profissionais: number
+          semana: string
+        }[]
+      }
+      admin_indicacoes: {
+        Args: { p_incluir_demo?: boolean }
+        Returns: {
+          cadastrado_em: string
+          indicado_email: string
+          indicado_id: string
+          indicado_nome: string
+          indicado_tipo: string
+          indicador_codigo: string
+          indicador_id: string
+          indicador_nome: string
+          pagou: boolean
+          perfil_completo: boolean
+          recompensa_em: string
+          recompensa_liberada: boolean
+        }[]
+      }
+      admin_liberar_recompensa: {
+        Args: { p_indicado: string; p_liberada?: boolean }
+        Returns: undefined
+      }
+      admin_listar_contratacoes: {
+        Args: { p_incluir_demo?: boolean }
+        Returns: {
+          criada_em: string
+          empresa: string
+          empresa_id: string
+          finalizada_em: string
+          id: string
+          is_demo: boolean
+          profissional: string
+          profissional_id: string
+          status: string
+          status_taxa: string
+          taxa: number
+          taxa_cobrada: boolean
+          taxa_paga_em: string
+          vaga: string
+          valor: number
+          valor_contestado: number
+        }[]
+      }
+      admin_listar_empresas: {
+        Args: { p_incluir_demo?: boolean }
+        Returns: {
+          assinante: boolean
+          assinatura_fim: string
+          assinatura_status: string
+          ativo: boolean
+          avaliacao_media: number
+          cidade: string
+          cnpj: string
+          contratacoes: number
+          contratacoes_finalizadas: number
+          created_at: string
           creditos: number
+          destaque: boolean
+          em_divergencia: number
+          email: string
+          endereco: string
+          id: string
+          inadimplente: boolean
+          indicacoes: number
+          is_demo: boolean
+          movimentado: number
+          nome_empresa: string
+          perto_teto: boolean
+          ramo: string
+          responsavel: string
+          saldo_taxas: number
+          selos_extras: string[]
+          taxa_aberta_desde: string
+          taxas_abertas: number
+          taxas_pagas: number
+          telefone: string
+          total_avaliacoes: number
+          travada: boolean
+          ultima_atividade: string
+          vagas: number
+          vagas_abertas: number
+          verificado: boolean
+        }[]
+      }
+      admin_listar_profissionais: {
+        Args: { p_incluir_demo?: boolean }
+        Returns: {
+          assinante: boolean
+          assinatura_fim: string
+          assinatura_status: string
+          ativo: boolean
+          avaliacao_media: number
+          candidaturas: number
+          cidade: string
+          codigo_indicacao: string
+          created_at: string
+          destaque: boolean
+          disponibilidade: string
+          email: string
+          fotos_portfolio: number
+          ganhos: number
+          id: string
+          indicado_por: string
+          is_demo: boolean
+          meta_ajuste_trabalhos: number
+          meta_trabalhos: number
+          nome: string
+          profissoes: string[]
+          selos_extras: string[]
+          telefone: string
+          total_avaliacoes: number
+          trabalhos: number
+          ultima_atividade: string
+          verificado: boolean
+        }[]
+      }
+      admin_listar_vagas: {
+        Args: { p_incluir_demo?: boolean }
+        Returns: {
+          bairro: string
+          candidaturas: number
+          candidaturas_pendentes: number
+          categoria: string
+          created_at: string
+          data: string
+          empresa: string
+          empresa_id: string
+          funcao: string
+          horario: string
+          id: string
+          is_demo: boolean
+          profissional: string
+          status: string
+          status_contratacao: string
+          titulo: string
+          valor: number
+        }[]
+      }
+      admin_promover: {
+        Args: {
+          p_destaque?: boolean
+          p_id: string
+          p_selos_extras?: string[]
+          p_verificado?: boolean
+        }
+        Returns: undefined
+      }
+      admin_receita_mensal: {
+        Args: { p_incluir_demo?: boolean; p_meses?: number }
+        Returns: {
+          contratacoes: number
+          mes: string
+          movimentado: number
+          taxas: number
+        }[]
+      }
+      admin_registrar_pagamento_taxas: {
+        Args: { p_empresa: string; p_referencia?: string }
+        Returns: number
+      }
+      admin_resolver_divergencia: {
+        Args: { p_id: string; p_valor_final: number }
+        Returns: undefined
+      }
+      admin_saldos_taxas: {
+        Args: never
+        Returns: {
+          a_confirmar: number
+          bloqueado: boolean
           em_divergencia: number
           empresa_id: string
+          nome_empresa: string
           pago: number
           saldo: number
-        }
-        Relationships: []
+        }[]
       }
-    }
-    Functions: {
+      admin_set_verificado: {
+        Args: { p_id: string; p_valor: boolean }
+        Returns: undefined
+      }
+      admin_usuario_detalhe: { Args: { p_id: string }; Returns: Json }
+      admin_visao_geral: { Args: { p_incluir_demo?: boolean }; Returns: Json }
+      confirmar_valor_contratacao: {
+        Args: {
+          p_confirma: boolean
+          p_id: string
+          p_motivo?: string
+          p_valor_recebido?: number
+        }
+        Returns: string
+      }
+      contratacoes_finalizadas_empresa: {
+        Args: { p_id: string }
+        Returns: number
+      }
+      creditos_disponiveis: { Args: { p_empresa: string }; Returns: number }
+      frela_autoconfirmar_valores: {
+        Args: { p_dias?: number }
+        Returns: number
+      }
+      frela_brl: { Args: { v: number }; Returns: string }
+      frela_conceder_recompensa: {
+        Args: { p_forcar?: boolean; p_indicacao: string }
+        Returns: number
+      }
+      frela_eh_indicado: {
+        Args: {
+          p_ajuste: number
+          p_media: number
+          p_selos: string[]
+          p_total_avaliacoes: number
+          p_trabalhos: number
+        }
+        Returns: boolean
+      }
+      frela_exige_admin: { Args: never; Returns: undefined }
+      frela_meta_trabalhos: { Args: never; Returns: number }
+      frela_nota_minima_indicado: { Args: never; Returns: number }
+      frela_preco_assinatura: { Args: { p_tipo: string }; Returns: number }
+      frela_quitar_taxas: {
+        Args: { p_empresa: string; p_referencia?: string }
+        Returns: number
+      }
+      frela_recompensa_indicacao: { Args: never; Returns: number }
+      frela_taxa_percentual: { Args: never; Returns: number }
+      frela_teto_taxas: { Args: never; Returns: number }
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
+      historico_profissional: {
+        Args: { p_id: string }
+        Returns: {
+          comentario: string
+          contratacao_id: string
+          data: string
+          empresa: string
+          finalizada_em: string
+          nota: number
+          titulo: string
+        }[]
+      }
+      is_admin: { Args: never; Returns: boolean }
       minhas_indicacoes: {
-        Args: Record<PropertyKey, never>
+        Args: never
         Returns: {
           created_at: string
           id: string
-          indicado_nome: string | null
+          indicado_nome: string
           indicado_tipo: string
-          recompensa_valor: number | null
-          recompensado_em: string | null
+          recompensa_valor: number
+          recompensado_em: string
           status: string
         }[]
       }
+      minhas_taxas_resumo: {
+        Args: never
+        Returns: {
+          a_confirmar: number
+          bloqueado: boolean
+          bruto: number
+          confirmado: number
+          creditos: number
+          em_divergencia: number
+          pago: number
+          pode_renovar: boolean
+          saldo: number
+          teto: number
+        }[]
+      }
+      pode_renovar_assinatura: { Args: never; Returns: boolean }
       recomendadas_empresas: {
         Args: { p_limite?: number }
         Returns: {
           avaliacao_media: number
-          cidade: string | null
+          cidade: string
           contratacoes: number
           destaque: boolean
-          endereco: string | null
-          foto_url: string | null
+          endereco: string
+          foto_url: string
           id: string
           nome_empresa: string
-          ramo: string | null
+          ramo: string
           relevancia: number
           top_avaliada: boolean
           total_avaliacoes: number
@@ -723,14 +1221,14 @@ export type Database = {
         Args: { p_limite?: number }
         Returns: {
           avaliacao_media: number
-          cidade: string | null
+          cidade: string
           destaque: boolean
-          disponibilidade: string | null
-          foto_url: string | null
+          disponibilidade: string
+          foto_url: string
           id: string
           indicado: boolean
-          nome: string | null
-          profissoes: string[] | null
+          nome: string
+          profissoes: string[]
           relevancia: number
           top_avaliado: boolean
           total_avaliacoes: number
@@ -738,276 +1236,7 @@ export type Database = {
           verificado: boolean
         }[]
       }
-      validar_codigo_indicacao: {
-        Args: { p_codigo: string }
-        Returns: string | null
-      }
-      admin_ajustar_meta: {
-        Args: { p_id: string; p_ajuste: number }
-        Returns: undefined
-      }
-      admin_crescimento: {
-        Args: { p_semanas?: number; p_incluir_demo?: boolean }
-        Returns: {
-          semana: string
-          empresas: number
-          profissionais: number
-          contratacoes: number
-        }[]
-      }
-      admin_indicacoes: {
-        Args: { p_incluir_demo?: boolean }
-        Returns: {
-          indicado_id: string
-          indicado_nome: string | null
-          indicado_tipo: string
-          indicado_email: string
-          cadastrado_em: string
-          perfil_completo: boolean
-          pagou: boolean
-          recompensa_liberada: boolean
-          recompensa_em: string | null
-          indicador_id: string
-          indicador_nome: string | null
-          indicador_codigo: string | null
-        }[]
-      }
-      admin_liberar_recompensa: {
-        Args: { p_indicado: string; p_liberada?: boolean }
-        Returns: undefined
-      }
-      admin_listar_contratacoes: {
-        Args: { p_incluir_demo?: boolean }
-        Returns: {
-          id: string
-          vaga: string
-          empresa_id: string
-          empresa: string
-          profissional_id: string
-          profissional: string | null
-          valor: number
-          status: string
-          status_taxa: string | null
-          taxa: number | null
-          taxa_cobrada: boolean
-          valor_contestado: number | null
-          criada_em: string
-          finalizada_em: string | null
-          taxa_paga_em: string | null
-          is_demo: boolean
-        }[]
-      }
-      admin_listar_empresas: {
-        Args: { p_incluir_demo?: boolean }
-        Returns: {
-          id: string
-          nome_empresa: string
-          responsavel: string | null
-          email: string
-          telefone: string | null
-          ramo: string | null
-          cidade: string | null
-          endereco: string | null
-          cnpj: string | null
-          assinatura_status: string
-          assinatura_fim: string | null
-          assinante: boolean
-          vagas: number
-          vagas_abertas: number
-          contratacoes: number
-          contratacoes_finalizadas: number
-          movimentado: number
-          saldo_taxas: number
-          taxas_abertas: number
-          taxa_aberta_desde: string | null
-          em_divergencia: number
-          taxas_pagas: number
-          travada: boolean
-          perto_teto: boolean
-          inadimplente: boolean
-          avaliacao_media: number
-          total_avaliacoes: number
-          verificado: boolean
-          destaque: boolean
-          selos_extras: string[]
-          ultima_atividade: string
-          ativo: boolean
-          created_at: string
-          is_demo: boolean
-          creditos: number
-          indicacoes: number
-        }[]
-      }
-      admin_listar_profissionais: {
-        Args: { p_incluir_demo?: boolean }
-        Returns: {
-          id: string
-          nome: string | null
-          email: string
-          telefone: string | null
-          profissoes: string[] | null
-          cidade: string | null
-          disponibilidade: string | null
-          assinatura_status: string
-          assinatura_fim: string | null
-          assinante: boolean
-          avaliacao_media: number
-          total_avaliacoes: number
-          candidaturas: number
-          trabalhos: number
-          meta_ajuste_trabalhos: number
-          meta_trabalhos: number
-          ganhos: number
-          fotos_portfolio: number
-          verificado: boolean
-          destaque: boolean
-          selos_extras: string[]
-          indicado_por: string | null
-          codigo_indicacao: string | null
-          ultima_atividade: string
-          ativo: boolean
-          created_at: string
-          is_demo: boolean
-        }[]
-      }
-      admin_listar_vagas: {
-        Args: { p_incluir_demo?: boolean }
-        Returns: {
-          id: string
-          titulo: string
-          empresa_id: string
-          empresa: string
-          categoria: string
-          funcao: string
-          data: string
-          horario: string
-          valor: number
-          bairro: string
-          status: string
-          candidaturas: number
-          candidaturas_pendentes: number
-          profissional: string | null
-          status_contratacao: string | null
-          created_at: string
-          is_demo: boolean
-        }[]
-      }
-      admin_promover: {
-        Args: { p_id: string; p_verificado?: boolean; p_destaque?: boolean; p_selos_extras?: string[] }
-        Returns: undefined
-      }
-      admin_receita_mensal: {
-        Args: { p_meses?: number; p_incluir_demo?: boolean }
-        Returns: {
-          mes: string
-          taxas: number
-          movimentado: number
-          contratacoes: number
-        }[]
-      }
-      admin_usuario_detalhe: {
-        Args: { p_id: string }
-        Returns: Json
-      }
-      admin_visao_geral: {
-        Args: { p_incluir_demo?: boolean }
-        Returns: Json
-      }
-      admin_registrar_pagamento_taxas: {
-        Args: { p_empresa: string; p_referencia?: string }
-        Returns: number
-      }
-      admin_resolver_divergencia: {
-        Args: { p_id: string; p_valor_final: number }
-        Returns: undefined
-      }
-      admin_saldos_taxas: {
-        Args: Record<PropertyKey, never>
-        Returns: {
-          a_confirmar: number
-          bloqueado: boolean
-          em_divergencia: number
-          empresa_id: string
-          nome_empresa: string
-          pago: number
-          saldo: number
-        }[]
-      }
-      gerar_codigo_confirmacao: {
-        Args: { p_id: string; p_valor: number }
-        Returns: string
-      }
-      meu_codigo_confirmacao: {
-        Args: { p_id: string }
-        Returns: string | null
-      }
-      confirmar_codigo_contratacao: {
-        Args: { p_id: string; p_codigo: string; p_valor_confere?: boolean; p_valor_recebido?: number; p_motivo?: string }
-        Returns: string
-      }
-      admin_encerrar_contratacao: {
-        Args: { p_id: string; p_valor: number }
-        Returns: undefined
-      }
-      minhas_pendencias: {
-        Args: Record<PropertyKey, never>
-        Returns: { tipo: string; contratacao_id: string; titulo: string; data: string; bloqueia: boolean }[]
-      }
-      frela_curriculo_completo: {
-        Args: { p_id: string }
-        Returns: boolean
-      }
-      confirmar_valor_contratacao: {
-        Args: { p_id: string; p_confirma: boolean; p_valor_recebido?: number; p_motivo?: string }
-        Returns: string
-      }
-      minhas_taxas_resumo: {
-        Args: Record<PropertyKey, never>
-        Returns: {
-          a_confirmar: number
-          bloqueado: boolean
-          confirmado: number
-          em_divergencia: number
-          pago: number
-          pode_renovar: boolean
-          saldo: number
-          teto: number
-          creditos: number
-          bruto: number
-        }[]
-      }
-      pode_renovar_assinatura: {
-        Args: Record<PropertyKey, never>
-        Returns: boolean
-      }
-      saldo_taxas_empresa: {
-        Args: { p_empresa: string }
-        Returns: number
-      }
-      admin_set_verificado: {
-        Args: { p_id: string; p_valor: boolean }
-        Returns: undefined
-      }
-      is_admin: {
-        Args: Record<PropertyKey, never>
-        Returns: boolean
-      }
-      contratacoes_finalizadas_empresa: {
-        Args: { p_id: string }
-        Returns: number
-      }
-      historico_profissional: {
-        Args: { p_id: string }
-        Returns: {
-          comentario: string | null
-          contratacao_id: string
-          data: string
-          empresa: string
-          finalizada_em: string | null
-          nota: number | null
-          titulo: string
-        }[]
-      }
+      saldo_taxas_empresa: { Args: { p_empresa: string }; Returns: number }
       trabalhos_finalizados: {
         Args: { p_ids: string[] }
         Returns: {
@@ -1015,9 +1244,10 @@ export type Database = {
           total: number
         }[]
       }
+      validar_codigo_indicacao: { Args: { p_codigo: string }; Returns: string }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "moderator" | "user"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1144,6 +1374,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "moderator", "user"],
+    },
   },
 } as const
