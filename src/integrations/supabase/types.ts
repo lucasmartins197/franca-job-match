@@ -46,6 +46,163 @@ export type Database = {
           },
         ]
       }
+      avaliacoes: {
+        Row: {
+          comentario: string | null
+          contratacao_id: string
+          created_at: string
+          de_id: string
+          id: string
+          nota: number
+          para_id: string
+        }
+        Insert: {
+          comentario?: string | null
+          contratacao_id: string
+          created_at?: string
+          de_id: string
+          id?: string
+          nota: number
+          para_id: string
+        }
+        Update: {
+          comentario?: string | null
+          contratacao_id?: string
+          created_at?: string
+          de_id?: string
+          id?: string
+          nota?: number
+          para_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "avaliacoes_contratacao_id_fkey"
+            columns: ["contratacao_id"]
+            isOneToOne: false
+            referencedRelation: "contratacoes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "avaliacoes_de_id_fkey"
+            columns: ["de_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "avaliacoes_para_id_fkey"
+            columns: ["para_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      contratacoes: {
+        Row: {
+          created_at: string
+          empresa_id: string
+          finalizada_em: string | null
+          id: string
+          job_id: string
+          profissional_id: string
+          status: string
+          taxa_5pct: number
+          taxa_cobrada: boolean
+          valor: number
+        }
+        Insert: {
+          created_at?: string
+          empresa_id: string
+          finalizada_em?: string | null
+          id?: string
+          job_id: string
+          profissional_id: string
+          status?: string
+          taxa_5pct?: number
+          taxa_cobrada?: boolean
+          valor?: number
+        }
+        Update: {
+          created_at?: string
+          empresa_id?: string
+          finalizada_em?: string | null
+          id?: string
+          job_id?: string
+          profissional_id?: string
+          status?: string
+          taxa_5pct?: number
+          taxa_cobrada?: boolean
+          valor?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "contratacoes_empresa_id_fkey"
+            columns: ["empresa_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contratacoes_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "jobs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contratacoes_profissional_id_fkey"
+            columns: ["profissional_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      empresa_dados: {
+        Row: {
+          bio: string | null
+          cnpj: string | null
+          created_at: string
+          endereco: string
+          id: string
+          is_demo: boolean
+          nome_empresa: string
+          profile_id: string
+          ramo: string | null
+        }
+        Insert: {
+          bio?: string | null
+          cnpj?: string | null
+          created_at?: string
+          endereco?: string
+          id?: string
+          is_demo?: boolean
+          nome_empresa?: string
+          profile_id: string
+          ramo?: string | null
+        }
+        Update: {
+          bio?: string | null
+          cnpj?: string | null
+          created_at?: string
+          endereco?: string
+          id?: string
+          is_demo?: boolean
+          nome_empresa?: string
+          profile_id?: string
+          ramo?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "empresa_dados_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       jobs: {
         Row: {
           address: string
@@ -106,11 +263,152 @@ export type Database = {
         }
         Relationships: []
       }
+      mensagens: {
+        Row: {
+          contratacao_id: string
+          created_at: string
+          de_id: string
+          id: string
+          lida: boolean
+          para_id: string
+          texto: string
+        }
+        Insert: {
+          contratacao_id: string
+          created_at?: string
+          de_id: string
+          id?: string
+          lida?: boolean
+          para_id: string
+          texto: string
+        }
+        Update: {
+          contratacao_id?: string
+          created_at?: string
+          de_id?: string
+          id?: string
+          lida?: boolean
+          para_id?: string
+          texto?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mensagens_contratacao_id_fkey"
+            columns: ["contratacao_id"]
+            isOneToOne: false
+            referencedRelation: "contratacoes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mensagens_de_id_fkey"
+            columns: ["de_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mensagens_para_id_fkey"
+            columns: ["para_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      notificacoes: {
+        Row: {
+          created_at: string
+          id: string
+          lida: boolean
+          link: string | null
+          texto: string
+          tipo: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          lida?: boolean
+          link?: string | null
+          texto: string
+          tipo: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          lida?: boolean
+          link?: string | null
+          texto?: string
+          tipo?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notificacoes_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pagamentos: {
+        Row: {
+          contratacao_id: string | null
+          created_at: string
+          id: string
+          status: string
+          stripe_id: string | null
+          tipo: string
+          user_id: string
+          valor: number
+        }
+        Insert: {
+          contratacao_id?: string | null
+          created_at?: string
+          id?: string
+          status?: string
+          stripe_id?: string | null
+          tipo: string
+          user_id: string
+          valor?: number
+        }
+        Update: {
+          contratacao_id?: string | null
+          created_at?: string
+          id?: string
+          status?: string
+          stripe_id?: string | null
+          tipo?: string
+          user_id?: string
+          valor?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pagamentos_contratacao_id_fkey"
+            columns: ["contratacao_id"]
+            isOneToOne: false
+            referencedRelation: "contratacoes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pagamentos_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
+          avaliacao_media: number
           bio: string | null
+          cidade: string
           created_at: string
           email: string
+          foto_url: string | null
           id: string
           jobs_completed: number | null
           neighborhood: string | null
@@ -118,12 +416,19 @@ export type Database = {
           phone: string | null
           rating: number | null
           skills: string[] | null
+          subscription_end: string | null
+          subscription_status: string
+          telefone: string
           tipo: string
+          total_avaliacoes: number
         }
         Insert: {
+          avaliacao_media?: number
           bio?: string | null
+          cidade?: string
           created_at?: string
           email: string
+          foto_url?: string | null
           id: string
           jobs_completed?: number | null
           neighborhood?: string | null
@@ -131,12 +436,19 @@ export type Database = {
           phone?: string | null
           rating?: number | null
           skills?: string[] | null
+          subscription_end?: string | null
+          subscription_status?: string
+          telefone?: string
           tipo: string
+          total_avaliacoes?: number
         }
         Update: {
+          avaliacao_media?: number
           bio?: string | null
+          cidade?: string
           created_at?: string
           email?: string
+          foto_url?: string | null
           id?: string
           jobs_completed?: number | null
           neighborhood?: string | null
@@ -144,9 +456,54 @@ export type Database = {
           phone?: string | null
           rating?: number | null
           skills?: string[] | null
+          subscription_end?: string | null
+          subscription_status?: string
+          telefone?: string
           tipo?: string
+          total_avaliacoes?: number
         }
         Relationships: []
+      }
+      profissional_dados: {
+        Row: {
+          bio: string
+          created_at: string
+          disponibilidade: string
+          experiencia: string
+          id: string
+          is_demo: boolean
+          profile_id: string
+          profissoes: string[]
+        }
+        Insert: {
+          bio?: string
+          created_at?: string
+          disponibilidade?: string
+          experiencia?: string
+          id?: string
+          is_demo?: boolean
+          profile_id: string
+          profissoes?: string[]
+        }
+        Update: {
+          bio?: string
+          created_at?: string
+          disponibilidade?: string
+          experiencia?: string
+          id?: string
+          is_demo?: boolean
+          profile_id?: string
+          profissoes?: string[]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "profissional_dados_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_roles: {
         Row: {
