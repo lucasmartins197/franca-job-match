@@ -791,6 +791,10 @@ export type Database = {
       }
     }
     Functions: {
+      admin_ajustar_meta: {
+        Args: { p_ajuste: number; p_id: string }
+        Returns: undefined
+      }
       admin_crescimento: {
         Args: { p_incluir_demo?: boolean; p_semanas?: number }
         Returns: {
@@ -799,6 +803,150 @@ export type Database = {
           profissionais: number
           semana: string
         }[]
+      }
+      admin_indicacoes: {
+        Args: { p_incluir_demo?: boolean }
+        Returns: {
+          cadastrado_em: string
+          indicado_email: string
+          indicado_id: string
+          indicado_nome: string
+          indicado_tipo: string
+          indicador_codigo: string
+          indicador_id: string
+          indicador_nome: string
+          pagou: boolean
+          perfil_completo: boolean
+          recompensa_em: string
+          recompensa_liberada: boolean
+        }[]
+      }
+      admin_liberar_recompensa: {
+        Args: { p_indicado: string; p_liberada?: boolean }
+        Returns: undefined
+      }
+      admin_listar_contratacoes: {
+        Args: { p_incluir_demo?: boolean }
+        Returns: {
+          criada_em: string
+          empresa: string
+          empresa_id: string
+          finalizada_em: string
+          id: string
+          is_demo: boolean
+          profissional: string
+          profissional_id: string
+          status: string
+          status_taxa: string
+          taxa: number
+          taxa_cobrada: boolean
+          taxa_paga_em: string
+          vaga: string
+          valor: number
+          valor_contestado: number
+        }[]
+      }
+      admin_listar_empresas: {
+        Args: { p_incluir_demo?: boolean }
+        Returns: {
+          assinante: boolean
+          assinatura_fim: string
+          assinatura_status: string
+          ativo: boolean
+          avaliacao_media: number
+          cidade: string
+          cnpj: string
+          contratacoes: number
+          contratacoes_finalizadas: number
+          created_at: string
+          destaque: boolean
+          em_divergencia: number
+          email: string
+          endereco: string
+          id: string
+          inadimplente: boolean
+          is_demo: boolean
+          movimentado: number
+          nome_empresa: string
+          perto_teto: boolean
+          ramo: string
+          responsavel: string
+          saldo_taxas: number
+          selos_extras: string[]
+          taxa_aberta_desde: string
+          taxas_abertas: number
+          taxas_pagas: number
+          telefone: string
+          total_avaliacoes: number
+          travada: boolean
+          ultima_atividade: string
+          vagas: number
+          vagas_abertas: number
+          verificado: boolean
+        }[]
+      }
+      admin_listar_profissionais: {
+        Args: { p_incluir_demo?: boolean }
+        Returns: {
+          assinante: boolean
+          assinatura_fim: string
+          assinatura_status: string
+          ativo: boolean
+          avaliacao_media: number
+          candidaturas: number
+          cidade: string
+          codigo_indicacao: string
+          created_at: string
+          destaque: boolean
+          disponibilidade: string
+          email: string
+          fotos_portfolio: number
+          ganhos: number
+          id: string
+          indicado_por: string
+          is_demo: boolean
+          meta_ajuste_trabalhos: number
+          meta_trabalhos: number
+          nome: string
+          profissoes: string[]
+          selos_extras: string[]
+          telefone: string
+          total_avaliacoes: number
+          trabalhos: number
+          ultima_atividade: string
+          verificado: boolean
+        }[]
+      }
+      admin_listar_vagas: {
+        Args: { p_incluir_demo?: boolean }
+        Returns: {
+          bairro: string
+          candidaturas: number
+          candidaturas_pendentes: number
+          categoria: string
+          created_at: string
+          data: string
+          empresa: string
+          empresa_id: string
+          funcao: string
+          horario: string
+          id: string
+          is_demo: boolean
+          profissional: string
+          status: string
+          status_contratacao: string
+          titulo: string
+          valor: number
+        }[]
+      }
+      admin_promover: {
+        Args: {
+          p_destaque?: boolean
+          p_id: string
+          p_selos_extras?: string[]
+          p_verificado?: boolean
+        }
+        Returns: undefined
       }
       admin_receita_mensal: {
         Args: { p_incluir_demo?: boolean; p_meses?: number }
@@ -833,6 +981,7 @@ export type Database = {
         Args: { p_id: string; p_valor: boolean }
         Returns: undefined
       }
+      admin_usuario_detalhe: { Args: { p_id: string }; Returns: Json }
       admin_visao_geral: { Args: { p_incluir_demo?: boolean }; Returns: Json }
       confirmar_valor_contratacao: {
         Args: {

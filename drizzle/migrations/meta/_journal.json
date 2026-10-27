@@ -43,6 +43,13 @@
       "when": 1793128839310,
       "tag": "0005_frela_fase5_gestao_1",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1793128867178,
+      "tag": "0006_frela_fase5_gestao_2",
+      "breakpoints": true
     }
   ]
 }
