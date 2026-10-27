@@ -1,13 +1,12 @@
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Briefcase, ChevronRight, MapPin, Search, Star, Trophy } from "lucide-react";
+import { Search, Trophy } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
-import { selosRecomendado, useRecomendadosProfissionais } from "@/hooks/useRecomendacoes";
+import { useRecomendadosProfissionais } from "@/hooks/useRecomendacoes";
 import PageHeader from "@/components/frela/PageHeader";
-import UserAvatar from "@/components/frela/UserAvatar";
 import EmptyState from "@/components/frela/EmptyState";
-import Selos from "@/components/perfil/Selos";
+import ProfissionalCard from "@/components/perfil/ProfissionalCard";
 import { cn } from "@/lib/utils";
 
 /** Vitrine para a empresa: os melhores profissionais, ordenados por selo > avaliação > trabalhos. */
@@ -58,41 +57,13 @@ const Recomendados = () => {
         )}
 
         {isLoading ? (
-          <div className="space-y-3">{[0, 1, 2].map((i) => <Skeleton key={i} className="h-28 rounded-2xl" />)}</div>
+          <div className="space-y-3">{[0, 1, 2].map((i) => <Skeleton key={i} className="h-40 rounded-3xl" />)}</div>
         ) : filtrados.length === 0 ? (
           <EmptyState icon={Trophy} titulo="Ninguém por aqui ainda" descricao="Assim que os profissionais completarem trabalhos e receberem avaliações, eles aparecem aqui." />
         ) : (
           <ol className="space-y-3">
             {filtrados.map((p, i) => (
-              <li key={p.id}>
-                <button onClick={() => navigate(`/perfil/${p.id}`)}
-                  className={cn("w-full text-left bg-card rounded-2xl border p-4 shadow-card flex gap-3 items-start hover:border-primary/40",
-                    p.indicado ? "border-amber-300" : "border-border")}>
-                  <div className="relative shrink-0">
-                    <UserAvatar nome={p.nome} fotoUrl={p.foto_url} size="lg" />
-                    <span className={cn("absolute -top-2 -left-2 w-6 h-6 rounded-full text-[11px] font-bold flex items-center justify-center border-2 border-card",
-                      i === 0 ? "bg-amber-400 text-amber-950" : i === 1 ? "bg-slate-300 text-slate-800" : i === 2 ? "bg-orange-300 text-orange-900" : "bg-muted text-muted-foreground")}>
-                      {i + 1}
-                    </span>
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="font-display font-bold text-foreground truncate">{p.nome}</p>
-                    <div className="flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs text-muted-foreground mt-0.5">
-                      <span className="inline-flex items-center gap-1">
-                        <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />
-                        {p.total_avaliacoes ? <><b className="text-foreground">{Number(p.avaliacao_media).toFixed(1)}</b> ({p.total_avaliacoes})</> : "Sem avaliações"}
-                      </span>
-                      <span className="inline-flex items-center gap-1"><Briefcase className="h-3.5 w-3.5" /> {p.trabalhos} trabalho{p.trabalhos === 1 ? "" : "s"}</span>
-                      {p.cidade && <span className="inline-flex items-center gap-1"><MapPin className="h-3.5 w-3.5" /> {p.cidade}</span>}
-                    </div>
-                    <Selos selos={selosRecomendado(p)} size="sm" className="mt-1.5" />
-                    {(p.profissoes ?? []).length > 0 && (
-                      <p className="text-xs text-foreground/80 mt-1.5 truncate">{(p.profissoes ?? []).join(" · ")}</p>
-                    )}
-                  </div>
-                  <ChevronRight className="h-4 w-4 text-muted-foreground shrink-0 self-center" />
-                </button>
-              </li>
+              <li key={p.id}><ProfissionalCard p={p} posicao={i + 1} index={i} /></li>
             ))}
           </ol>
         )}

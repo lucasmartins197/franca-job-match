@@ -67,8 +67,8 @@ const SearchTab = () => {
           <EmptyState icon={SearchX} titulo="Nenhuma vaga encontrada" descricao="Tente outra palavra ou outra função." />
         ) : (
           <div className="space-y-3">
-            {filtered.map((job, i) => <JobCard key={job.id} job={job} index={i} fotoEmpresa={empresas[job.user_id]?.foto_url}
-                  notaEmpresa={empresas[job.user_id]?.avaliacao_media} totalAvaliacoesEmpresa={empresas[job.user_id]?.total_avaliacoes} />)}
+            {filtered.map((job, i) => <JobCard key={job.id} job={job} index={i} empresa={empresas[job.user_id]}
+ />)}
           </div>
         )}
       </div>

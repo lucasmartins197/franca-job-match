@@ -122,8 +122,8 @@ const HomeTab = () => {
           ) : (
             <div className="space-y-3">
               {filteredJobs.map((job, i) => (
-                <JobCard key={job.id} job={job} index={i} fotoEmpresa={empresas[job.user_id]?.foto_url}
-                  notaEmpresa={empresas[job.user_id]?.avaliacao_media} totalAvaliacoesEmpresa={empresas[job.user_id]?.total_avaliacoes} />
+                <JobCard key={job.id} job={job} index={i} empresa={empresas[job.user_id]}
+ />
               ))}
             </div>
           )}
