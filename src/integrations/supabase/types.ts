@@ -208,6 +208,61 @@ export type Database = {
           },
         ]
       }
+      creditos_taxas: {
+        Row: {
+          created_at: string
+          descricao: string | null
+          empresa_id: string
+          id: string
+          indicacao_id: string | null
+          origem: string
+          saldo: number
+          valor: number
+        }
+        Insert: {
+          created_at?: string
+          descricao?: string | null
+          empresa_id: string
+          id?: string
+          indicacao_id?: string | null
+          origem?: string
+          saldo: number
+          valor: number
+        }
+        Update: {
+          created_at?: string
+          descricao?: string | null
+          empresa_id?: string
+          id?: string
+          indicacao_id?: string | null
+          origem?: string
+          saldo?: number
+          valor?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "creditos_taxas_empresa_id_fkey"
+            columns: ["empresa_id"]
+            isOneToOne: false
+            referencedRelation: "frela_ultima_atividade"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "creditos_taxas_empresa_id_fkey"
+            columns: ["empresa_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "creditos_taxas_indicacao_id_fkey"
+            columns: ["indicacao_id"]
+            isOneToOne: false
+            referencedRelation: "indicacoes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       empresa_dados: {
         Row: {
           bio: string | null
@@ -260,6 +315,71 @@ export type Database = {
             foreignKeyName: "empresa_dados_profile_id_fkey"
             columns: ["profile_id"]
             isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      indicacoes: {
+        Row: {
+          codigo: string
+          created_at: string
+          id: string
+          indicado_id: string
+          indicador_id: string
+          recompensa_valor: number | null
+          recompensado_em: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          codigo: string
+          created_at?: string
+          id?: string
+          indicado_id: string
+          indicador_id: string
+          recompensa_valor?: number | null
+          recompensado_em?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          codigo?: string
+          created_at?: string
+          id?: string
+          indicado_id?: string
+          indicador_id?: string
+          recompensa_valor?: number | null
+          recompensado_em?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "indicacoes_indicado_id_fkey"
+            columns: ["indicado_id"]
+            isOneToOne: true
+            referencedRelation: "frela_ultima_atividade"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "indicacoes_indicado_id_fkey"
+            columns: ["indicado_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "indicacoes_indicador_id_fkey"
+            columns: ["indicador_id"]
+            isOneToOne: false
+            referencedRelation: "frela_ultima_atividade"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "indicacoes_indicador_id_fkey"
+            columns: ["indicador_id"]
+            isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
@@ -1001,13 +1121,29 @@ export type Database = {
         Returns: number
       }
       frela_brl: { Args: { v: number }; Returns: string }
+      frela_conceder_recompensa: {
+        Args: { p_forcar?: boolean; p_indicacao: string }
+        Returns: number
+      }
+      frela_eh_indicado: {
+        Args: {
+          p_ajuste: number
+          p_media: number
+          p_selos: string[]
+          p_total_avaliacoes: number
+          p_trabalhos: number
+        }
+        Returns: boolean
+      }
       frela_exige_admin: { Args: never; Returns: undefined }
       frela_meta_trabalhos: { Args: never; Returns: number }
+      frela_nota_minima_indicado: { Args: never; Returns: number }
       frela_preco_assinatura: { Args: { p_tipo: string }; Returns: number }
       frela_quitar_taxas: {
         Args: { p_empresa: string; p_referencia?: string }
         Returns: number
       }
+      frela_recompensa_indicacao: { Args: never; Returns: number }
       frela_taxa_percentual: { Args: never; Returns: number }
       frela_teto_taxas: { Args: never; Returns: number }
       has_role: {
@@ -1044,6 +1180,44 @@ export type Database = {
         }[]
       }
       pode_renovar_assinatura: { Args: never; Returns: boolean }
+      recomendadas_empresas: {
+        Args: { p_limite?: number }
+        Returns: {
+          avaliacao_media: number
+          cidade: string
+          contratacoes: number
+          destaque: boolean
+          endereco: string
+          foto_url: string
+          id: string
+          nome_empresa: string
+          ramo: string
+          relevancia: number
+          top_avaliada: boolean
+          total_avaliacoes: number
+          vagas_abertas: number
+          verificado: boolean
+        }[]
+      }
+      recomendados_profissionais: {
+        Args: { p_limite?: number }
+        Returns: {
+          avaliacao_media: number
+          cidade: string
+          destaque: boolean
+          disponibilidade: string
+          foto_url: string
+          id: string
+          indicado: boolean
+          nome: string
+          profissoes: string[]
+          relevancia: number
+          top_avaliado: boolean
+          total_avaliacoes: number
+          trabalhos: number
+          verificado: boolean
+        }[]
+      }
       saldo_taxas_empresa: { Args: { p_empresa: string }; Returns: number }
       trabalhos_finalizados: {
         Args: { p_ids: string[] }
@@ -1052,6 +1226,7 @@ export type Database = {
           total: number
         }[]
       }
+      validar_codigo_indicacao: { Args: { p_codigo: string }; Returns: string }
     }
     Enums: {
       app_role: "admin" | "moderator" | "user"
