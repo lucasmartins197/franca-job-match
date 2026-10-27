@@ -4,6 +4,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useChatNaoLidas } from "@/hooks/useChat";
 import { useMeuPerfil } from "@/hooks/usePerfil";
 import BottomNav from "@/components/BottomNav";
+import { FiltrosVagasProvider } from "@/hooks/useVagas";
 import HomeTab from "@/components/HomeTab";
 import SearchTab from "@/components/SearchTab";
 import MyWorkTab from "@/components/MyWorkTab";
@@ -49,12 +50,14 @@ const Index = () => {
   };
 
   return (
+    <FiltrosVagasProvider>
     <div className="min-h-screen bg-background max-w-lg mx-auto relative">
       <motion.div key={activeTab} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.18 }}>
         {renderTab()}
       </motion.div>
       <BottomNav activeTab={activeTab} onTabChange={handleTabChange} badges={{ messages: chatNaoLidas }} mostrarGestao={!!perfil?.profile.is_admin} />
     </div>
+    </FiltrosVagasProvider>
   );
 };
 

@@ -8,6 +8,7 @@ import { AuthProvider, useAuth } from "@/hooks/useAuth";
 import { useMeuPerfil } from "@/hooks/usePerfil";
 import { useChatRealtime } from "@/hooks/useChat";
 import Logo from "@/components/frela/Logo";
+import { LocalizacaoProvider } from "@/hooks/useLocalizacao";
 import AvaliacaoObrigatoriaModal from "@/components/confirmacao/AvaliacaoObrigatoriaModal";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
@@ -81,6 +82,7 @@ const App = () => (
       <Sonner theme="light" position="top-center" />
       <BrowserRouter>
         <AuthProvider>
+        <LocalizacaoProvider>
           <ChatRealtime />
           <AvaliacaoObrigatoriaModal />
           <AppNativo />
@@ -123,6 +125,7 @@ const App = () => (
             <Route path="*" element={<NotFound />} />
           </Routes>
           </TransicaoDeTela>
+        </LocalizacaoProvider>
         </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>

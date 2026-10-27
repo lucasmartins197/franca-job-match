@@ -276,6 +276,8 @@ export type Database = {
       }
       jobs: {
         Row: {
+          latitude: number | null
+          longitude: number | null
           address: string
           category: string
           company_name: string
@@ -295,6 +297,8 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          latitude?: number | null
+          longitude?: number | null
           address?: string
           category: string
           company_name: string
@@ -314,6 +318,8 @@ export type Database = {
           user_id: string
         }
         Update: {
+          latitude?: number | null
+          longitude?: number | null
           address?: string
           category?: string
           company_name?: string
@@ -507,6 +513,9 @@ export type Database = {
       }
       profiles: {
         Row: {
+          latitude: number | null
+          longitude: number | null
+          localizacao_em: string | null
           avaliacao_media: number | null
           cartao_cadastrado: boolean | null
           cidade: string | null
@@ -533,6 +542,9 @@ export type Database = {
           selos_extras: string[]
         }
         Insert: {
+          latitude?: number | null
+          longitude?: number | null
+          localizacao_em?: string | null
           avaliacao_media?: number | null
           cartao_cadastrado?: boolean | null
           cidade?: string | null
@@ -559,6 +571,9 @@ export type Database = {
           selos_extras?: string[]
         }
         Update: {
+          latitude?: number | null
+          longitude?: number | null
+          localizacao_em?: string | null
           avaliacao_media?: number | null
           cartao_cadastrado?: boolean | null
           cidade?: string | null
