@@ -18,6 +18,7 @@ import AdminEncerrarCard from "@/components/confirmacao/AdminEncerrarCard";
 import { useMeuPerfil } from "@/hooks/usePerfil";
 import ConfirmarValorCard from "@/components/taxas/ConfirmarValorCard";
 import TaxaStatusBadge from "@/components/taxas/TaxaStatusBadge";
+import PageSkeleton from "@/components/frela/PageSkeleton";
 
 const ContratacaoDetail = () => {
   const { id } = useParams();
@@ -42,7 +43,7 @@ const ContratacaoDetail = () => {
   }, [hash, contratacao?.status]);
 
   if (isLoading) {
-    return <div className="min-h-screen bg-background flex items-center justify-center"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>;
+    return <PageSkeleton variante="detalhe" />;
   }
   if (!contratacao || !user) {
     return (
@@ -81,7 +82,7 @@ const ContratacaoDetail = () => {
       <PageHeader title="Contratação" right={<StatusBadge status={contratacao.status} />} />
 
       <div className="px-5 space-y-4">
-        <div className="bg-card rounded-2xl p-4 border border-border shadow-card">
+        <div className="bg-card rounded-3xl p-4 border border-border/70 shadow-card">
           <button onClick={() => job && navigate(`/job/${job.id}`)} className="text-left w-full">
             <h2 className="text-xl font-display font-bold text-foreground">{job?.title ?? "Vaga"}</h2>
             <p className="text-sm text-muted-foreground">{job?.company_name}</p>
@@ -115,7 +116,7 @@ const ContratacaoDetail = () => {
           )}
         </div>
 
-        <div className="bg-card rounded-2xl p-4 border border-border shadow-card">
+        <div className="bg-card rounded-3xl p-4 border border-border/70 shadow-card">
           <p className="text-xs text-muted-foreground mb-2">{souEmpresa ? "Profissional" : "Empresa"}</p>
           <button onClick={() => navigate(`/perfil/${outroId}`)} className="w-full flex items-center gap-3 text-left">
             <UserAvatar nome={outroNome} fotoUrl={outro?.foto_url} size="md" />

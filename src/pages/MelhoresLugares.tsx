@@ -24,7 +24,7 @@ const MelhoresLugares = () => {
         ) : (
           lista.map((e, i) => (
             <button key={e.id} onClick={() => navigate(`/perfil/${e.id}`)}
-              className="w-full text-left bg-card rounded-2xl border border-border p-4 shadow-card flex gap-3 items-start hover:border-primary/40">
+              className="w-full text-left bg-card rounded-3xl border border-border/70 p-4 shadow-card active:scale-[0.985] transition-transform flex gap-3 items-start hover:border-primary/40">
               <div className="relative shrink-0">
                 <UserAvatar nome={e.nome_empresa} fotoUrl={e.foto_url} size="lg" />
                 <span className="absolute -top-2 -left-2 w-6 h-6 rounded-full bg-muted text-muted-foreground text-[11px] font-bold flex items-center justify-center border-2 border-card">{i + 1}</span>

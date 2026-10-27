@@ -294,7 +294,7 @@ const Dashboard = () => {
                   {lista.map((job) => {
                     const novos = pendentesPorVaga(job.id);
                     return (
-                      <div key={job.id} className="bg-card rounded-2xl p-4 border border-border shadow-card">
+                      <div key={job.id} className="bg-card rounded-3xl p-4 border border-border/70 shadow-card">
                         <div className="flex items-start justify-between gap-2 mb-1">
                           <div className="min-w-0">
                             <h3 className="font-display font-bold text-foreground truncate">{job.title}</h3>

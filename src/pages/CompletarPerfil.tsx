@@ -1,9 +1,10 @@
 import { useNavigate } from "react-router-dom";
-import { Loader2, LogOut } from "lucide-react";
+import { LogOut } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useMeuPerfil } from "@/hooks/usePerfil";
 import ProfileForm from "@/components/perfil/ProfileForm";
 import Logo from "@/components/frela/Logo";
+import PageSkeleton from "@/components/frela/PageSkeleton";
 
 /** Etapa obrigatória depois do cadastro: sem perfil completo, o resto do app fica bloqueado. */
 const CompletarPerfil = () => {
@@ -12,7 +13,7 @@ const CompletarPerfil = () => {
   const { data: perfil, isLoading } = useMeuPerfil();
 
   if (isLoading || !perfil) {
-    return <div className="min-h-screen bg-background flex items-center justify-center"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>;
+    return <PageSkeleton variante="form" comHeader={false} />;
   }
 
   const isEmpresa = perfil.profile.tipo === "empresa";

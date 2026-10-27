@@ -1,5 +1,6 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Route, Routes, Navigate } from "react-router-dom";
+import TransicaoDeTela from "@/components/frela/TransicaoDeTela";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -7,6 +8,7 @@ import { AuthProvider, useAuth } from "@/hooks/useAuth";
 import { useMeuPerfil } from "@/hooks/usePerfil";
 import { useChatRealtime } from "@/hooks/useChat";
 import Logo from "@/components/frela/Logo";
+import { LocalizacaoProvider } from "@/hooks/useLocalizacao";
 import AvaliacaoObrigatoriaModal from "@/components/confirmacao/AvaliacaoObrigatoriaModal";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
@@ -80,9 +82,11 @@ const App = () => (
       <Sonner theme="light" position="top-center" />
       <BrowserRouter>
         <AuthProvider>
+        <LocalizacaoProvider>
           <ChatRealtime />
           <AvaliacaoObrigatoriaModal />
           <AppNativo />
+          <TransicaoDeTela>
           <Routes>
             <Route path="/auth" element={<Auth />} />
             <Route path="/privacidade" element={<Privacidade />} />
@@ -120,6 +124,8 @@ const App = () => (
             </Route>
             <Route path="*" element={<NotFound />} />
           </Routes>
+          </TransicaoDeTela>
+        </LocalizacaoProvider>
         </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>

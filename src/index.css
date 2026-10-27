@@ -130,3 +130,31 @@
     background-clip: text;
   }
 }
+
+/* ── Mapa de vagas (Leaflet) ── */
+.frela-pin { background: none; border: none; }
+.frela-pin__corpo {
+  position: absolute; left: 50%; bottom: 6px; transform: translateX(-50%);
+  white-space: nowrap; padding: 5px 9px; border-radius: 999px;
+  font: 700 12px/1 Inter, system-ui, sans-serif; color: hsl(var(--foreground));
+  background: hsl(var(--card)); border: 1.5px solid hsl(var(--border));
+  box-shadow: 0 4px 12px -4px hsl(200 28% 12% / 0.35);
+  transition: transform .15s ease, background-color .15s ease;
+}
+.frela-pin__corpo::after {
+  content: ""; position: absolute; left: 50%; bottom: -5px; width: 8px; height: 8px;
+  transform: translateX(-50%) rotate(45deg); background: inherit;
+  border-right: 1.5px solid hsl(var(--border)); border-bottom: 1.5px solid hsl(var(--border));
+}
+.frela-pin--hoje { border-color: hsl(36 92% 48%); }
+.frela-pin--hoje::after { border-color: hsl(36 92% 48%); }
+.frela-pin--ativo { background: hsl(var(--primary)); color: hsl(var(--primary-foreground)); border-color: hsl(var(--primary)); transform: translateX(-50%) scale(1.12); }
+.frela-pin--ativo::after { border-color: hsl(var(--primary)); }
+.frela-eu { background: none; border: none; }
+.frela-eu__ponto { position: absolute; inset: 4px; border-radius: 999px; background: #2563eb; border: 3px solid #fff; box-shadow: 0 1px 4px rgb(0 0 0 / .35); }
+.frela-eu__pulso { position: absolute; inset: -6px; border-radius: 999px; background: rgb(37 99 235 / .25); animation: frela-pulso 2s ease-out infinite; }
+@keyframes frela-pulso { from { transform: scale(.5); opacity: 1; } to { transform: scale(1.6); opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { .frela-eu__pulso { animation: none; } }
+.leaflet-container { font-family: Inter, system-ui, sans-serif; }
+.frela-mapa .leaflet-top.leaflet-right { margin-top: 56px; }
+.frela-mapa .leaflet-control-zoom { border: 1px solid hsl(var(--border)); border-radius: 14px; overflow: hidden; box-shadow: 0 4px 12px -6px hsl(200 28% 12% / 0.3); }

@@ -1,84 +1,118 @@
-import { MapPin, Clock, CalendarDays, Star } from "lucide-react";
-import { categoriaDe } from "@/lib/categorias";
+import { BadgeCheck, CalendarDays, MapPin, Star, Users } from "lucide-react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import type { DbJob } from "@/hooks/useJobs";
+import type { DbProfile } from "@/hooks/useFrela";
 import { formatBRL } from "@/hooks/useFrela";
+import { categoriaDe } from "@/lib/categorias";
+import { formatDistancia } from "@/lib/geo";
+import { ICONE_PERIODO, dataAmigavel, ehNova, periodoDe } from "@/lib/vagas";
 import UserAvatar from "@/components/frela/UserAvatar";
+import SalvarVagaButton from "@/components/frela/SalvarVagaButton";
+import { cn } from "@/lib/utils";
 
 interface JobCardProps {
   job: DbJob;
   index?: number;
+  /** Perfil da empresa (foto, nota, selo). */
+  empresa?: DbProfile | null;
+  /** Compatibilidade: usados quando não há o perfil completo */
   fotoEmpresa?: string | null;
-  /** Reputação da empresa (profiles.avaliacao_media / total_avaliacoes) */
   notaEmpresa?: number | null;
   totalAvaliacoesEmpresa?: number | null;
+  /** Distância do usuário até o local da vaga */
+  distanciaKm?: number | null;
+  /** Visual compacto (carrossel / resumo do pin no mapa) */
+  compacto?: boolean;
   onClick?: () => void;
 }
 
-/** "Hoje", "Amanhã" ou "sex, 24/10". */
-const dataAmigavel = (date: string) => {
-  const d = new Date(`${date}T12:00:00`);
-  const hoje = new Date();
-  hoje.setHours(12, 0, 0, 0);
-  const diff = Math.round((d.getTime() - hoje.getTime()) / 86_400_000);
-  if (diff === 0) return "Hoje";
-  if (diff === 1) return "Amanhã";
-  return d.toLocaleDateString("pt-BR", { weekday: "short", day: "2-digit", month: "2-digit" }).replace(".", "");
-};
-
-const JobCard = ({ job, index = 0, fotoEmpresa, notaEmpresa, totalAvaliacoesEmpresa, onClick }: JobCardProps) => {
-  const cat = categoriaDe(job.category);
+/** Card de vaga: valor em destaque, empresa com foto e selo, quando, onde e a que distância. */
+const JobCard = ({ job, index = 0, empresa, fotoEmpresa, notaEmpresa, totalAvaliacoesEmpresa, distanciaKm, compacto, onClick }: JobCardProps) => {
   const navigate = useNavigate();
+  const cat = categoriaDe(job.category);
   const quando = dataAmigavel(job.date);
   const urgente = quando === "Hoje" || quando === "Amanhã";
+  const periodo = periodoDe(job.time_start);
+  const IconePeriodo = periodo ? ICONE_PERIODO[periodo] : CalendarDays;
+  const nota = Number(empresa?.avaliacao_media ?? notaEmpresa ?? 0);
+  const totalAval = empresa?.total_avaliacoes ?? totalAvaliacoesEmpresa ?? 0;
+  const distancia = formatDistancia(distanciaKm);
+  const abrir = onClick ?? (() => navigate(`/job/${job.id}`));
 
   return (
-    <motion.button
-      type="button"
-      initial={{ opacity: 0, y: 10 }}
+    <motion.article
+      role="link"
+      tabIndex={0}
+      initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: Math.min(index, 8) * 0.04, duration: 0.25 }}
-      onClick={onClick ?? (() => navigate(`/job/${job.id}`))}
-      className="w-full text-left bg-card rounded-2xl p-4 border border-border shadow-card hover:border-primary/40 active:scale-[0.99] transition-all"
+      whileTap={{ scale: 0.985 }}
+      transition={{ delay: Math.min(index, 6) * 0.04, duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
+      onClick={abrir}
+      onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && (e.preventDefault(), abrir())}
+      aria-label={`${job.title}, ${formatBRL(job.payment)}, ${job.company_name}`}
+      className={cn("group relative w-full text-left bg-card rounded-3xl border border-border/70 shadow-card cursor-pointer",
+        "hover:shadow-lg hover:border-primary/30 transition-[box-shadow,border-color] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+        compacto ? "p-3.5" : "p-4")}
     >
-      <div className="flex items-start gap-3">
-        <UserAvatar nome={job.company_name} fotoUrl={fotoEmpresa} size="md" />
-        <div className="flex-1 min-w-0">
-          <h3 className="font-display font-bold text-foreground leading-snug line-clamp-2">{job.title}</h3>
-          <p className="text-sm text-muted-foreground truncate flex items-center gap-1.5">
+      {/* Empresa */}
+      <div className="flex items-center gap-2.5 pr-10">
+        <UserAvatar nome={job.company_name} fotoUrl={empresa?.foto_url ?? fotoEmpresa} size="sm" />
+        <div className="min-w-0 flex-1">
+          <p className="text-sm font-semibold text-foreground truncate flex items-center gap-1">
             <span className="truncate">{job.company_name}</span>
-            {!!totalAvaliacoesEmpresa && (
-              <span className="inline-flex items-center gap-0.5 text-foreground font-semibold shrink-0">
-                <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400" /> {Number(notaEmpresa ?? 0).toFixed(1)}
+            {empresa?.verificado && <BadgeCheck className="h-4 w-4 text-primary shrink-0" aria-label="Empresa verificada" />}
+          </p>
+          <p className="text-xs text-muted-foreground flex items-center gap-1.5">
+            {totalAval > 0 ? (
+              <span className="inline-flex items-center gap-0.5 font-medium text-foreground/80">
+                <Star className="h-3 w-3 fill-amber-400 text-amber-400" /> {nota.toFixed(1)}
+                <span className="text-muted-foreground font-normal">({totalAval})</span>
               </span>
+            ) : (
+              <span>Nova no FreLa</span>
             )}
+            {distancia && <><span aria-hidden>·</span><span className="font-medium text-foreground/80">{distancia}</span></>}
           </p>
         </div>
+      </div>
+      <SalvarVagaButton jobId={job.id} className="absolute top-3 right-3" />
+
+      {/* Vaga */}
+      <h3 className={cn("font-display font-bold text-foreground leading-snug line-clamp-2 mt-3", compacto ? "text-base" : "text-[17px]")}>{job.title}</h3>
+      <div className="flex flex-wrap items-center gap-1.5 mt-2">
+        <span className={cn("inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold", cat?.cor ?? "bg-primary/10 text-primary")}>
+          {cat && <cat.icon className="h-3 w-3" />}
+          {job.skill && job.skill !== job.category ? job.skill : cat?.curto ?? job.category}
+        </span>
+        {ehNova(job.created_at) && <span className="px-2 py-0.5 rounded-full text-[11px] font-semibold bg-sky-100 text-sky-800">Nova</span>}
+        {job.slots_remaining > 1 && (
+          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-muted text-foreground/80">
+            <Users className="h-3 w-3" /> {job.slots_remaining} vagas
+          </span>
+        )}
+      </div>
+
+      {/* Quando, onde e quanto */}
+      <div className="mt-3 pt-3 border-t border-dashed border-border flex items-end justify-between gap-3">
+        <div className="min-w-0 space-y-1 text-[13px]">
+          <p className="flex items-center gap-1.5 text-foreground">
+            <IconePeriodo className={cn("h-3.5 w-3.5 shrink-0", urgente ? "text-amber-600" : "text-muted-foreground")} />
+            <span className={cn("font-semibold", urgente && "text-amber-700")}>{quando}</span>
+            <span className="text-muted-foreground">· {job.time_start}–{job.time_end}</span>
+          </p>
+          {(job.neighborhood || job.address) && (
+            <p className="flex items-center gap-1.5 text-muted-foreground min-w-0">
+              <MapPin className="h-3.5 w-3.5 shrink-0" /> <span className="truncate">{job.neighborhood || job.address}</span>
+            </p>
+          )}
+        </div>
         <div className="text-right shrink-0">
-          <p className="font-display font-extrabold text-lg text-primary leading-none">{formatBRL(job.payment)}</p>
+          <p className="font-display font-extrabold text-xl text-primary leading-none tabular-nums">{formatBRL(job.payment)}</p>
           <p className="text-[11px] text-muted-foreground mt-1">pelo serviço</p>
         </div>
       </div>
-
-      <div className="flex flex-wrap items-center gap-1.5 mt-3">
-        <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-medium ${urgente ? "bg-warning/15 text-amber-800" : "bg-muted text-foreground/80"}`}>
-          <CalendarDays className="h-3.5 w-3.5" /> {quando}
-        </span>
-        <span className="inline-flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-medium bg-muted text-foreground/80">
-          <Clock className="h-3.5 w-3.5" /> {job.time_start}–{job.time_end}
-        </span>
-        {(job.neighborhood || job.address) && (
-          <span className="inline-flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-medium bg-muted text-foreground/80 max-w-full">
-            <MapPin className="h-3.5 w-3.5 shrink-0" /> <span className="truncate">{job.neighborhood || job.address}</span>
-          </span>
-        )}
-        <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-medium ${cat?.cor ?? "bg-primary/10 text-primary"}`}>
-          {cat && <cat.icon className="h-3.5 w-3.5" />}
-          {job.skill && job.skill !== job.category ? job.skill : cat?.curto ?? job.category}
-        </span>
-      </div>
-    </motion.button>
+    </motion.article>
   );
 };
 

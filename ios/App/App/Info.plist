@@ -6,6 +6,8 @@
 	<string>$(CAPACITOR_DEBUG)</string>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>pt-BR</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>O FreLa usa sua localização para mostrar as vagas mais perto de você e a distância até cada uma.</string>
 	<key>NSCameraUsageDescription</key>
 	<string>O FreLa usa a câmera para você tirar a foto do seu perfil e as fotos do seu portfólio.</string>
 	<key>NSPhotoLibraryUsageDescription</key>

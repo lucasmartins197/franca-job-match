@@ -85,10 +85,15 @@ export const useCreateJob = () => {
         .eq("status", "em_andamento");
       if (travaError) throw travaError;
       if ((count ?? 0) > 0) {
-        throw new Error("Confirme a finalização da contratação em andamento antes de criar uma nova vaga.");
+        throw new Error("Confirme o serviço em andamento com o código antes de criar uma nova vaga.");
       }
 
-      const { data, error } = await supabase.from("jobs").insert(job).select().single();
+      let { data, error } = await supabase.from("jobs").insert(job).select().single();
+      // banco sem o SQL da Fase 8 (colunas de mapa): publica sem as coordenadas
+      if (error && /latitude|longitude/.test(error.message)) {
+        const { latitude: _lat, longitude: _lon, ...semMapa } = job;
+        ({ data, error } = await supabase.from("jobs").insert(semMapa).select().single());
+      }
       if (error) throw new Error(mensagemTrava(error) ?? error.message);
       return data;
     },

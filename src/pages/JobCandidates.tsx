@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { Loader2, ChevronRight, Users, XCircle } from "lucide-react";
+import { ChevronRight, Users, XCircle } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
@@ -19,6 +19,7 @@ import StatusBadge from "@/components/frela/StatusBadge";
 import CandidateCard from "@/components/perfil/CandidateCard";
 import EmptyState from "@/components/frela/EmptyState";
 import { relevanciaPerfil, useTrabalhosFinalizados } from "@/hooks/usePerfil";
+import PageSkeleton from "@/components/frela/PageSkeleton";
 
 const JobCandidates = () => {
   const { id } = useParams();
@@ -56,7 +57,7 @@ const JobCandidates = () => {
   const cancelarVaga = useCancelarVaga();
 
   if (loadingJob) {
-    return <div className="min-h-screen bg-background flex items-center justify-center"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>;
+    return <PageSkeleton variante="lista" />;
   }
   if (!job || job.user_id !== user?.id) {
     return (
@@ -120,7 +121,7 @@ const JobCandidates = () => {
       <PageHeader title="Candidatos" />
 
       <div className="px-5 mb-6">
-        <div className="bg-card rounded-xl p-4 border border-border shadow-card">
+        <div className="bg-card rounded-3xl p-4 border border-border/70 shadow-card">
           <div className="flex items-start justify-between gap-2">
             <div className="min-w-0">
               <h2 className="font-display font-bold text-foreground truncate">{job.title}</h2>

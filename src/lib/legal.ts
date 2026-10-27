@@ -11,5 +11,5 @@ export const LEGAL = {
   /** E-mail público para assuntos de privacidade (opcional: sem ele, o contato é pelo suporte do app) */
   emailContato: "",
   cidade: "Franca/SP",
-  atualizadoEm: "26/10/2026",
+  atualizadoEm: "27/10/2026",
 };
