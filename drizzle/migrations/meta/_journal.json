@@ -29,6 +29,13 @@
       "when": 1793128769495,
       "tag": "0003_frela_fase3_portfolio_selos_suporte",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1793128803602,
+      "tag": "0004_frela_fase4_taxas",
+      "breakpoints": true
     }
   ]
 }

@@ -100,40 +100,61 @@ export type Database = {
       }
       contratacoes: {
         Row: {
+          confirmado_profissional_em: string | null
           created_at: string
+          divergencia_resolvida_em: string | null
           empresa_id: string
           finalizada_em: string | null
           id: string
           job_id: string
+          motivo_divergencia: string | null
           profissional_id: string
           status: string
+          status_taxa: string | null
           taxa_5pct: number
           taxa_cobrada: boolean
+          taxa_paga_em: string | null
           valor: number
+          valor_confirmado_profissional: boolean
+          valor_contestado: number | null
         }
         Insert: {
+          confirmado_profissional_em?: string | null
           created_at?: string
+          divergencia_resolvida_em?: string | null
           empresa_id: string
           finalizada_em?: string | null
           id?: string
           job_id: string
+          motivo_divergencia?: string | null
           profissional_id: string
           status?: string
+          status_taxa?: string | null
           taxa_5pct?: number
           taxa_cobrada?: boolean
+          taxa_paga_em?: string | null
           valor?: number
+          valor_confirmado_profissional?: boolean
+          valor_contestado?: number | null
         }
         Update: {
+          confirmado_profissional_em?: string | null
           created_at?: string
+          divergencia_resolvida_em?: string | null
           empresa_id?: string
           finalizada_em?: string | null
           id?: string
           job_id?: string
+          motivo_divergencia?: string | null
           profissional_id?: string
           status?: string
+          status_taxa?: string | null
           taxa_5pct?: number
           taxa_cobrada?: boolean
+          taxa_paga_em?: string | null
           valor?: number
+          valor_confirmado_profissional?: boolean
+          valor_contestado?: number | null
         }
         Relationships: [
           {
@@ -614,17 +635,75 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      taxas_saldo_empresas: {
+        Row: {
+          a_confirmar: number | null
+          confirmado: number | null
+          em_divergencia: number | null
+          empresa_id: string | null
+          pago: number | null
+          saldo: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "contratacoes_empresa_id_fkey"
+            columns: ["empresa_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
+      admin_registrar_pagamento_taxas: {
+        Args: { p_empresa: string; p_referencia?: string }
+        Returns: number
+      }
+      admin_resolver_divergencia: {
+        Args: { p_id: string; p_valor_final: number }
+        Returns: undefined
+      }
+      admin_saldos_taxas: {
+        Args: never
+        Returns: {
+          a_confirmar: number
+          bloqueado: boolean
+          em_divergencia: number
+          empresa_id: string
+          nome_empresa: string
+          pago: number
+          saldo: number
+        }[]
+      }
       admin_set_verificado: {
         Args: { p_id: string; p_valor: boolean }
         Returns: undefined
+      }
+      confirmar_valor_contratacao: {
+        Args: {
+          p_confirma: boolean
+          p_id: string
+          p_motivo?: string
+          p_valor_recebido?: number
+        }
+        Returns: string
       }
       contratacoes_finalizadas_empresa: {
         Args: { p_id: string }
         Returns: number
       }
+      frela_autoconfirmar_valores: {
+        Args: { p_dias?: number }
+        Returns: number
+      }
+      frela_brl: { Args: { v: number }; Returns: string }
+      frela_quitar_taxas: {
+        Args: { p_empresa: string; p_referencia?: string }
+        Returns: number
+      }
+      frela_taxa_percentual: { Args: never; Returns: number }
+      frela_teto_taxas: { Args: never; Returns: number }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -645,6 +724,21 @@ export type Database = {
         }[]
       }
       is_admin: { Args: never; Returns: boolean }
+      minhas_taxas_resumo: {
+        Args: never
+        Returns: {
+          a_confirmar: number
+          bloqueado: boolean
+          confirmado: number
+          em_divergencia: number
+          pago: number
+          pode_renovar: boolean
+          saldo: number
+          teto: number
+        }[]
+      }
+      pode_renovar_assinatura: { Args: never; Returns: boolean }
+      saldo_taxas_empresa: { Args: { p_empresa: string }; Returns: number }
       trabalhos_finalizados: {
         Args: { p_ids: string[] }
         Returns: {
