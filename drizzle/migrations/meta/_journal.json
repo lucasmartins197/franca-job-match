@@ -36,6 +36,13 @@
       "when": 1793128803602,
       "tag": "0004_frela_fase4_taxas",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1793128839310,
+      "tag": "0005_frela_fase5_gestao_1",
+      "breakpoints": true
     }
   ]
 }

@@ -86,7 +86,21 @@ export type Database = {
             foreignKeyName: "avaliacoes_de_id_fkey"
             columns: ["de_id"]
             isOneToOne: false
+            referencedRelation: "frela_ultima_atividade"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "avaliacoes_de_id_fkey"
+            columns: ["de_id"]
+            isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "avaliacoes_para_id_fkey"
+            columns: ["para_id"]
+            isOneToOne: false
+            referencedRelation: "frela_ultima_atividade"
             referencedColumns: ["id"]
           },
           {
@@ -161,6 +175,13 @@ export type Database = {
             foreignKeyName: "contratacoes_empresa_id_fkey"
             columns: ["empresa_id"]
             isOneToOne: false
+            referencedRelation: "frela_ultima_atividade"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contratacoes_empresa_id_fkey"
+            columns: ["empresa_id"]
+            isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
@@ -169,6 +190,13 @@ export type Database = {
             columns: ["job_id"]
             isOneToOne: false
             referencedRelation: "jobs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contratacoes_profissional_id_fkey"
+            columns: ["profissional_id"]
+            isOneToOne: false
+            referencedRelation: "frela_ultima_atividade"
             referencedColumns: ["id"]
           },
           {
@@ -221,6 +249,13 @@ export type Database = {
           ramo?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "empresa_dados_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: true
+            referencedRelation: "frela_ultima_atividade"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "empresa_dados_profile_id_fkey"
             columns: ["profile_id"]
@@ -330,7 +365,21 @@ export type Database = {
             foreignKeyName: "mensagens_de_id_fkey"
             columns: ["de_id"]
             isOneToOne: false
+            referencedRelation: "frela_ultima_atividade"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mensagens_de_id_fkey"
+            columns: ["de_id"]
+            isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mensagens_para_id_fkey"
+            columns: ["para_id"]
+            isOneToOne: false
+            referencedRelation: "frela_ultima_atividade"
             referencedColumns: ["id"]
           },
           {
@@ -371,6 +420,13 @@ export type Database = {
           user_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "notificacoes_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "frela_ultima_atividade"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "notificacoes_user_id_fkey"
             columns: ["user_id"]
@@ -423,6 +479,13 @@ export type Database = {
             foreignKeyName: "pagamentos_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
+            referencedRelation: "frela_ultima_atividade"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pagamentos_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
@@ -455,6 +518,13 @@ export type Database = {
             foreignKeyName: "portfolio_fotos_profile_id_fkey"
             columns: ["profile_id"]
             isOneToOne: false
+            referencedRelation: "frela_ultima_atividade"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "portfolio_fotos_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
@@ -466,17 +536,24 @@ export type Database = {
           bio: string | null
           cartao_cadastrado: boolean
           cidade: string
+          codigo_indicacao: string | null
           created_at: string
+          destaque: boolean
           email: string
           foto_url: string | null
           id: string
+          indicacao_recompensa_em: string | null
+          indicacao_recompensa_liberada: boolean
+          indicado_por: string | null
           is_admin: boolean
           is_demo: boolean
           jobs_completed: number | null
+          meta_ajuste_trabalhos: number
           neighborhood: string | null
           nome: string | null
           phone: string | null
           rating: number | null
+          selos_extras: string[]
           skills: string[] | null
           stripe_customer_id: string | null
           subscription_end: string | null
@@ -491,17 +568,24 @@ export type Database = {
           bio?: string | null
           cartao_cadastrado?: boolean
           cidade?: string
+          codigo_indicacao?: string | null
           created_at?: string
+          destaque?: boolean
           email: string
           foto_url?: string | null
           id: string
+          indicacao_recompensa_em?: string | null
+          indicacao_recompensa_liberada?: boolean
+          indicado_por?: string | null
           is_admin?: boolean
           is_demo?: boolean
           jobs_completed?: number | null
+          meta_ajuste_trabalhos?: number
           neighborhood?: string | null
           nome?: string | null
           phone?: string | null
           rating?: number | null
+          selos_extras?: string[]
           skills?: string[] | null
           stripe_customer_id?: string | null
           subscription_end?: string | null
@@ -516,17 +600,24 @@ export type Database = {
           bio?: string | null
           cartao_cadastrado?: boolean
           cidade?: string
+          codigo_indicacao?: string | null
           created_at?: string
+          destaque?: boolean
           email?: string
           foto_url?: string | null
           id?: string
+          indicacao_recompensa_em?: string | null
+          indicacao_recompensa_liberada?: boolean
+          indicado_por?: string | null
           is_admin?: boolean
           is_demo?: boolean
           jobs_completed?: number | null
+          meta_ajuste_trabalhos?: number
           neighborhood?: string | null
           nome?: string | null
           phone?: string | null
           rating?: number | null
+          selos_extras?: string[]
           skills?: string[] | null
           stripe_customer_id?: string | null
           subscription_end?: string | null
@@ -536,7 +627,22 @@ export type Database = {
           total_avaliacoes?: number
           verificado?: boolean
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "profiles_indicado_por_fkey"
+            columns: ["indicado_por"]
+            isOneToOne: false
+            referencedRelation: "frela_ultima_atividade"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "profiles_indicado_por_fkey"
+            columns: ["indicado_por"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       profissional_dados: {
         Row: {
@@ -576,6 +682,13 @@ export type Database = {
           profissoes?: string[]
         }
         Relationships: [
+          {
+            foreignKeyName: "profissional_dados_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: true
+            referencedRelation: "frela_ultima_atividade"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "profissional_dados_profile_id_fkey"
             columns: ["profile_id"]
@@ -635,6 +748,21 @@ export type Database = {
       }
     }
     Views: {
+      frela_ultima_atividade: {
+        Row: {
+          id: string | null
+          ultima_atividade: string | null
+        }
+        Insert: {
+          id?: string | null
+          ultima_atividade?: never
+        }
+        Update: {
+          id?: string | null
+          ultima_atividade?: never
+        }
+        Relationships: []
+      }
       taxas_saldo_empresas: {
         Row: {
           a_confirmar: number | null
@@ -649,6 +777,13 @@ export type Database = {
             foreignKeyName: "contratacoes_empresa_id_fkey"
             columns: ["empresa_id"]
             isOneToOne: false
+            referencedRelation: "frela_ultima_atividade"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contratacoes_empresa_id_fkey"
+            columns: ["empresa_id"]
+            isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
@@ -656,6 +791,24 @@ export type Database = {
       }
     }
     Functions: {
+      admin_crescimento: {
+        Args: { p_incluir_demo?: boolean; p_semanas?: number }
+        Returns: {
+          contratacoes: number
+          empresas: number
+          profissionais: number
+          semana: string
+        }[]
+      }
+      admin_receita_mensal: {
+        Args: { p_incluir_demo?: boolean; p_meses?: number }
+        Returns: {
+          contratacoes: number
+          mes: string
+          movimentado: number
+          taxas: number
+        }[]
+      }
       admin_registrar_pagamento_taxas: {
         Args: { p_empresa: string; p_referencia?: string }
         Returns: number
@@ -680,6 +833,7 @@ export type Database = {
         Args: { p_id: string; p_valor: boolean }
         Returns: undefined
       }
+      admin_visao_geral: { Args: { p_incluir_demo?: boolean }; Returns: Json }
       confirmar_valor_contratacao: {
         Args: {
           p_confirma: boolean
@@ -698,6 +852,9 @@ export type Database = {
         Returns: number
       }
       frela_brl: { Args: { v: number }; Returns: string }
+      frela_exige_admin: { Args: never; Returns: undefined }
+      frela_meta_trabalhos: { Args: never; Returns: number }
+      frela_preco_assinatura: { Args: { p_tipo: string }; Returns: number }
       frela_quitar_taxas: {
         Args: { p_empresa: string; p_referencia?: string }
         Returns: number
