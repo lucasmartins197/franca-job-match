@@ -8,6 +8,13 @@
       "when": 1793128694756,
       "tag": "0000_frela_base_schema_reconstruction",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1793128721271,
+      "tag": "0001_frela_fase1_automacoes",
+      "breakpoints": true
     }
   ]
 }
