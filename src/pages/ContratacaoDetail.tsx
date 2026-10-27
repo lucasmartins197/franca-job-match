@@ -18,6 +18,7 @@ import AdminEncerrarCard from "@/components/confirmacao/AdminEncerrarCard";
 import { useMeuPerfil } from "@/hooks/usePerfil";
 import ConfirmarValorCard from "@/components/taxas/ConfirmarValorCard";
 import TaxaStatusBadge from "@/components/taxas/TaxaStatusBadge";
+import PageSkeleton from "@/components/frela/PageSkeleton";
 
 const ContratacaoDetail = () => {
   const { id } = useParams();
@@ -42,7 +43,7 @@ const ContratacaoDetail = () => {
   }, [hash, contratacao?.status]);
 
   if (isLoading) {
-    return <div className="min-h-screen bg-background flex items-center justify-center"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>;
+    return <PageSkeleton variante="detalhe" />;
   }
   if (!contratacao || !user) {
     return (

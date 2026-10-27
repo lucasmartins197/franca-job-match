@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { ChevronRight, Crown, Edit2, Headset, Loader2, LogOut, LayoutDashboard, Receipt, Scale, ShieldCheck } from "lucide-react";
+import { ChevronRight, Crown, Edit2, Headset, LogOut, LayoutDashboard, Receipt, Scale, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import { useHistoricoProfissional, useMeuPerfil } from "@/hooks/usePerfil";
@@ -9,6 +9,7 @@ import IndiqueGanhe from "@/components/perfil/IndiqueGanhe";
 import ExcluirConta from "@/components/perfil/ExcluirConta";
 import ProfileView from "@/components/perfil/ProfileView";
 import { useSuporteNaoLidas } from "@/hooks/useSuporte";
+import PageSkeleton from "@/components/frela/PageSkeleton";
 
 /** Meu perfil (aba Perfil do profissional e /profile da empresa). */
 const ProfileTab = () => {
@@ -24,7 +25,7 @@ const ProfileTab = () => {
   };
 
   if (isLoading || !perfil) {
-    return <div className="flex justify-center pt-24"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>;
+    return <PageSkeleton variante="perfil" comHeader={false} />;
   }
 
   return (

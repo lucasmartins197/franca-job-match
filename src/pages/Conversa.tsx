@@ -1,5 +1,5 @@
 import { useNavigate, useParams } from "react-router-dom";
-import { ChevronRight, Loader2, Lock } from "lucide-react";
+import { ChevronRight, Lock } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
 import { useContratacao, useProfilesByIds } from "@/hooks/useFrela";
@@ -7,6 +7,7 @@ import { useEnviarMensagem, useMarcarConversaLida, useMensagens } from "@/hooks/
 import UserAvatar from "@/components/frela/UserAvatar";
 import EmptyState from "@/components/frela/EmptyState";
 import { CabecalhoChat, CaixaMensagem, ListaMensagens } from "@/components/chat/ChatParts";
+import PageSkeleton from "@/components/frela/PageSkeleton";
 
 const Conversa = () => {
   const { id } = useParams();
@@ -33,7 +34,7 @@ const Conversa = () => {
   };
 
   if (loadingC) {
-    return <div className="h-[100dvh] flex items-center justify-center bg-background"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>;
+    return <PageSkeleton variante="chat" />;
   }
   if (!contratacao) {
     return <div className="min-h-screen bg-background"><EmptyState titulo="Conversa não encontrada" /></div>;

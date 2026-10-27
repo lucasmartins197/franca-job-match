@@ -1,4 +1,5 @@
 import { Home, Search, Briefcase, MessageCircle, User, LayoutDashboard } from "lucide-react";
+import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 
 interface BottomNavProps {
@@ -33,16 +34,18 @@ const BottomNav = ({ activeTab, onTabChange, badges = {}, mostrarGestao = false 
             aria-current={isActive ? "page" : undefined}
             className={cn("relative flex flex-col items-center justify-center gap-1 transition-colors", isActive ? "text-primary" : "text-muted-foreground")}
           >
-            {isActive && <span className="absolute top-0 h-0.5 w-8 rounded-full bg-primary" />}
+            {isActive && <motion.span layoutId="aba-ativa" transition={{ type: "spring", stiffness: 500, damping: 38 }} className="absolute top-1.5 h-8 w-12 rounded-full bg-primary/10" />}
             <span className="relative">
-              <tab.icon className={cn("h-5 w-5", isActive && "stroke-[2.5]")} />
+              <motion.span className="block" animate={{ y: isActive ? -1 : 0, scale: isActive ? 1.08 : 1 }} transition={{ type: "spring", stiffness: 500, damping: 30 }}>
+                <tab.icon className={cn("h-5 w-5", isActive && "stroke-[2.5]")} />
+              </motion.span>
               {badge > 0 && (
                 <span className="absolute -top-1.5 -right-2.5 min-w-[16px] h-4 px-1 rounded-full bg-destructive text-[10px] font-bold text-white flex items-center justify-center">
                   {badge > 9 ? "9+" : badge}
                 </span>
               )}
             </span>
-            <span className={cn("text-[11px]", isActive ? "font-semibold" : "font-medium")}>{tab.label}</span>
+            <span className={cn("relative text-[11px]", isActive ? "font-semibold" : "font-medium")}>{tab.label}</span>
           </button>
         );
       })}

@@ -1,4 +1,5 @@
 import { Navigate, useNavigate, useSearchParams } from "react-router-dom";
+import { motion } from "framer-motion";
 import { useAuth } from "@/hooks/useAuth";
 import { useChatNaoLidas } from "@/hooks/useChat";
 import { useMeuPerfil } from "@/hooks/usePerfil";
@@ -49,7 +50,9 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background max-w-lg mx-auto relative">
-      {renderTab()}
+      <motion.div key={activeTab} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.18 }}>
+        {renderTab()}
+      </motion.div>
       <BottomNav activeTab={activeTab} onTabChange={handleTabChange} badges={{ messages: chatNaoLidas }} mostrarGestao={!!perfil?.profile.is_admin} />
     </div>
   );

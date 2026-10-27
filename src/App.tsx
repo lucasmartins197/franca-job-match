@@ -1,5 +1,6 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Route, Routes, Navigate } from "react-router-dom";
+import TransicaoDeTela from "@/components/frela/TransicaoDeTela";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -83,6 +84,7 @@ const App = () => (
           <ChatRealtime />
           <AvaliacaoObrigatoriaModal />
           <AppNativo />
+          <TransicaoDeTela>
           <Routes>
             <Route path="/auth" element={<Auth />} />
             <Route path="/privacidade" element={<Privacidade />} />
@@ -120,6 +122,7 @@ const App = () => (
             </Route>
             <Route path="*" element={<NotFound />} />
           </Routes>
+          </TransicaoDeTela>
         </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>

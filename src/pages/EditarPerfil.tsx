@@ -3,6 +3,7 @@ import { Loader2 } from "lucide-react";
 import { useMeuPerfil } from "@/hooks/usePerfil";
 import ProfileForm from "@/components/perfil/ProfileForm";
 import PageHeader from "@/components/frela/PageHeader";
+import PageSkeleton from "@/components/frela/PageSkeleton";
 
 const EditarPerfil = () => {
   const navigate = useNavigate();
@@ -13,7 +14,7 @@ const EditarPerfil = () => {
       <PageHeader title="Editar perfil" />
       <div className="px-5">
         {isLoading || !perfil ? (
-          <div className="flex justify-center py-16"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>
+          <PageSkeleton variante="form" comHeader={false} />
         ) : (
           <ProfileForm perfil={perfil} onSaved={() => navigate(-1)} />
         )}

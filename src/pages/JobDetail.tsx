@@ -1,3 +1,4 @@
+import { useCallback, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { MapPin, Clock, Calendar, Building2, CheckCircle2, Loader2, Users, ChevronRight, Lock } from "lucide-react";
 import { motion } from "framer-motion";
@@ -9,12 +10,15 @@ import { formatBRL, useAvaliacoesRecebidas } from "@/hooks/useFrela";
 import { textoPendencia, usePendencias } from "@/hooks/useConfirmacao";
 import { selosDe, useContratacoesEmpresa, usePerfilPublico } from "@/hooks/usePerfil";
 import UserAvatar from "@/components/frela/UserAvatar";
+import SucessoAnimado from "@/components/frela/SucessoAnimado";
+import SalvarVagaButton from "@/components/frela/SalvarVagaButton";
 import MapaEndereco from "@/components/frela/MapaEndereco";
 import Selos from "@/components/perfil/Selos";
 import { categoriaDe } from "@/lib/categorias";
 import PageHeader from "@/components/frela/PageHeader";
 import StatusBadge from "@/components/frela/StatusBadge";
 import Stars from "@/components/frela/Stars";
+import PageSkeleton from "@/components/frela/PageSkeleton";
 
 const JobDetail = () => {
   const { id } = useParams();
@@ -25,12 +29,14 @@ const JobDetail = () => {
   const { data: myApplications = [] } = useMyApplications();
   const { data: perfilEmpresa } = usePerfilPublico(job?.user_id);
   const pendencias = usePendencias();
+  const [enviada, setEnviada] = useState(false);
+  const fecharSucesso = useCallback(() => setEnviada(false), []);
   const { data: contratacoesEmpresa } = useContratacoesEmpresa(job?.user_id);
   const { data: avaliacoesEmpresa = [] } = useAvaliacoesRecebidas(job?.user_id);
   const ultimaAvaliacao = avaliacoesEmpresa.find((a) => a.comentario);
 
   if (isLoading) {
-    return <div className="min-h-screen bg-background flex items-center justify-center"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>;
+    return <PageSkeleton variante="detalhe" />;
   }
   if (!job) {
     return (
@@ -51,7 +57,7 @@ const JobDetail = () => {
     if (!user) return;
     try {
       await applyMutation.mutateAsync({ jobId: job.id, userId: user.id });
-      toast.success("Candidatura enviada! A empresa foi notificada.");
+      setEnviada(true);
     } catch (err) {
       toast.error(err instanceof Error && err.message ? err.message : "Erro ao candidatar-se");
     }
@@ -110,7 +116,8 @@ const JobDetail = () => {
 
   return (
     <div className="min-h-screen bg-background pb-40 max-w-lg mx-auto">
-      <PageHeader title="Detalhes da vaga" />
+      <PageHeader title="Detalhes da vaga" right={!isDona && userTipo !== "empresa" ? <SalvarVagaButton jobId={job.id} /> : undefined} />
+      <SucessoAnimado aberto={enviada} onFim={fecharSucesso} titulo="Candidatura enviada!" descricao="A empresa foi avisada. Você recebe uma notificação quando ela responder." />
 
       <div className="px-5">
         <section className="bg-card rounded-2xl border border-border shadow-card p-5 mb-5">

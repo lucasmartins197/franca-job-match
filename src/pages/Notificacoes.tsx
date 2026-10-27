@@ -1,10 +1,11 @@
 import { useNavigate } from "react-router-dom";
-import { Bell, Loader2, UserPlus, CheckCircle2, Star, MessageSquare, Flag, Headset, BadgeDollarSign, Receipt, AlertTriangle, XCircle, Gift, KeyRound, CalendarCheck } from "lucide-react";
+import { Bell, UserPlus, CheckCircle2, Star, MessageSquare, Flag, Headset, BadgeDollarSign, Receipt, AlertTriangle, XCircle, Gift, KeyRound, CalendarCheck } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { DbNotificacao, useMarcarNotificacaoLida, useNotificacoes } from "@/hooks/useFrela";
 import PageHeader from "@/components/frela/PageHeader";
 import EmptyState from "@/components/frela/EmptyState";
+import PageSkeleton from "@/components/frela/PageSkeleton";
 
 const ICONES: Record<string, typeof Bell> = {
   candidatura: UserPlus,
@@ -48,7 +49,7 @@ const Notificacoes = () => {
       />
 
       <div className="px-5 space-y-2">
-        {isLoading && <div className="flex justify-center py-12"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>}
+        {isLoading && <PageSkeleton variante="lista" comHeader={false} />}
         {!isLoading && notificacoes.length === 0 && (
           <EmptyState icon={Bell} titulo="Tudo em dia por aqui"
             descricao="Vagas nos seus dias disponíveis, candidaturas, códigos de confirmação, mensagens e avaliações aparecem aqui." />

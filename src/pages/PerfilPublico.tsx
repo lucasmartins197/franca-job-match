@@ -17,6 +17,7 @@ import PageHeader from "@/components/frela/PageHeader";
 import ProfileView from "@/components/perfil/ProfileView";
 import JobCard from "@/components/JobCard";
 import EmptyState from "@/components/frela/EmptyState";
+import PageSkeleton from "@/components/frela/PageSkeleton";
 
 /**
  * Perfil de qualquer usuário. Vindo da lista de candidatos (?vaga=&candidatura=),
@@ -67,7 +68,7 @@ const PerfilPublico = () => {
   });
 
   if (isLoading) {
-    return <div className="min-h-screen bg-background flex items-center justify-center"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>;
+    return <PageSkeleton variante="perfil" />;
   }
   if (!perfil) {
     return (
