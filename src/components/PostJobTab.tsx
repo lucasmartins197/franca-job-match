@@ -12,6 +12,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useCreateJob } from "@/hooks/useJobs";
 import { TEXTO_TRAVA_VAGA, useMyProfile, useTravaNovaVaga } from "@/hooks/useFrela";
 import { CATEGORIAS } from "@/lib/categorias";
+import { geocodificar } from "@/hooks/usePerfil";
 
 
 const PostJobTab = ({ onClose }: { onClose?: () => void }) => {
@@ -64,6 +65,8 @@ const PostJobTab = ({ onClose }: { onClose?: () => void }) => {
       return;
     }
     try {
+      // Pin no mapa: geocodifica o endereço da vaga (sem achar, o banco usa o ponto da empresa)
+      const ponto = await geocodificar([address.trim(), neighborhood.trim()].filter(Boolean).join(" - "), profile?.cidade || "Franca");
       await createJob.mutateAsync({
         user_id: user.id,
         company_name: empresaDados?.nome_empresa || profile?.nome || user.user_metadata?.nome || "Empresa",
@@ -80,6 +83,8 @@ const PostJobTab = ({ onClose }: { onClose?: () => void }) => {
         neighborhood: neighborhood.trim(),
         address: address.trim(),
         status: "aberta",
+        latitude: ponto?.lat ?? null,
+        longitude: ponto?.lon ?? null,
       });
       setSubmitted(true);
       toast.success("Vaga publicada!");

@@ -14,6 +14,8 @@ import PendenciasAviso from "@/components/confirmacao/PendenciasAviso";
 import AtalhosFiltro from "@/components/vagas/AtalhosFiltro";
 import FiltrosSheet from "@/components/vagas/FiltrosSheet";
 import ListaVagas from "@/components/vagas/ListaVagas";
+import ForaDaArea from "@/components/vagas/ForaDaArea";
+import { cidadeAtendida } from "@/lib/geo";
 import { CATEGORIAS, categoriaDe } from "@/lib/categorias";
 import { contarFiltros } from "@/lib/filtrosVagas";
 import { useMeuPerfil } from "@/hooks/usePerfil";
@@ -32,6 +34,13 @@ const HomeTab = () => {
   const { vagas, lista, empresas, isLoading, refetch, localizacao: loc } = useVagasFiltradas();
   const { data: lugares = [], refetch: refetchLugares } = useRecomendadasEmpresas(8);
   const [filtrosAbertos, setFiltrosAbertos] = useState(false);
+  const [verMesmoAssim, setVerMesmoAssim] = useState(() => {
+    try {
+      return sessionStorage.getItem("frela-fora-da-area") === "1";
+    } catch {
+      return false;
+    }
+  });
 
   const profile = perfil?.profile;
   const nome = profile?.nome || "Usuário";
@@ -43,6 +52,16 @@ const HomeTab = () => {
     if (id) contagem[id] = (contagem[id] ?? 0) + 1;
   }
   const nomeCategoria = CATEGORIAS.find((c) => c.id === filtros.categoria)?.nome;
+  // Fora de Franca e região: pelo GPS ou, sem ele, pela cidade do perfil
+  const fora = !verMesmoAssim && (loc.foraDaArea || (!loc.real && !cidadeAtendida(profile?.cidade)));
+  const continuar = () => {
+    setVerMesmoAssim(true);
+    try {
+      sessionStorage.setItem("frela-fora-da-area", "1");
+    } catch {
+      /* sem storage */
+    }
+  };
   const tituloFeed = nomeCategoria ?? (semFiltro ? (loc.real ? "Vagas perto de você" : "Vagas abertas") : "Resultados");
 
   return (
@@ -77,6 +96,7 @@ const HomeTab = () => {
         </header>
 
         <div className="px-5 space-y-6">
+          {fora ? <ForaDaArea ponto={loc.real ? loc.ponto : null} cidadePerfil={profile?.cidade} onContinuar={continuar} /> : <>
           {semFiltro && (
             <section>
               <h2 className="font-display font-bold text-lg text-foreground mb-3">O que você procura?</h2>
@@ -158,6 +178,7 @@ const HomeTab = () => {
               <ListaVagas vagas={lista} empresas={empresas} chave={JSON.stringify(filtros)} mostrarDistancia={loc.real} />
             )}
           </section>
+          </>}
         </div>
       </div>
       <FiltrosSheet aberto={filtrosAbertos} onFechar={() => setFiltrosAbertos(false)} />

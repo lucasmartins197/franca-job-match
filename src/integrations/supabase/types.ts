@@ -274,6 +274,39 @@ export type Database = {
         }
         Relationships: []
       }
+      lista_espera: {
+        Row: {
+          id: string
+          email: string
+          cidade: string | null
+          tipo: string | null
+          latitude: number | null
+          longitude: number | null
+          user_id: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          email: string
+          cidade?: string | null
+          tipo?: string | null
+          latitude?: number | null
+          longitude?: number | null
+          user_id?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          email?: string
+          cidade?: string | null
+          tipo?: string | null
+          latitude?: number | null
+          longitude?: number | null
+          user_id?: string | null
+          created_at?: string
+        }
+        Relationships: []
+      }
       jobs: {
         Row: {
           latitude: number | null

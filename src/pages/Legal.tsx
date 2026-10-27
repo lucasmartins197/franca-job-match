@@ -46,7 +46,8 @@ export const Privacidade = () => (
       <p><b>Cadastro:</b> nome, e-mail, telefone, cidade e foto. Empresas: nome da empresa, ramo, endereço e, se informado, CNPJ.</p>
       <p><b>Currículo do profissional:</b> profissões, experiência, sobre você, dias e períodos disponíveis, fotos do portfólio e redes sociais (opcionais).</p>
       <p><b>Uso do app:</b> vagas, candidaturas, contratações, valores declarados, códigos de confirmação, avaliações, mensagens do chat e do suporte.</p>
-      <p>Não coletamos sua localização pelo GPS. O endereço da empresa é convertido em ponto no mapa (OpenStreetMap).</p>
+      <p><b>Localização (opcional, com sua permissão):</b> usamos a localização do aparelho para mostrar as vagas perto de você e a distância até elas. A posição exata fica só no seu celular; guardamos apenas a região aproximada (cerca de 1 km). Os endereços das vagas e das empresas viram pontos no mapa (OpenStreetMap).</p>
+      <p><b>Lista de espera:</b> se você estiver fora da área atendida e pedir aviso, guardamos seu e-mail e sua cidade para avisar quando o {LEGAL.empresa} chegar aí.</p>
     </Topico>
     <Topico titulo="Para que usamos">
       <p>Para mostrar vagas e currículos, avisar sobre vagas nos seus dias disponíveis, confirmar que o serviço aconteceu (código de confirmação), calcular a taxa de intermediação da empresa, manter avaliações e selos, prevenir fraudes e dar suporte.</p>

@@ -6,7 +6,7 @@ import { Switch } from "@/components/ui/switch";
 import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
-  IndicacaoGestao, ProfissionalGestao, useEmpresasGestao, useIndicacoesGestao, useLiberarRecompensa, useProfissionaisGestao, usePromover,
+  IndicacaoGestao, ItemListaEspera, ProfissionalGestao, useEmpresasGestao, useIndicacoesGestao, useLiberarRecompensa, useListaEspera, useProfissionaisGestao, usePromover,
 } from "@/hooks/useGestao";
 import DataTable, { Coluna } from "@/components/gestao/DataTable";
 import { Chip, SelectFiltro, TituloPagina, data } from "@/components/gestao/Pecas";
@@ -28,6 +28,7 @@ const Crescimento = () => {
   const { data: empresas = [], isLoading: l1 } = useEmpresasGestao();
   const { data: pros = [], isLoading: l2 } = useProfissionaisGestao();
   const { data: indicacoes = [], isLoading: l3 } = useIndicacoesGestao();
+  const { data: espera = [], isLoading: l4, error: erroEspera } = useListaEspera();
   const promover = usePromover();
   const liberar = useLiberarRecompensa();
   const [tipo, setTipo] = useState("todos");
@@ -102,6 +103,18 @@ const Crescimento = () => {
     { id: "nota", titulo: "Nota", valor: (p) => p.avaliacao_media, render: (p) => (p.total_avaliacoes ? Number(p.avaliacao_media).toFixed(1) : "—"), alinhar: "right" },
   ];
 
+  const porCidade = Object.entries(espera.reduce<Record<string, number>>((acc, e) => {
+    const c = e.cidade?.trim() || "Sem cidade";
+    acc[c] = (acc[c] ?? 0) + 1;
+    return acc;
+  }, {})).sort((a, b) => b[1] - a[1]);
+  const colEspera: Coluna<ItemListaEspera>[] = [
+    { id: "email", titulo: "E-mail", valor: (e) => e.email, render: (e) => <span className="font-semibold">{e.email}</span> },
+    { id: "cidade", titulo: "Cidade", valor: (e) => e.cidade },
+    { id: "tipo", titulo: "Tipo", valor: (e) => (e.tipo === "empresa" ? "Empresa" : e.tipo === "freelancer" ? "Profissional" : "—") },
+    { id: "data", titulo: "Entrou em", valor: (e) => e.created_at, render: (e) => data(e.created_at) },
+  ];
+
   return (
     <div>
       <TituloPagina titulo="Crescimento" sub="Promova usuários, acompanhe indicações e o progresso das metas." />
@@ -110,6 +123,7 @@ const Crescimento = () => {
           <TabsTrigger value="promover">Promover</TabsTrigger>
           <TabsTrigger value="indicacoes">Indicações ({indicacoes.length})</TabsTrigger>
           <TabsTrigger value="metas">Metas</TabsTrigger>
+          <TabsTrigger value="espera">Lista de espera ({espera.length})</TabsTrigger>
         </TabsList>
 
         <TabsContent value="promover">
@@ -167,6 +181,28 @@ const Crescimento = () => {
             ]} />}
           />
           <p className="text-xs text-muted-foreground mt-2">Para ajustar a meta de alguém, abra o usuário (clique na linha) e use “Salvar ajuste”.</p>
+        </TabsContent>
+        <TabsContent value="espera" className="space-y-3">
+          {erroEspera ? (
+            <p className="text-sm rounded-xl border border-amber-300 bg-amber-50 p-3 text-amber-900">{(erroEspera as Error).message}</p>
+          ) : (
+            <>
+              <p className="text-xs text-muted-foreground flex gap-1.5 rounded-xl border border-border bg-card p-3">
+                <Info className="h-4 w-4 shrink-0 text-primary" />
+                <span>Pessoas que abriram o app fora de Franca e região e pediram aviso. Use para decidir a próxima cidade.</span>
+              </p>
+              {porCidade.length > 0 && (
+                <div className="flex flex-wrap gap-2">
+                  {porCidade.slice(0, 12).map(([c, n]) => (
+                    <span key={c} className="px-3 py-1 rounded-full bg-card border border-border text-xs font-semibold">{c} <span className="text-primary">{n}</span></span>
+                  ))}
+                </div>
+              )}
+              <DataTable dados={espera} colunas={colEspera} chave={(e) => e.id} nomeExport="lista-de-espera"
+                busca={(e) => `${e.email} ${e.cidade ?? ""}`} placeholderBusca="Buscar e-mail ou cidade" carregando={l4}
+                ordemInicial={{ id: "data", dir: "desc" }} vazio="Ninguém na lista de espera ainda" />
+            </>
+          )}
         </TabsContent>
       </Tabs>
     </div>

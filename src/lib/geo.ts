@@ -32,3 +32,26 @@ export const dentroDaCobertura = (p: Ponto) => distanciaKm(p, FRANCA) <= RAIO_CO
 
 /** Arredonda para ~1 km: é o que guardamos do usuário (privacidade). */
 export const arredondarRegiao = (p: Ponto): Ponto => ({ lat: Math.round(p.lat * 100) / 100, lon: Math.round(p.lon * 100) / 100 });
+
+/** Cidades de Franca e região (usado quando não temos o GPS, pela cidade do perfil). */
+export const CIDADES_ATENDIDAS = [
+  "Franca", "Restinga", "Cristais Paulista", "Patrocínio Paulista", "Ribeirão Corrente", "Itirapuã", "Jeriquara",
+  "Pedregulho", "Rifaina", "São José da Bela Vista", "Claraval", "Ibiraci", "Capetinga", "Batatais",
+];
+
+const semAcento = (t: string) => t.normalize("NFD").replace(/[̀-ͯ]/g, "").trim().toLowerCase();
+
+export const cidadeAtendida = (cidade?: string | null) =>
+  !cidade || CIDADES_ATENDIDAS.some((c) => semAcento(c) === semAcento(cidade.split(/[-,/]/)[0]));
+
+/** Nome da cidade de um ponto (OpenStreetMap, sem chave). */
+export const cidadeDoPonto = async (p: Ponto): Promise<string | null> => {
+  try {
+    const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&zoom=10&accept-language=pt-BR&lat=${p.lat}&lon=${p.lon}`);
+    if (!res.ok) return null;
+    const j = (await res.json()) as { address?: { city?: string; town?: string; village?: string; municipality?: string } };
+    return j.address?.city ?? j.address?.town ?? j.address?.municipality ?? j.address?.village ?? null;
+  } catch {
+    return null;
+  }
+};

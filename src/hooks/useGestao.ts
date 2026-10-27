@@ -1,3 +1,4 @@
+import type { Tables } from "@/integrations/supabase/types";
 import { createContext, useContext } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -98,6 +99,19 @@ export const useProfissionaisGestao = () => useLista("admin_listar_profissionais
 export const useVagasGestao = () => useLista("admin_listar_vagas");
 export const useContratacoesGestao = () => useLista("admin_listar_contratacoes");
 export const useIndicacoesGestao = () => useLista("admin_indicacoes");
+
+export type ItemListaEspera = Tables<"lista_espera">;
+
+/** Lista de espera (fora da área atendida) — SQL da Fase 8; só ADM lê. */
+export const useListaEspera = () =>
+  useQuery({
+    queryKey: ["gestao", "lista-espera"],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("lista_espera").select("*").order("created_at", { ascending: false }).limit(2000);
+      if (error) throw new Error(error.message.includes("lista_espera") ? "Rode o SQL da Fase 8 para ver a lista de espera." : error.message);
+      return data;
+    },
+  });
 
 export interface UsuarioDetalhe {
   profile: Record<string, unknown> & {
