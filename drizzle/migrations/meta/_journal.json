@@ -22,6 +22,13 @@
       "when": 1793128744783,
       "tag": "0002_frela_fase2_perfil",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1793128769495,
+      "tag": "0003_frela_fase3_portfolio_selos_suporte",
+      "breakpoints": true
     }
   ]
 }

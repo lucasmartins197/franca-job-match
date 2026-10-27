@@ -167,6 +167,8 @@ export type Database = {
           endereco: string
           id: string
           is_demo: boolean
+          latitude: number | null
+          longitude: number | null
           nome_empresa: string
           profile_id: string
           ramo: string | null
@@ -178,6 +180,8 @@ export type Database = {
           endereco?: string
           id?: string
           is_demo?: boolean
+          latitude?: number | null
+          longitude?: number | null
           nome_empresa?: string
           profile_id: string
           ramo?: string | null
@@ -189,6 +193,8 @@ export type Database = {
           endereco?: string
           id?: string
           is_demo?: boolean
+          latitude?: number | null
+          longitude?: number | null
           nome_empresa?: string
           profile_id?: string
           ramo?: string | null
@@ -401,66 +407,113 @@ export type Database = {
           },
         ]
       }
+      portfolio_fotos: {
+        Row: {
+          created_at: string
+          id: string
+          legenda: string | null
+          profile_id: string
+          url: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          legenda?: string | null
+          profile_id: string
+          url: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          legenda?: string | null
+          profile_id?: string
+          url?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "portfolio_fotos_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           avaliacao_media: number
           bio: string | null
+          cartao_cadastrado: boolean
           cidade: string
           created_at: string
           email: string
           foto_url: string | null
           id: string
+          is_admin: boolean
+          is_demo: boolean
           jobs_completed: number | null
           neighborhood: string | null
           nome: string | null
           phone: string | null
           rating: number | null
           skills: string[] | null
+          stripe_customer_id: string | null
           subscription_end: string | null
           subscription_status: string
           telefone: string
           tipo: string
           total_avaliacoes: number
+          verificado: boolean
         }
         Insert: {
           avaliacao_media?: number
           bio?: string | null
+          cartao_cadastrado?: boolean
           cidade?: string
           created_at?: string
           email: string
           foto_url?: string | null
           id: string
+          is_admin?: boolean
+          is_demo?: boolean
           jobs_completed?: number | null
           neighborhood?: string | null
           nome?: string | null
           phone?: string | null
           rating?: number | null
           skills?: string[] | null
+          stripe_customer_id?: string | null
           subscription_end?: string | null
           subscription_status?: string
           telefone?: string
           tipo: string
           total_avaliacoes?: number
+          verificado?: boolean
         }
         Update: {
           avaliacao_media?: number
           bio?: string | null
+          cartao_cadastrado?: boolean
           cidade?: string
           created_at?: string
           email?: string
           foto_url?: string | null
           id?: string
+          is_admin?: boolean
+          is_demo?: boolean
           jobs_completed?: number | null
           neighborhood?: string | null
           nome?: string | null
           phone?: string | null
           rating?: number | null
           skills?: string[] | null
+          stripe_customer_id?: string | null
           subscription_end?: string | null
           subscription_status?: string
           telefone?: string
           tipo?: string
           total_avaliacoes?: number
+          verificado?: boolean
         }
         Relationships: []
       }
@@ -511,6 +564,36 @@ export type Database = {
           },
         ]
       }
+      suporte_mensagens: {
+        Row: {
+          autor_id: string
+          created_at: string
+          id: string
+          lida_admin: boolean
+          lida_usuario: boolean
+          texto: string
+          user_id: string
+        }
+        Insert: {
+          autor_id: string
+          created_at?: string
+          id?: string
+          lida_admin?: boolean
+          lida_usuario?: boolean
+          texto: string
+          user_id: string
+        }
+        Update: {
+          autor_id?: string
+          created_at?: string
+          id?: string
+          lida_admin?: boolean
+          lida_usuario?: boolean
+          texto?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           id: string
@@ -534,6 +617,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      admin_set_verificado: {
+        Args: { p_id: string; p_valor: boolean }
+        Returns: undefined
+      }
       contratacoes_finalizadas_empresa: {
         Args: { p_id: string }
         Returns: number
@@ -557,6 +644,7 @@ export type Database = {
           titulo: string
         }[]
       }
+      is_admin: { Args: never; Returns: boolean }
       trabalhos_finalizados: {
         Args: { p_ids: string[] }
         Returns: {
