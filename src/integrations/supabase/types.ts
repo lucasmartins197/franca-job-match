@@ -471,7 +471,9 @@ export type Database = {
           disponibilidade: string
           experiencia: string
           id: string
+          instagram: string | null
           is_demo: boolean
+          linkedin: string | null
           profile_id: string
           profissoes: string[]
         }
@@ -481,7 +483,9 @@ export type Database = {
           disponibilidade?: string
           experiencia?: string
           id?: string
+          instagram?: string | null
           is_demo?: boolean
+          linkedin?: string | null
           profile_id: string
           profissoes?: string[]
         }
@@ -491,7 +495,9 @@ export type Database = {
           disponibilidade?: string
           experiencia?: string
           id?: string
+          instagram?: string | null
           is_demo?: boolean
+          linkedin?: string | null
           profile_id?: string
           profissoes?: string[]
         }
@@ -528,12 +534,35 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      contratacoes_finalizadas_empresa: {
+        Args: { p_id: string }
+        Returns: number
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
           _user_id: string
         }
         Returns: boolean
+      }
+      historico_profissional: {
+        Args: { p_id: string }
+        Returns: {
+          comentario: string
+          contratacao_id: string
+          data: string
+          empresa: string
+          finalizada_em: string
+          nota: number
+          titulo: string
+        }[]
+      }
+      trabalhos_finalizados: {
+        Args: { p_ids: string[] }
+        Returns: {
+          profissional_id: string
+          total: number
+        }[]
       }
     }
     Enums: {

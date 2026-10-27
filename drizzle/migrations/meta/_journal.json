@@ -15,6 +15,13 @@
       "when": 1793128721271,
       "tag": "0001_frela_fase1_automacoes",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1793128744783,
+      "tag": "0002_frela_fase2_perfil",
+      "breakpoints": true
     }
   ]
 }
