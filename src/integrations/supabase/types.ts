@@ -887,6 +887,7 @@ export type Database = {
         Row: {
           a_confirmar: number | null
           confirmado: number | null
+          creditos: number | null
           em_divergencia: number | null
           empresa_id: string | null
           pago: number | null
@@ -979,12 +980,14 @@ export type Database = {
           contratacoes: number
           contratacoes_finalizadas: number
           created_at: string
+          creditos: number
           destaque: boolean
           em_divergencia: number
           email: string
           endereco: string
           id: string
           inadimplente: boolean
+          indicacoes: number
           is_demo: boolean
           movimentado: number
           nome_empresa: string
@@ -1116,6 +1119,7 @@ export type Database = {
         Args: { p_id: string }
         Returns: number
       }
+      creditos_disponiveis: { Args: { p_empresa: string }; Returns: number }
       frela_autoconfirmar_valores: {
         Args: { p_dias?: number }
         Returns: number
@@ -1166,12 +1170,26 @@ export type Database = {
         }[]
       }
       is_admin: { Args: never; Returns: boolean }
+      minhas_indicacoes: {
+        Args: never
+        Returns: {
+          created_at: string
+          id: string
+          indicado_nome: string
+          indicado_tipo: string
+          recompensa_valor: number
+          recompensado_em: string
+          status: string
+        }[]
+      }
       minhas_taxas_resumo: {
         Args: never
         Returns: {
           a_confirmar: number
           bloqueado: boolean
+          bruto: number
           confirmado: number
+          creditos: number
           em_divergencia: number
           pago: number
           pode_renovar: boolean
