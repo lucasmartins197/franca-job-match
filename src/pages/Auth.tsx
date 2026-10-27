@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
 import { Briefcase, Building2, ArrowLeft, Loader2, MailCheck, ChevronRight, KeyRound, CheckCircle2 } from "lucide-react";
-import OnboardingScreen from "@/components/OnboardingScreen";
+import OnboardingScreen, { onboardingVisto } from "@/components/OnboardingScreen";
 import Logo from "@/components/frela/Logo";
 import { useAuth } from "@/hooks/useAuth";
 
@@ -33,8 +33,8 @@ const Auth = () => {
   const { session, userTipo, loading: authLoading, refreshAuthState } = useAuth();
   const [searchParams] = useSearchParams();
   const codigoDoLink = (searchParams.get("indicacao") ?? searchParams.get("ref") ?? "").trim().toUpperCase();
-  // Quem chega por link de indicação pula a apresentação
-  const [step, setStep] = useState<Step>(codigoDoLink ? "choose" : "onboarding");
+  // Boas-vindas só na primeira abertura; quem chega por link de indicação pula
+  const [step, setStep] = useState<Step>(codigoDoLink || onboardingVisto() ? "choose" : "onboarding");
   const [codigoIndicacao, setCodigoIndicacao] = useState(codigoDoLink);
   const [indicadoPor, setIndicadoPor] = useState<string | null>(null);
   const [tipo, setTipo] = useState<UserTipo>("freelancer");
@@ -219,7 +219,9 @@ const Auth = () => {
   }
 
   if (step === "onboarding") {
-    return <OnboardingScreen onComplete={() => setStep("choose")} />;
+    return (
+      <OnboardingScreen onComplete={(fim) => (fim.acao === "cadastro" ? goToSignUp(fim.tipo) : fim.acao === "entrar" ? goToLogin() : setStep("choose"))} />
+    );
   }
 
   const anim = { initial: { opacity: 0, y: 16 }, animate: { opacity: 1, y: 0 }, exit: { opacity: 0, y: -16 }, transition: { duration: 0.2 } };
