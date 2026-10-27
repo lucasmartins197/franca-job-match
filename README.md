@@ -21,8 +21,9 @@
 6. **Fase 5 — rode:** `supabase/migrations/20261021120000_fase5_gestao.sql` (funções do painel de gestão, colunas de destaque/selos/metas/indicação). Depois disso, o painel fica em **`/gestao`** (só para `is_admin = true`).
 7. **Fase 6 — rode:** `supabase/migrations/20261022120000_fase6_crescimento.sql` (selo Indicado automático, recomendações, Indique e Ganhe com crédito nas taxas). O `seed_demo.sql` agora requer as Fases 1–6.
 8. **Fase 7 — rode:** `supabase/migrations/20261023120000_fase7_ajustes_finais.sql` (profissional grátis nas métricas, código de confirmação cruzado, avaliação obrigatória, travas, aviso de vagas nos dias disponíveis, Verificado exige currículo completo).
-9. **Auth → URL Configuration:** coloque a URL do app em *Site URL* e adicione em *Redirect URLs* `<url-do-app>/auth` (confirmação de email) e `<url-do-app>/redefinir-senha` (esqueci minha senha).
-10. As migrations antigas (`20260324…`, `20260404…`, `20260618…`) são do projeto Supabase anterior — **não rode** no FreLa.
+9. **Fase 8 — rode:** `supabase/migrations/20261024120000_fase8_geolocalizacao.sql` (latitude/longitude nas vagas — herdam o ponto da empresa —, região aproximada do usuário, tabela `lista_espera` para quem está fora de Franca e região).
+10. **Auth → URL Configuration:** coloque a URL do app em *Site URL* e adicione em *Redirect URLs* `<url-do-app>/auth` (confirmação de email) e `<url-do-app>/redefinir-senha` (esqueci minha senha).
+11. As migrations antigas (`20260324…`, `20260404…`, `20260618…`) são do projeto Supabase anterior — **não rode** no FreLa.
 
 ## Dados de demonstração (apresentação)
 
@@ -51,6 +52,13 @@ Empresa compartilha o código/link (perfil da empresa). Quando a empresa indicad
 Contratações finalizadas antes da Fase 7 continuam no fluxo antigo (profissional confirma o valor pelo cartão "Confirme o valor recebido").
 - Renovação da assinatura só com zero taxas em aberto.
 - Quitação → `paga` (hoje manual pelo ADM; depois automática pelo Stripe).
+
+## Mapa e localização (Fase 8)
+
+- Mapa com **Leaflet + OpenStreetMap** (sem chave). Os blocos do mapa vêm de `tile.openstreetmap.org`, que é gratuito para uso moderado; com muito tráfego, trocar a URL em `src/components/vagas/MapaVagas.tsx` por um provedor de tiles (ex.: MapTiler/Stadia, plano gratuito).
+- Geocodificação (endereço → ponto) pelo Nominatim (OpenStreetMap), feita ao publicar a vaga.
+- O app pede a localização ao abrir (profissional). A posição exata fica só no aparelho; no banco vai só a região (~1 km).
+- Área atendida: raio de 60 km de Franca (`RAIO_COBERTURA_KM` em `src/lib/geo.ts`). Fora dela → tela "O FreLa ainda não chegou na sua região" + lista de espera (Gestão → Crescimento → Lista de espera).
 
 ## Publicar nas lojas (Capacitor)
 

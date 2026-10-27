@@ -8,6 +8,8 @@ import { useJob, useApply, useMyApplications } from "@/hooks/useJobs";
 import { useAuth } from "@/hooks/useAuth";
 import { formatBRL, useAvaliacoesRecebidas } from "@/hooks/useFrela";
 import { textoPendencia, usePendencias } from "@/hooks/useConfirmacao";
+import { useLocalizacao } from "@/hooks/useLocalizacao";
+import { distanciaKm, formatDistancia } from "@/lib/geo";
 import { selosDe, useContratacoesEmpresa, usePerfilPublico } from "@/hooks/usePerfil";
 import UserAvatar from "@/components/frela/UserAvatar";
 import SucessoAnimado from "@/components/frela/SucessoAnimado";
@@ -29,6 +31,7 @@ const JobDetail = () => {
   const { data: myApplications = [] } = useMyApplications();
   const { data: perfilEmpresa } = usePerfilPublico(job?.user_id);
   const pendencias = usePendencias();
+  const loc = useLocalizacao();
   const [enviada, setEnviada] = useState(false);
   const fecharSucesso = useCallback(() => setEnviada(false), []);
   const { data: contratacoesEmpresa } = useContratacoesEmpresa(job?.user_id);
@@ -50,6 +53,9 @@ const JobDetail = () => {
   const empresa = perfilEmpresa?.profile;
   const empresaDados = perfilEmpresa?.empresa;
   const cat = categoriaDe(job.category);
+  const pontoVaga = job.latitude != null && job.longitude != null ? { lat: job.latitude, lon: job.longitude }
+    : empresaDados?.latitude != null && empresaDados?.longitude != null ? { lat: empresaDados.latitude, lon: empresaDados.longitude } : null;
+  const distancia = loc.real && pontoVaga ? formatDistancia(distanciaKm(loc.ponto, pontoVaga)) : null;
   const isDona = job.user_id === user?.id;
   const minhaCandidatura = myApplications.find((a) => a.job_id === job.id);
 
@@ -149,7 +155,10 @@ const JobDetail = () => {
             <li className="flex items-center gap-3"><Clock className="h-4 w-4 text-primary shrink-0" />
               <span className="text-foreground">{job.time_start} às {job.time_end}</span></li>
             <li className="flex items-start gap-3"><MapPin className="h-4 w-4 text-primary shrink-0 mt-0.5" />
-              <span className="text-foreground">{[job.neighborhood, job.address].filter(Boolean).join(" · ") || "Franca/SP"}</span></li>
+              <span className="text-foreground">
+                {[job.neighborhood, job.address].filter(Boolean).join(" · ") || "Franca/SP"}
+                {distancia && <span className="ml-1.5 inline-block px-2 py-0.5 rounded-full bg-primary/10 text-primary text-xs font-semibold">a {distancia} de você</span>}
+              </span></li>
           </ul>
         </section>
 

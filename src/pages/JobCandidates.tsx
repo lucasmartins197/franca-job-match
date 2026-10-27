@@ -121,7 +121,7 @@ const JobCandidates = () => {
       <PageHeader title="Candidatos" />
 
       <div className="px-5 mb-6">
-        <div className="bg-card rounded-xl p-4 border border-border shadow-card">
+        <div className="bg-card rounded-3xl p-4 border border-border/70 shadow-card">
           <div className="flex items-start justify-between gap-2">
             <div className="min-w-0">
               <h2 className="font-display font-bold text-foreground truncate">{job.title}</h2>

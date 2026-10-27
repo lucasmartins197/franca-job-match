@@ -15,7 +15,7 @@ const tabs = [
   { id: "home", label: "Início", icon: Home },
   { id: "search", label: "Buscar", icon: Search },
   { id: "work", label: "Trabalhos", icon: Briefcase },
-  { id: "messages", label: "Chat", icon: MessageCircle },
+  { id: "messages", label: "Mensagens", icon: MessageCircle },
   { id: "profile", label: "Perfil", icon: User },
 ];
 

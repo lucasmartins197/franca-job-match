@@ -14,7 +14,7 @@ const CodigoEmpresaCard = ({ contratacao, profissionalNome }: { contratacao: DbC
 
   if (!gerado) {
     return (
-      <section className="bg-card rounded-2xl p-4 border border-border shadow-card space-y-3">
+      <section className="bg-card rounded-3xl p-4 border border-border/70 shadow-card space-y-3">
         <div className="flex gap-3">
           <span className="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0"><KeyRound className="h-5 w-5" /></span>
           <div>

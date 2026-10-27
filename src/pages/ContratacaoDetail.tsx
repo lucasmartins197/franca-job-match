@@ -82,7 +82,7 @@ const ContratacaoDetail = () => {
       <PageHeader title="Contratação" right={<StatusBadge status={contratacao.status} />} />
 
       <div className="px-5 space-y-4">
-        <div className="bg-card rounded-2xl p-4 border border-border shadow-card">
+        <div className="bg-card rounded-3xl p-4 border border-border/70 shadow-card">
           <button onClick={() => job && navigate(`/job/${job.id}`)} className="text-left w-full">
             <h2 className="text-xl font-display font-bold text-foreground">{job?.title ?? "Vaga"}</h2>
             <p className="text-sm text-muted-foreground">{job?.company_name}</p>
@@ -116,7 +116,7 @@ const ContratacaoDetail = () => {
           )}
         </div>
 
-        <div className="bg-card rounded-2xl p-4 border border-border shadow-card">
+        <div className="bg-card rounded-3xl p-4 border border-border/70 shadow-card">
           <p className="text-xs text-muted-foreground mb-2">{souEmpresa ? "Profissional" : "Empresa"}</p>
           <button onClick={() => navigate(`/perfil/${outroId}`)} className="w-full flex items-center gap-3 text-left">
             <UserAvatar nome={outroNome} fotoUrl={outro?.foto_url} size="md" />

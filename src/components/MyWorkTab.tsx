@@ -28,7 +28,7 @@ const MyWorkTab = () => {
     <button
       key={c.id}
       onClick={() => navigate(`/contratacao/${c.id}`)}
-      className="w-full text-left bg-card rounded-2xl p-4 border border-border shadow-card flex items-center gap-3"
+      className="w-full text-left bg-card rounded-3xl p-4 border border-border/70 shadow-card active:scale-[0.985] transition-transform flex items-center gap-3"
     >
       <div className="flex-1 min-w-0">
         <div className="flex items-center justify-between gap-2 mb-1">
@@ -50,7 +50,7 @@ const MyWorkTab = () => {
           )}
         </div>
         <p className="text-sm text-muted-foreground truncate">{c.jobs?.company_name}</p>
-        <div className="flex items-center justify-between mt-2 text-sm">
+        <div className="flex flex-wrap items-center justify-between gap-x-3 mt-2 text-sm">
           <span className="font-display font-bold text-primary">{formatBRL(c.valor)}</span>
           {c.jobs && (
             <span className="text-xs text-muted-foreground">
@@ -67,7 +67,7 @@ const MyWorkTab = () => {
     <button
       key={a.id}
       onClick={() => navigate(`/job/${a.job_id}`)}
-      className="w-full text-left bg-card rounded-2xl p-4 border border-border shadow-card"
+      className="w-full text-left bg-card rounded-3xl p-4 border border-border/70 shadow-card active:scale-[0.985] transition-transform"
     >
       <div className="flex items-center justify-between gap-2 mb-1">
         <h3 className="font-display font-bold text-foreground truncate">{a.jobs?.title ?? "Vaga"}</h3>
