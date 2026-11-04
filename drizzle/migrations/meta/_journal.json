@@ -64,6 +64,13 @@
       "when": 1793128924838,
       "tag": "0008_frela_fase6_crescimento_2",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1793803100631,
+      "tag": "0009_frela_fase7_ajustes_1",
+      "breakpoints": true
     }
   ]
 }
