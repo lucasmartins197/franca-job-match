@@ -112,8 +112,38 @@ export type Database = {
           },
         ]
       }
+      contratacao_codigos: {
+        Row: {
+          codigo: string
+          contratacao_id: string
+          created_at: string
+        }
+        Insert: {
+          codigo: string
+          contratacao_id: string
+          created_at?: string
+        }
+        Update: {
+          codigo?: string
+          contratacao_id?: string
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "contratacao_codigos_contratacao_id_fkey"
+            columns: ["contratacao_id"]
+            isOneToOne: true
+            referencedRelation: "contratacoes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       contratacoes: {
         Row: {
+          codigo_confirmado_em: string | null
+          codigo_gerado_em: string | null
+          codigo_tentativas: number
+          confirmado_por_codigo: boolean
           confirmado_profissional_em: string | null
           created_at: string
           divergencia_resolvida_em: string | null
@@ -133,6 +163,10 @@ export type Database = {
           valor_contestado: number | null
         }
         Insert: {
+          codigo_confirmado_em?: string | null
+          codigo_gerado_em?: string | null
+          codigo_tentativas?: number
+          confirmado_por_codigo?: boolean
           confirmado_profissional_em?: string | null
           created_at?: string
           divergencia_resolvida_em?: string | null
@@ -152,6 +186,10 @@ export type Database = {
           valor_contestado?: number | null
         }
         Update: {
+          codigo_confirmado_em?: string | null
+          codigo_gerado_em?: string | null
+          codigo_tentativas?: number
+          confirmado_por_codigo?: boolean
           confirmado_profissional_em?: string | null
           created_at?: string
           divergencia_resolvida_em?: string | null
@@ -394,6 +432,8 @@ export type Database = {
           date: string
           description: string
           id: string
+          latitude: number | null
+          longitude: number | null
           neighborhood: string
           payment: number
           skill: string
@@ -413,6 +453,8 @@ export type Database = {
           date: string
           description?: string
           id?: string
+          latitude?: number | null
+          longitude?: number | null
           neighborhood?: string
           payment?: number
           skill: string
@@ -432,6 +474,8 @@ export type Database = {
           date?: string
           description?: string
           id?: string
+          latitude?: number | null
+          longitude?: number | null
           neighborhood?: string
           payment?: number
           skill?: string
@@ -442,6 +486,39 @@ export type Database = {
           time_start?: string
           title?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      lista_espera: {
+        Row: {
+          cidade: string | null
+          created_at: string
+          email: string
+          id: string
+          latitude: number | null
+          longitude: number | null
+          tipo: string | null
+          user_id: string | null
+        }
+        Insert: {
+          cidade?: string | null
+          created_at?: string
+          email: string
+          id?: string
+          latitude?: number | null
+          longitude?: number | null
+          tipo?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          cidade?: string | null
+          created_at?: string
+          email?: string
+          id?: string
+          latitude?: number | null
+          longitude?: number | null
+          tipo?: string | null
+          user_id?: string | null
         }
         Relationships: []
       }
@@ -668,6 +745,9 @@ export type Database = {
           is_admin: boolean
           is_demo: boolean
           jobs_completed: number | null
+          latitude: number | null
+          localizacao_em: string | null
+          longitude: number | null
           meta_ajuste_trabalhos: number
           neighborhood: string | null
           nome: string | null
@@ -700,6 +780,9 @@ export type Database = {
           is_admin?: boolean
           is_demo?: boolean
           jobs_completed?: number | null
+          latitude?: number | null
+          localizacao_em?: string | null
+          longitude?: number | null
           meta_ajuste_trabalhos?: number
           neighborhood?: string | null
           nome?: string | null
@@ -732,6 +815,9 @@ export type Database = {
           is_admin?: boolean
           is_demo?: boolean
           jobs_completed?: number | null
+          latitude?: number | null
+          localizacao_em?: string | null
+          longitude?: number | null
           meta_ajuste_trabalhos?: number
           neighborhood?: string | null
           nome?: string | null
@@ -925,6 +1011,10 @@ export type Database = {
           semana: string
         }[]
       }
+      admin_encerrar_contratacao: {
+        Args: { p_id: string; p_valor: number }
+        Returns: undefined
+      }
       admin_indicacoes: {
         Args: { p_incluir_demo?: boolean }
         Returns: {
@@ -1106,6 +1196,16 @@ export type Database = {
       }
       admin_usuario_detalhe: { Args: { p_id: string }; Returns: Json }
       admin_visao_geral: { Args: { p_incluir_demo?: boolean }; Returns: Json }
+      confirmar_codigo_contratacao: {
+        Args: {
+          p_codigo: string
+          p_id: string
+          p_motivo?: string
+          p_valor_confere?: boolean
+          p_valor_recebido?: number
+        }
+        Returns: string
+      }
       confirmar_valor_contratacao: {
         Args: {
           p_confirma: boolean
@@ -1129,6 +1229,8 @@ export type Database = {
         Args: { p_forcar?: boolean; p_indicacao: string }
         Returns: number
       }
+      frela_curriculo_completo: { Args: { p_id: string }; Returns: boolean }
+      frela_dia_semana: { Args: { p_data: string }; Returns: string }
       frela_eh_indicado: {
         Args: {
           p_ajuste: number
@@ -1140,8 +1242,25 @@ export type Database = {
         Returns: boolean
       }
       frela_exige_admin: { Args: never; Returns: undefined }
+      frela_funcoes_categoria: {
+        Args: { p_categoria: string }
+        Returns: string[]
+      }
+      frela_hoje: { Args: never; Returns: string }
+      frela_max_tentativas_codigo: { Args: never; Returns: number }
       frela_meta_trabalhos: { Args: never; Returns: number }
       frela_nota_minima_indicado: { Args: never; Returns: number }
+      frela_pendencias: {
+        Args: { p_user: string }
+        Returns: {
+          bloqueia: boolean
+          contratacao_id: string
+          data: string
+          tipo: string
+          titulo: string
+        }[]
+      }
+      frela_periodo: { Args: { p_hora: string }; Returns: string }
       frela_preco_assinatura: { Args: { p_tipo: string }; Returns: number }
       frela_quitar_taxas: {
         Args: { p_empresa: string; p_referencia?: string }
@@ -1150,6 +1269,14 @@ export type Database = {
       frela_recompensa_indicacao: { Args: never; Returns: number }
       frela_taxa_percentual: { Args: never; Returns: number }
       frela_teto_taxas: { Args: never; Returns: number }
+      frela_tokens_disponibilidade: {
+        Args: { p_texto: string }
+        Returns: string[]
+      }
+      gerar_codigo_confirmacao: {
+        Args: { p_id: string; p_valor: number }
+        Returns: string
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -1170,6 +1297,7 @@ export type Database = {
         }[]
       }
       is_admin: { Args: never; Returns: boolean }
+      meu_codigo_confirmacao: { Args: { p_id: string }; Returns: string }
       minhas_indicacoes: {
         Args: never
         Returns: {
@@ -1180,6 +1308,16 @@ export type Database = {
           recompensa_valor: number
           recompensado_em: string
           status: string
+        }[]
+      }
+      minhas_pendencias: {
+        Args: never
+        Returns: {
+          bloqueia: boolean
+          contratacao_id: string
+          data: string
+          tipo: string
+          titulo: string
         }[]
       }
       minhas_taxas_resumo: {

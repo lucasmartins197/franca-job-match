@@ -64,6 +64,41 @@
       "when": 1793128924838,
       "tag": "0008_frela_fase6_crescimento_2",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1793803100631,
+      "tag": "0009_frela_fase7_ajustes_1",
+      "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1793803151545,
+      "tag": "0010_frela_fase7_ajustes_2",
+      "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1793803170820,
+      "tag": "0011_frela_fase7_ajustes_3",
+      "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1793803184341,
+      "tag": "0012_frela_fase8_geolocalizacao",
+      "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1793803261572,
+      "tag": "0013_frela_retira_insert_livre_notificacoes_pagamentos",
+      "breakpoints": true
     }
   ]
 }
