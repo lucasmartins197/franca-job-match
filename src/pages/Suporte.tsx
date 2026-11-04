@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Headset, ShieldAlert } from "lucide-react";
 import { toast } from "sonner";
@@ -7,12 +8,15 @@ import { useEnviarSuporte, useIsAdmin, useMarcarSuporteLido, useSuporteConversa 
 import { CabecalhoChat, CaixaMensagem, ListaMensagens } from "@/components/chat/ChatParts";
 import UserAvatar from "@/components/frela/UserAvatar";
 import EmptyState from "@/components/frela/EmptyState";
+import AssistenteVera, { AvatarVera } from "@/components/suporte/AssistenteVera";
+import { NOME_APP, NOME_ASSISTENTE, PRAZO_RESPOSTA } from "@/lib/suporteFaq";
 
 const ASSUNTOS = ["Tenho uma dúvida sobre o app", "Problema com uma vaga", "Problema com um pagamento", "Quero denunciar um usuário", "Tenho uma sugestão"];
 
 /**
- * Chat com a equipe FreLa.
- * - /suporte → o próprio usuário fala com a equipe
+ * Suporte.
+ * - /suporte → primeiro a assistente Vera (respostas programadas); se não
+ *   resolver, a mensagem vira chamado para a equipe (mesma conversa de sempre)
  * - /admin/suporte/:userId → ADM respondendo aquele usuário
  */
 const Suporte = () => {
@@ -25,11 +29,15 @@ const Suporte = () => {
 
   const { data: mensagens = [], isLoading } = useSuporteConversa(donoId);
   const enviar = useEnviarSuporte(donoId);
-  useMarcarSuporteLido(donoId, mensagens, comoAdmin);
 
   const ids = Array.from(new Set([donoId, ...mensagens.map((m) => m.autor_id)].filter(Boolean) as string[]));
   const { data: perfis = {} } = useProfilesByIds(ids);
   const dono = donoId ? perfis[donoId] : undefined;
+  const naoLidasTime = mensagens.filter((m) => m.autor_id !== m.user_id && !m.lida_usuario).length;
+  // Resposta nova da equipe → abre direto a conversa com o time
+  const [vista, setVista] = useState<"vera" | "time" | null>(null);
+  const vistaAtual = comoAdmin ? "time" : vista ?? (naoLidasTime > 0 ? "time" : "vera");
+  useMarcarSuporteLido(donoId, vistaAtual === "time" ? mensagens : [], comoAdmin);
 
   if (comoAdmin && !isAdmin) {
     return <div className="min-h-screen bg-background"><EmptyState icon={ShieldAlert} titulo="Área restrita à equipe FreLa" /></div>;
@@ -57,9 +65,40 @@ const Suporte = () => {
     };
   });
 
+  const voltar = () => (window.history.length > 1 ? navigate(-1) : navigate("/"));
+
+  if (!comoAdmin && vistaAtual === "vera" && !isLoading) {
+    return (
+      <div className="h-[100dvh] flex flex-col bg-background max-w-lg mx-auto">
+        <CabecalhoChat onVoltar={voltar}
+          direita={
+            <button onClick={() => setVista("time")} aria-label="Conversa com o time"
+              className="relative w-10 h-10 rounded-xl flex items-center justify-center hover:bg-muted">
+              <Headset className="h-5 w-5 text-muted-foreground" />
+              {naoLidasTime > 0 && <span className="absolute top-1.5 right-1.5 w-2.5 h-2.5 rounded-full bg-destructive" />}
+            </button>
+          }>
+          <div className="flex items-center gap-3">
+            <AvatarVera />
+            <div>
+              <p className="font-semibold text-foreground leading-tight">{NOME_ASSISTENTE} · assistente {NOME_APP}</p>
+              <p className="text-xs text-emerald-700 flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-emerald-500" /> Online agora</p>
+            </div>
+          </div>
+        </CabecalhoChat>
+        <AssistenteVera onVerTime={() => setVista("time")} mensagensTime={mensagens.length} naoLidasTime={naoLidasTime} />
+      </div>
+    );
+  }
+
   return (
     <div className="h-[100dvh] flex flex-col bg-background max-w-lg mx-auto">
-      <CabecalhoChat onVoltar={() => (window.history.length > 1 ? navigate(-1) : navigate("/"))}>
+      <CabecalhoChat onVoltar={comoAdmin ? voltar : () => setVista("vera")}
+        direita={!comoAdmin ? (
+          <button onClick={() => setVista("vera")} className="h-9 px-3 rounded-xl text-xs font-semibold text-primary hover:bg-primary/5 inline-flex items-center gap-1.5">
+            <AvatarVera size="sm" /> {NOME_ASSISTENTE}
+          </button>
+        ) : undefined}>
         {comoAdmin ? (
           <button onClick={() => navigate(`/perfil/${donoId}`)} className="flex items-center gap-3 min-w-0 text-left w-full">
             <UserAvatar nome={dono?.nome} fotoUrl={dono?.foto_url} size="sm" />
@@ -72,8 +111,8 @@ const Suporte = () => {
           <div className="flex items-center gap-3">
             <div className="w-9 h-9 rounded-lg bg-primary text-primary-foreground flex items-center justify-center"><Headset className="h-5 w-5" /></div>
             <div>
-              <p className="font-semibold text-foreground leading-tight">Equipe FreLa</p>
-              <p className="text-xs text-muted-foreground">Respondemos em até 1 dia útil</p>
+              <p className="font-semibold text-foreground leading-tight">Time de suporte {NOME_APP}</p>
+              <p className="text-xs text-muted-foreground">Respondemos em até {PRAZO_RESPOSTA}, por aqui ou por email</p>
             </div>
           </div>
         )}
