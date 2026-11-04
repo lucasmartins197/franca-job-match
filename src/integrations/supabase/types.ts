@@ -963,6 +963,10 @@ export type Database = {
           semana: string
         }[]
       }
+      admin_encerrar_contratacao: {
+        Args: { p_id: string; p_valor: number }
+        Returns: undefined
+      }
       admin_indicacoes: {
         Args: { p_incluir_demo?: boolean }
         Returns: {
@@ -1144,6 +1148,16 @@ export type Database = {
       }
       admin_usuario_detalhe: { Args: { p_id: string }; Returns: Json }
       admin_visao_geral: { Args: { p_incluir_demo?: boolean }; Returns: Json }
+      confirmar_codigo_contratacao: {
+        Args: {
+          p_codigo: string
+          p_id: string
+          p_motivo?: string
+          p_valor_confere?: boolean
+          p_valor_recebido?: number
+        }
+        Returns: string
+      }
       confirmar_valor_contratacao: {
         Args: {
           p_confirma: boolean
@@ -1187,6 +1201,16 @@ export type Database = {
       frela_max_tentativas_codigo: { Args: never; Returns: number }
       frela_meta_trabalhos: { Args: never; Returns: number }
       frela_nota_minima_indicado: { Args: never; Returns: number }
+      frela_pendencias: {
+        Args: { p_user: string }
+        Returns: {
+          bloqueia: boolean
+          contratacao_id: string
+          data: string
+          tipo: string
+          titulo: string
+        }[]
+      }
       frela_periodo: { Args: { p_hora: string }; Returns: string }
       frela_preco_assinatura: { Args: { p_tipo: string }; Returns: number }
       frela_quitar_taxas: {
@@ -1224,6 +1248,7 @@ export type Database = {
         }[]
       }
       is_admin: { Args: never; Returns: boolean }
+      meu_codigo_confirmacao: { Args: { p_id: string }; Returns: string }
       minhas_indicacoes: {
         Args: never
         Returns: {
@@ -1234,6 +1259,16 @@ export type Database = {
           recompensa_valor: number
           recompensado_em: string
           status: string
+        }[]
+      }
+      minhas_pendencias: {
+        Args: never
+        Returns: {
+          bloqueia: boolean
+          contratacao_id: string
+          data: string
+          tipo: string
+          titulo: string
         }[]
       }
       minhas_taxas_resumo: {

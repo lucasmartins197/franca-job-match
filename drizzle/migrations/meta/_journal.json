@@ -71,6 +71,13 @@
       "when": 1793803100631,
       "tag": "0009_frela_fase7_ajustes_1",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1793803151545,
+      "tag": "0010_frela_fase7_ajustes_2",
+      "breakpoints": true
     }
   ]
 }
