@@ -1,16 +1,20 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import type { Tables } from "@/integrations/supabase/types";
+import type { Tables, TablesInsert } from "@/integrations/supabase/types";
 import { useAuth } from "./useAuth";
 
 export type DbEmpresaDados = Tables<"empresa_dados">;
 export type DbProfissionalDados = Tables<"profissional_dados">;
 export type DbPortfolioFoto = Tables<"portfolio_fotos">;
 
+/** Rascunho (o que o formulário monta e envia): colunas geradas pelo banco são opcionais. */
+export type NovoEmpresaDados = TablesInsert<"empresa_dados">;
+export type NovoProfissionalDados = TablesInsert<"profissional_dados">;
+
 export interface PerfilCompleto {
   profile: Tables<"profiles">;
-  empresa: DbEmpresaDados | null;
-  profissional: DbProfissionalDados | null;
+  empresa: NovoEmpresaDados | null;
+  profissional: NovoProfissionalDados | null;
 }
 
 const preenchido = (v: string | null | undefined) => !!v && v.trim().length > 0;
