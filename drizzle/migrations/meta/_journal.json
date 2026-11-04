@@ -92,6 +92,13 @@
       "when": 1793803184341,
       "tag": "0012_frela_fase8_geolocalizacao",
       "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1793803261572,
+      "tag": "0013_frela_retira_insert_livre_notificacoes_pagamentos",
+      "breakpoints": true
     }
   ]
 }
