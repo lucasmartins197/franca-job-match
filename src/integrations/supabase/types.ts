@@ -1181,6 +1181,7 @@ export type Database = {
         Args: { p_forcar?: boolean; p_indicacao: string }
         Returns: number
       }
+      frela_curriculo_completo: { Args: { p_id: string }; Returns: boolean }
       frela_dia_semana: { Args: { p_data: string }; Returns: string }
       frela_eh_indicado: {
         Args: {
