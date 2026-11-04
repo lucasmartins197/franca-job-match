@@ -85,6 +85,13 @@
       "when": 1793803170820,
       "tag": "0011_frela_fase7_ajustes_3",
       "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1793803184341,
+      "tag": "0012_frela_fase8_geolocalizacao",
+      "breakpoints": true
     }
   ]
 }

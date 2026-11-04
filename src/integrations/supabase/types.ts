@@ -432,6 +432,8 @@ export type Database = {
           date: string
           description: string
           id: string
+          latitude: number | null
+          longitude: number | null
           neighborhood: string
           payment: number
           skill: string
@@ -451,6 +453,8 @@ export type Database = {
           date: string
           description?: string
           id?: string
+          latitude?: number | null
+          longitude?: number | null
           neighborhood?: string
           payment?: number
           skill: string
@@ -470,6 +474,8 @@ export type Database = {
           date?: string
           description?: string
           id?: string
+          latitude?: number | null
+          longitude?: number | null
           neighborhood?: string
           payment?: number
           skill?: string
@@ -480,6 +486,39 @@ export type Database = {
           time_start?: string
           title?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      lista_espera: {
+        Row: {
+          cidade: string | null
+          created_at: string
+          email: string
+          id: string
+          latitude: number | null
+          longitude: number | null
+          tipo: string | null
+          user_id: string | null
+        }
+        Insert: {
+          cidade?: string | null
+          created_at?: string
+          email: string
+          id?: string
+          latitude?: number | null
+          longitude?: number | null
+          tipo?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          cidade?: string | null
+          created_at?: string
+          email?: string
+          id?: string
+          latitude?: number | null
+          longitude?: number | null
+          tipo?: string | null
+          user_id?: string | null
         }
         Relationships: []
       }
@@ -706,6 +745,9 @@ export type Database = {
           is_admin: boolean
           is_demo: boolean
           jobs_completed: number | null
+          latitude: number | null
+          localizacao_em: string | null
+          longitude: number | null
           meta_ajuste_trabalhos: number
           neighborhood: string | null
           nome: string | null
@@ -738,6 +780,9 @@ export type Database = {
           is_admin?: boolean
           is_demo?: boolean
           jobs_completed?: number | null
+          latitude?: number | null
+          localizacao_em?: string | null
+          longitude?: number | null
           meta_ajuste_trabalhos?: number
           neighborhood?: string | null
           nome?: string | null
@@ -770,6 +815,9 @@ export type Database = {
           is_admin?: boolean
           is_demo?: boolean
           jobs_completed?: number | null
+          latitude?: number | null
+          localizacao_em?: string | null
+          longitude?: number | null
           meta_ajuste_trabalhos?: number
           neighborhood?: string | null
           nome?: string | null
